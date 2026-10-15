@@ -22,6 +22,8 @@ Este E-commerce reúne su catálogo en una tienda construida con Next.js, Expres
 | Capa pública | Cloudflare Free | DNS, proxy/CDN, TLS y protecciones básicas |
 | Despliegue | Railway | Alojar frontend, backend, worker y PostgreSQL |
 
+Para las cuotas, tarifas y supuestos de costo por proveedor, consulta [Servicios y costos](docs/servicios-y-costos.md).
+
 ## Arquitectura
 
 El diagrama muestra las conexiones entre el navegador, Cloudflare, Railway y los servicios externos. Cloudflare se conectará cuando se configure el dominio; al inicio, *staging* puede usar las URL de Railway.
