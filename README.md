@@ -67,27 +67,40 @@ flowchart TB
 
 ### Flujos principales
 
-El servidor Next.js y el navegador pueden consultar Express por rutas distintas:
+Los recorridos se muestran por separado para distinguir la carga SSR de las peticiones que el navegador envía directamente a la API.
+
+#### Carga de una página renderizada por servidor
 
 ```mermaid
-flowchart TB
-    browser["Navegador"]
-    cf["Cloudflare"]
-    web["Next.js<br/>servidor del frontend"]
-    api["Express API"]
-    pg[("PostgreSQL")]
+sequenceDiagram
+    participant Browser as Navegador
+    participant CF as Cloudflare
+    participant Next as Next.js
+    participant Express as Express API
+    participant PG as PostgreSQL
 
-    browser -->|"HTTPS: solicitar página"| cf
-    cf -->|"Hostname de tienda"| web
-    web -.->|"Consulta SSR<br/>red privada"| api
-    api -->|"SQL: red privada"| pg
-    web -->|"HTML + JavaScript"| cf
-    cf --> browser
+    Browser->>CF: HTTPS: solicitar página
+    CF->>Next: Hostname de tienda
+    Next->>Express: Consulta SSR · red privada
+    Express->>PG: Consulta de datos · red privada
+    PG-->>Express: Datos
+    Express-->>Next: Datos para SSR
+    Next-->>CF: HTML + JavaScript
+    CF-->>Browser: Página renderizada
+```
 
-    browser -->|"Interacción que requiere backend<br/>HTTPS"| cf
-    cf -->|"Hostname público de API"| api
-    api -->|"Respuesta de API"| cf
-    cf --> browser
+#### Interacción que requiere la API
+
+```mermaid
+sequenceDiagram
+    participant Browser as Navegador
+    participant CF as Cloudflare
+    participant Express as Express API
+
+    Browser->>CF: HTTPS: petición de API
+    CF->>Express: Hostname público de API
+    Express-->>CF: Respuesta de API
+    CF-->>Browser: Respuesta para la interfaz
 ```
 
 - Express comprueba que los productos sigan activos y usa sus precios vigentes; PostgreSQL conserva el pedido y sus datos históricos. El MVP no comprueba existencias.
