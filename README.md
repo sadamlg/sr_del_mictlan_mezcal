@@ -19,7 +19,7 @@ Este E-commerce reúne su catálogo en una tienda construida con Next.js, Expres
 | Pagos | Stripe Checkout | Checkout alojado y notificaciones firmadas de pago |
 | Correo | Resend | Correos transaccionales, como recuperación de contraseña y confirmación de pedidos |
 | Medios | Cloudflare R2 | Almacenar y entregar imágenes de producto y medios de la landing |
-| Capa pública | Cloudflare Free | DNS, proxy/CDN, TLS y protecciones básicas |
+| Capa pública | Cloudflare Free | DNS autoritativo; proxy/CDN y TLS para hostnames configurados como *Proxied*; WAF, protección DDoS y Bot Fight Mode (requiere habilitación) |
 | Despliegue | Railway | Alojar frontend, backend, worker y PostgreSQL |
 
 Para las cuotas, tarifas y supuestos de costo por proveedor, consulta [Servicios y costos](docs/servicios-y-costos.md).
@@ -42,7 +42,7 @@ flowchart TB
         pg[("PostgreSQL<br/>datos del negocio y trabajos de correo<br/>red privada + volumen persistente")]
         worker["Worker<br/>correos · proceso separado"]
 
-        web -.->|"SSR: llamadas servidor a servidor"| api
+        web -.->|"SSR: consulta del servidor Next.js<br/>red privada"| api
         api -->|"SQL: datos del negocio y trabajos de correo<br/>red privada"| pg
         pg -->|"Entrega trabajos pendientes<br/>red privada"| worker
         worker -->|"Actualiza el estado del trabajo<br/>red privada"| pg
@@ -67,7 +67,29 @@ flowchart TB
 
 ### Flujos principales
 
-- El navegador carga la tienda y consulta la API por HTTPS. Las páginas renderizadas en el servidor Next.js pueden consultar Express por la red privada de Railway.
+El servidor Next.js y el navegador pueden consultar Express por rutas distintas:
+
+```mermaid
+flowchart TB
+    browser["Navegador"]
+    cf["Cloudflare"]
+    web["Next.js<br/>servidor del frontend"]
+    api["Express API"]
+    pg[("PostgreSQL")]
+
+    browser -->|"HTTPS: solicitar página"| cf
+    cf -->|"Hostname de tienda"| web
+    web -.->|"Consulta SSR<br/>red privada"| api
+    api -->|"SQL: red privada"| pg
+    web -->|"HTML + JavaScript"| cf
+    cf --> browser
+
+    browser -->|"Interacción que requiere backend<br/>HTTPS"| cf
+    cf -->|"Hostname público de API"| api
+    api -->|"Respuesta de API"| cf
+    cf --> browser
+```
+
 - Express comprueba que los productos sigan activos y usa sus precios vigentes; PostgreSQL conserva el pedido y sus datos históricos. El MVP no comprueba existencias.
 - Express crea la sesión de Stripe y devuelve al navegador la URL para abrir el Checkout alojado.
 - El backend verifica el webhook firmado de Stripe y actualiza el pedido en PostgreSQL. Después registra el trabajo de correo correspondiente en PostgreSQL; el worker consulta los trabajos pendientes, actualiza su estado y envía el correo mediante Resend. El redirect de regreso sirve para mostrar el resultado al cliente, pero no es prueba de pago.
@@ -76,6 +98,8 @@ flowchart TB
 ## Ramas y despliegues
 
 La rama predeterminada del repositorio en GitHub es `develop`, que integra los cambios y despliega a staging. `main` corresponde a producción.
+
+GitHub tiene activada la opción **Automatically delete head branches**: al fusionar un pull request, elimina automáticamente su rama de origen.
 
 ```text
 feature/* ── pull request ──> develop ──> Railway staging
@@ -113,7 +137,7 @@ Docker Compose construye las imágenes del frontend y backend, y levanta fronten
 
 | Servicio | Dirección local |
 |---|---|
-| Tienda frontend | [http://localhost:3000](http://localhost:3000) (anfitrión); |
+| Tienda frontend | [http://localhost:3000](http://localhost:3000) |
 | API; comprobar salud | [http://localhost:4000/health](http://localhost:4000/health) |
 | Mailpit; bandeja de correo de desarrollo | [http://localhost:8025](http://localhost:8025) |
 | PostgreSQL | `localhost:5432` |
