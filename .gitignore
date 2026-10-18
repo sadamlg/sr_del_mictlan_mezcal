@@ -4,6 +4,7 @@
 
 node_modules/
 .next/
+backend/generated/prisma/
 dist/
 coverage/
 *.log

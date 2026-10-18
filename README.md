@@ -126,6 +126,8 @@ feature/* ── pull request ──> develop ──> Railway staging
 
 Se requiere Git, Docker Engine y Docker Compose. Desde la carpeta donde guardarás el proyecto:
 
+Para construir paso a paso los archivos de esta infraestructura local desde una copia limpia, sigue la [guía de construcción con Docker Compose](docs/docker/guia-de-construccion-docker-compose.md).
+
 ```bash
 git clone https://github.com/sadamlg/sr_del_mictlan_mezcal.git
 cd sr_del_mictlan_mezcal
@@ -140,13 +142,13 @@ Valida la configuración y construye e inicia los servicios en segundo plano:
 
 ```bash
 docker compose config --quiet
-docker compose up --build --detach
+docker compose up --build --detach --wait --wait-timeout 180
 docker compose ps
 ```
 
 La opción `--build` reconstruye las imágenes antes de iniciar los contenedores.
 
-Docker Compose construye las imágenes del frontend y backend, y levanta frontend, API, PostgreSQL, worker de correos y Mailpit. Los procesos de desarrollo se ejecutan dentro de sus contenedores: el frontend con `npm run dev`, el backend genera Prisma Client y arranca Node con observación de cambios, y el worker con `npm run worker:dev`. No hace falta instalar Node.js en el anfitrión ni iniciar esos procesos manualmente.
+Docker Compose construye las imágenes del frontend y backend, y levanta frontend, API, PostgreSQL, worker de correos y Mailpit. `--wait` espera los health checks de los servicios. Los procesos de desarrollo se ejecutan dentro de sus contenedores: el frontend con `npm run dev`, el backend genera Prisma Client y arranca Node con observación de cambios, y el worker con `npm run worker:dev`. No hace falta instalar Node.js en el anfitrión ni iniciar esos procesos manualmente.
 
 | Servicio | Dirección local |
 |---|---|

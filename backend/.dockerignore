@@ -1,0 +1,8 @@
+node_modules
+generated
+coverage
+dist
+*.log
+.env
+.env.*
+!.env.example
