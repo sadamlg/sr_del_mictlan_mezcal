@@ -37,6 +37,7 @@ services:
       NODE_ENV: development
       PORT: 3000
       DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
+      MEDIA_BASE_URL: ${MEDIA_BASE_URL:-http://localhost:3000}
     ports:
       - "${BACKEND_BIND_ADDRESS:-127.0.0.1}:${BACKEND_PORT:-4000}:3000"
     volumes:
