@@ -33,6 +33,6 @@ La tabla `products` conserva un `slug`, nombre, descripción, precio en centavos
 
 ## Medios
 
-PostgreSQL conserva una clave relativa y estable, por ejemplo `catalogo/identificador/frente.webp`; no conserva una URL temporal. La aplicación la resuelve con `MEDIA_BASE_URL`. En local, Compose apunta al origen del frontend; para staging, usar el origen público no productivo configurado para medios. No se requieren credenciales de escritura en la aplicación porque la carga del MVP es manual.
+PostgreSQL conserva una clave relativa y estable, por ejemplo `catalogo/identificador/frente.webp`; no conserva una URL temporal. La aplicación la resuelve con `MEDIA_BASE_URL`. En desarrollo local, Compose apunta al origen del frontend; para revisar desde otro dispositivo de la LAN, puede usar la IP privada del equipo anfitrión por HTTP. Esa excepción sólo está habilitada en desarrollo; para staging, usar HTTPS con el origen público no productivo configurado para medios. No se requieren credenciales de escritura en la aplicación porque la carga del MVP es manual.
 
-Las claves aceptan segmentos ASCII de letras, números, puntos, guiones y guiones bajos, sin segmentos `.` o `..`, barra inicial, query o fragmento. `MEDIA_BASE_URL` requiere HTTPS, salvo localhost en desarrollo, y no puede contener credenciales, query ni fragmento.
+Las claves aceptan segmentos ASCII de letras, números, puntos, guiones y guiones bajos, sin segmentos `.` o `..`, barra inicial, query o fragmento. `MEDIA_BASE_URL` requiere HTTPS, salvo localhost o una IPv4 privada cuando está habilitado el modo de desarrollo; no puede contener credenciales, query ni fragmento.

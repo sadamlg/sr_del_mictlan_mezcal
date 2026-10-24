@@ -5,11 +5,12 @@ const test = require('node:test');
 
 const source = (file) => readFileSync(path.join(__dirname, file), 'utf8');
 
-test('the footer offers a direct return to the mezcal collection', () => {
+test('the footer CTA invites visitors back to the mezcal collection', () => {
   const footer = source('../src/components/landing/landing-footer.js');
 
-  assert.equal([...footer.matchAll(/href="#coleccion"/g)].length, 2);
-  assert.match(footer, /<span>Volver al mezcal<\/span>/);
+  assert.equal([...footer.matchAll(/href:\s*'#coleccion'/g)].length, 1);
+  assert.match(footer, /href="#coleccion"/);
+  assert.match(footer, /<span>Explorar la colección<\/span>/);
 });
 
 test('every footer fragment link points to an existing landing section or footer anchor', () => {
@@ -28,7 +29,7 @@ test('every footer fragment link points to an existing landing section or footer
     ...[...landing.matchAll(/id="([^"]+)"/g)].map(([, id]) => id),
     ...[...landing.matchAll(/id: '([^']+)'/g)].map(([, id]) => id),
   ]);
-  const links = [...footer.matchAll(/href="(#[^"]+)"/g)].map(([, href]) => href.slice(1));
+  const links = [...footer.matchAll(/(?:href:\s*'|href=")(#[^'"]+)/g)].map(([, href]) => href.slice(1));
 
   assert.ok(links.length > 0);
   assert.deepEqual(links.filter((id) => !ids.has(id)), []);

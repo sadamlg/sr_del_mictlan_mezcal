@@ -5,7 +5,7 @@ import { createCatalogRepository } from './catalog/catalog-repository.js';
 
 const port = Number(process.env.PORT || 3000);
 
-export function createApp({ database, mediaBaseUrl }) {
+export function createApp({ database, mediaBaseUrl, allowPrivateLanHttp = false }) {
   const app = express();
   const catalogRepository = createCatalogRepository(database);
 
@@ -23,13 +23,18 @@ export function createApp({ database, mediaBaseUrl }) {
     createCatalogHandler({
       findActiveProducts: () => catalogRepository.findActiveProducts(),
       mediaBaseUrl,
+      allowPrivateLanHttp,
     }),
   );
 
   return app;
 }
 
-const app = createApp({ database: prisma, mediaBaseUrl: process.env.MEDIA_BASE_URL });
+const app = createApp({
+  database: prisma,
+  mediaBaseUrl: process.env.MEDIA_BASE_URL,
+  allowPrivateLanHttp: process.env.NODE_ENV === 'development',
+});
 
 const server = app.listen(port, '0.0.0.0', () => {
   console.log(`API escuchando en el puerto ${port}`);

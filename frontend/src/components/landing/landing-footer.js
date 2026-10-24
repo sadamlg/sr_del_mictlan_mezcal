@@ -1,52 +1,88 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowUp, ArrowUpRight } from 'lucide-react';
+
+const footerLinks = [
+  { href: '#coleccion', label: 'Mezcales' },
+  { href: '#origen', label: 'Origen Etúcuaro' },
+  { href: '#ritual', label: 'Ritual' },
+  { href: '#preguntas', label: 'Preguntas frecuentes' },
+  { href: '#ritual', label: 'Consumo responsable' },
+  { href: '#aviso-edad', label: 'Aviso de edad' },
+];
 
 export default function LandingFooter({ year }) {
   return (
-    <footer className="bg-[#171717] text-[#eee9da]">
-      <div className="mx-auto box-border w-full max-w-[1280px] px-6 pt-[52px] pb-6 min-[801px]:px-[4.8rem] min-[801px]:pt-[72px]">
-        <div className="flex min-h-[182px] flex-col items-start justify-between gap-[25px] min-[801px]:min-h-[154px] min-[801px]:flex-row min-[801px]:items-center">
-          <Link className="block h-[108px] w-[203px] shrink-0 min-[801px]:h-[154px] min-[801px]:w-[min(511px,calc(100%-240px))]" href="/" aria-label="Señor del Mictlán, inicio">
-            <Image
-              src="/images/brand/senor-del-mictlan-brand.png"
-              alt="Señor del Mictlán"
-              width={1774}
-              height={887}
-              sizes="(max-width: 800px) 203px, 511px"
-              className="h-full w-full object-contain object-left"
+    <footer className="w-full bg-[radial-gradient(circle_at_50%_100%,rgba(77,15,22,0.72)_0%,rgba(20,8,10,0.96)_50%,#060707_100%)] text-[#e2e3e0]">
+      <div className="mx-auto w-full max-w-[1440px] px-6 pt-8 pb-10 md:px-16 md:pt-10 md:pb-12">
+        <div className="relative flex flex-col items-center gap-8 pb-4 md:pb-5">
+          <a
+            className="group relative z-10 inline-flex min-h-12 shrink-0 self-end items-center gap-3 rounded-full border border-[#0e7490] bg-transparent px-5 py-1 font-ui text-[11px] font-semibold uppercase tracking-[0.2em] text-white/85 no-underline transition-[background-color,border-color,color] duration-300 hover:border-[#97d2c6] hover:bg-[#97d2c6]/15 hover:text-[#97d2c6] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#97d2c6] [@media(min-width:80rem)_and_(min-height:54rem)_and_(orientation:landscape)]:absolute [@media(min-width:80rem)_and_(min-height:54rem)_and_(orientation:landscape)]:top-0 [@media(min-width:80rem)_and_(min-height:54rem)_and_(orientation:landscape)]:right-0"
+            href="#coleccion"
+          >
+            <span>Explorar la colección</span>
+            <ArrowUpRight
+              aria-hidden="true"
+              size={17}
+              strokeWidth={1.6}
+              className="text-white/80 transition-[transform,color] duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-[#97d2c6]"
             />
-          </Link>
-
-          <Link className="inline-flex h-[54px] w-[198px] items-center justify-between gap-5 bg-[#dedcb5] px-[22px] text-xs font-semibold tracking-[0.045em] text-[#173e38] no-underline transition-colors hover:bg-[#eee9da] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#d6c39f] min-[801px]:w-[215px] min-[801px]:px-[26px] min-[801px]:text-[13px]" href="#coleccion">
-            <span>Volver al mezcal</span>
-            <ArrowRight aria-hidden="true" size={15} strokeWidth={1.5} />
-          </Link>
+          </a>
+          <Image
+            src="/images/brand/senor-del-mictlan-brand.png"
+            alt=""
+            aria-hidden="true"
+            width={1774}
+            height={887}
+            sizes="(max-width: 640px) calc(100vw - 48px), (max-width: 1024px) 85vw, 1280px"
+            className="h-auto max-h-[460px] w-full max-w-[1280px] object-contain opacity-30"
+          />
         </div>
 
-        <h2 className="my-[35px] font-display text-[clamp(1.75rem,8vw,2.5rem)] font-normal leading-[1.16] tracking-[-0.025em] text-[#d6c39f] min-[801px]:my-[45px] min-[801px]:text-[clamp(3.5rem,5vw,4.375rem)]">
-          El encuentro<br /> continúa.
-        </h2>
+        <div className="w-full border-t border-[#4d4635]/30 pt-6 pb-8">
+          <nav aria-label="Navegación del pie de página">
+            <ul className="m-0 flex list-none flex-wrap items-center justify-center gap-x-6 gap-y-4 p-0 lg:justify-between lg:gap-x-3">
+              {footerLinks.map(({ href, label }, index) => (
+                <li className="flex items-center gap-6 lg:gap-3" key={label}>
+                  <Link
+                    className="font-ui text-[10px] font-medium uppercase tracking-[0.16em] text-[#d0c5af] no-underline transition-colors duration-200 hover:text-[#97d2c6] focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#97d2c6] sm:text-[11px] lg:text-[10px] xl:text-[11px]"
+                    href={href}
+                  >
+                    {label}
+                  </Link>
+                  {index < footerLinks.length - 1 && (
+                    <span className="hidden text-xs text-[#4d4635]/70 lg:inline" aria-hidden="true">
+                      ·
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </div>
 
-        <nav aria-label="Navegación del pie de página">
-          <ul className="m-0 grid list-none grid-cols-2 gap-x-3 gap-y-[17px] p-0 pb-10 text-sm min-[801px]:flex min-[801px]:flex-wrap min-[801px]:gap-x-6 min-[801px]:gap-y-3 min-[801px]:text-[15.6px]">
-            <li><Link className="text-inherit no-underline hover:text-[#d6c39f] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#d6c39f]" href="#coleccion">Mezcales</Link></li>
-            <li><Link className="text-inherit no-underline hover:text-[#d6c39f] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#d6c39f]" href="#origen">Origen</Link></li>
-            <li><Link className="text-inherit no-underline hover:text-[#d6c39f] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#d6c39f]" href="#ritual">Ritual</Link></li>
-            <li><Link className="text-inherit no-underline hover:text-[#d6c39f] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#d6c39f]" href="#preguntas">Preguntas frecuentes</Link></li>
-            <li><Link className="text-inherit no-underline hover:text-[#d6c39f] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#d6c39f]" href="#aviso-edad">Ver aviso de edad</Link></li>
-            <li><Link className="text-inherit no-underline hover:text-[#d6c39f] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#d6c39f]" href="#preguntas">Información de compra</Link></li>
-            <li><Link className="text-inherit no-underline hover:text-[#d6c39f] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#d6c39f]" href="#creditos">Créditos</Link></li>
-          </ul>
-        </nav>
-
-        <div className="flex flex-col gap-3 border-t border-[#455246] pt-[23px] text-[#bccab6]">
-          <div className="flex flex-col items-center gap-[14px] text-center text-sm leading-6 tracking-[0.2px] min-[801px]:flex-row min-[801px]:justify-between min-[801px]:gap-6 min-[801px]:text-left">
-            <p>Etúcuaro, Michoacán · 100% agave cupreata</p>
-            <p id="aviso-edad" className="max-w-[259px]">Disfruta con responsabilidad. Exclusivo para mayores de edad.</p>
-            <Link className="text-inherit no-underline hover:text-[#d6c39f] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#d6c39f]" href="#inicio">Volver arriba ↑</Link>
+        <div className="flex flex-col items-center justify-between gap-6 border-t border-[#4d4635]/20 pt-6 font-ui text-center md:flex-row md:text-left">
+          <p id="creditos" className="order-2 m-0 text-[9px] font-medium uppercase tracking-[0.13em] text-[#d0c5af]/80 sm:text-[10px] md:order-1">
+            © {year} Señor del Mictlán. Todos los derechos reservados.
+          </p>
+          <div
+            id="aviso-edad"
+            className="order-1 flex max-w-[34ch] flex-col gap-1 text-[9px] font-medium uppercase tracking-[0.15em] text-[#97d2c6]/90 sm:text-[10px] md:order-2 md:max-w-none"
+          >
+            <span>Hecho en México · Etúcuaro, Michoacán · 100% agave cupreata</span>
+            <span className="text-[#d0c5af]/80">Disfruta con responsabilidad. Exclusivo para mayores de edad.</span>
           </div>
-          <p id="creditos" className="m-0 text-center text-xs leading-5 tracking-[0.2px] min-[801px]:text-left">© {year} Señor del Mictlán. Todos los derechos reservados.</p>
+          <div className="order-3 flex shrink-0 items-center gap-5 whitespace-nowrap text-[9px] font-medium uppercase tracking-[0.15em] text-[#99907c] sm:text-[10px]">
+            <span>MX / ESP</span>
+            <span className="h-3 w-px bg-[#4d4635]/70" aria-hidden="true" />
+            <Link
+              className="inline-flex items-center gap-1 text-[#d0c5af] no-underline transition-colors duration-200 hover:text-[#97d2c6] focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#97d2c6]"
+              href="#inicio"
+            >
+              Volver arriba
+              <ArrowUp aria-hidden="true" size={13} strokeWidth={1.6} />
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

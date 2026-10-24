@@ -7,12 +7,12 @@ const priceFormatter = new Intl.NumberFormat('es-MX', {
   maximumFractionDigits: 2,
 });
 
-function MezcalCard({ product }) {
+function MezcalCard({ product, className = '' }) {
   const [name, descriptor] = product.name.split(' · ', 2);
 
   return (
-    <article className="relative mx-auto flex w-full max-w-[340px] flex-col items-center text-center text-white lg:max-w-[360px]">
-      <div className="group/visual relative aspect-[4/5] w-full overflow-hidden outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#e9bd82] lg:w-[min(100%,calc(80dvh_-_24.25rem),20.4rem)] [@media(min-width:64rem)_and_(max-height:42rem)]:w-[min(100%,19.2dvh)] [@media(min-width:64rem)_and_(min-height:54rem)]:w-[min(100%,clamp(20.4rem,calc(40dvh_-_1rem),22.5rem))]" tabIndex={0} aria-label={`${product.name}. Enfoca para ver una segunda fotografía`}>
+    <article className={`relative mx-auto flex w-full max-w-[340px] flex-col items-center text-center text-white lg:max-w-[360px] ${className}`}>
+      <div className="group/visual relative aspect-[4/5] w-full overflow-hidden outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#e9bd82] lg:w-[min(100%,clamp(15rem,calc(90dvh_-_23rem),20.4rem))]" tabIndex={0} aria-label={`${product.name}. Enfoca para ver una segunda fotografía`}>
         <img
           src={product.image.url}
           alt={product.image.alt}
@@ -56,14 +56,14 @@ export default function MezcalShowcase({ products }) {
   const mediaBaseUrl = process.env.MEDIA_BASE_URL?.replace(/\/+$/, '') || '';
 
   return (
-    <section id="coleccion" className="relative isolate scroll-mt-24 overflow-hidden bg-[#0a0b0a] px-6 pb-20 pt-24 text-white sm:px-10 lg:h-dvh lg:px-14 lg:py-12 [@media(min-width:64rem)_and_(max-height:42rem)]:py-6" aria-labelledby="mezcal-showcase-title">
+    <section id="coleccion" className="relative isolate scroll-mt-24 overflow-hidden bg-[#0a0b0a] px-6 pb-20 pt-24 text-white sm:px-10 lg:min-h-dvh lg:px-14 lg:py-5 [@media(min-width:80rem)_and_(min-height:54rem)]:h-dvh [@media(min-width:80rem)_and_(min-height:54rem)]:py-12" aria-labelledby="mezcal-showcase-title">
       <picture className="absolute inset-0 -z-20">
         <source media="(max-width: 640px)" srcSet={`${mediaBaseUrl}/images/mezcal-showcase-background-mobile.png`} />
         <img src={`${mediaBaseUrl}/images/mezcal-showcase-background.png`} alt="" width="1672" height="941" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
       </picture>
       <div className="absolute inset-0 -z-10 bg-black/80 max-sm:bg-black/55" aria-hidden="true" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-[5] h-36 bg-[linear-gradient(to_bottom,transparent,#0a0b0a)]" aria-hidden="true" />
-      <div className="mx-auto max-w-[1440px] lg:flex lg:h-full lg:flex-col">
+      <div className="mx-auto max-w-[1440px] lg:flex lg:flex-col [@media(min-width:80rem)_and_(min-height:54rem)]:h-full">
         <header className="text-center">
           <h2 id="mezcal-showcase-title" className="font-display text-[clamp(2rem,5vw,2.3rem)] font-medium uppercase leading-[1.12] text-[#2dd4bf] lg:text-[clamp(2.3rem,2.8vw,2.75rem)]">Totonalhuan</h2>
           <p className="mx-auto mt-2 max-w-none font-serif text-base font-extralight uppercase leading-normal tracking-[0.1em] text-white sm:whitespace-nowrap">Destilados que cruzan el umbral del tiempo</p>
@@ -77,8 +77,11 @@ export default function MezcalShowcase({ products }) {
         ) : products.length === 0 ? (
           <p className="mx-auto mt-16 max-w-lg text-center leading-7 text-white/80">La colección está tomando forma. Pronto podrás descubrir nuestros destilados.</p>
         ) : (
-          <div className="mt-14 grid gap-x-8 gap-y-16 md:grid-cols-3 lg:mt-10 lg:flex-1 lg:items-end lg:gap-x-10">
-            {products.map((product) => <MezcalCard key={product.slug} product={product} />)}
+          <div className="mt-14 grid gap-x-8 gap-y-16 sm:grid-cols-2 lg:mt-6 lg:grid-cols-3 lg:gap-x-10 [@media(min-width:80rem)_and_(min-height:54rem)]:flex-1 [@media(min-width:80rem)_and_(min-height:54rem)]:items-end">
+            {products.map((product, index) => {
+              const isUnpairedTabletCard = products.length % 2 === 1 && index === products.length - 1;
+              return <MezcalCard key={product.slug} product={product} className={isUnpairedTabletCard ? 'sm:col-span-2 lg:col-span-1' : undefined} />;
+            })}
           </div>
         )}
       </div>

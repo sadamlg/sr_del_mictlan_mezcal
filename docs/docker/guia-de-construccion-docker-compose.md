@@ -722,10 +722,11 @@ Si necesitas probar la tienda desde otro dispositivo de tu LAN:
 
 1. En <code>.env</code>, cambia <code>FRONTEND_BIND_ADDRESS</code> a <code>0.0.0.0</code>.
 2. Establece <code>NEXT_ALLOWED_DEV_ORIGIN</code> con la IP LAN del equipo anfitrión, sin protocolo ni puerto, por ejemplo <code>192.168.1.20</code>.
-3. Recrea el frontend para aplicar la variable:
+3. Establece <code>MEDIA_BASE_URL</code> al origen del frontend con esa misma IP, por ejemplo <code>http://192.168.1.20:3000</code>. Así las imágenes del catálogo y el fondo del showcase apuntan al equipo anfitrión y no a <code>localhost</code> del celular.
+4. Recrea el frontend y el backend para aplicar la configuración:
 
 ~~~bash
-docker compose up --build --detach --force-recreate frontend
+docker compose up --detach --force-recreate frontend backend
 ~~~
 
 Desde el otro dispositivo abre <code>http://&lt;IP-LAN-del-anfitrión&gt;:3000</code>. <code>0.0.0.0</code> en <code>ports</code> enlaza el puerto publicado a todas las interfaces IPv4 del anfitrión; no es la IP de la red bridge ni cambia las conexiones privadas entre contenedores. Usa esta opción sólo en una red local confiable y permite el puerto en el firewall si tu sistema lo bloquea. [Opción <code>allowedDevOrigins</code> de Next.js](https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins)

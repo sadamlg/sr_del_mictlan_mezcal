@@ -64,6 +64,23 @@ test('returns public product fields and resolves the stable media key', async ()
   });
 });
 
+test('resolves media URLs to the LAN host for an explicitly enabled local preview', async () => {
+  const response = createResponse();
+  const handler = createCatalogHandler({
+    findActiveProducts: async () => [fixtureProduct],
+    mediaBaseUrl: 'http://192.168.100.11:3000',
+    allowPrivateLanHttp: true,
+  });
+
+  await handler({}, response);
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(
+    response.body.products[0].image.url,
+    'http://192.168.100.11:3000/catalog/fixture/front.webp',
+  );
+});
+
 test('publishes a documented alcohol range without choosing an arbitrary exact value', async () => {
   const response = createResponse();
   const handler = createCatalogHandler({

@@ -5,13 +5,23 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import HeaderActions from './header-actions';
 import MobileMenu, { MobileMenuToggle } from './mobile-menu';
-import { lockBodyScroll, nextMenuState, shouldHideHeaderOnScroll } from './behavior';
+import {
+  lockBodyScroll,
+  nextMenuState,
+  shouldDisplayHeader,
+  shouldHideHeaderOnScroll,
+} from './behavior';
 
 export default function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
+  const headerShouldDisplay = shouldDisplayHeader(headerVisible, menuOpen);
   const closeMenu = () => setMenuOpen((open) => nextMenuState(open, 'navigate'));
+  const toggleMenu = () => {
+    setHeaderVisible(true);
+    setMenuOpen((open) => nextMenuState(open, 'toggle'));
+  };
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(min-width: 1024px)');
@@ -44,13 +54,13 @@ export default function SiteHeader() {
     <>
       <MobileMenu isOpen={menuOpen} onClose={closeMenu} />
       <header
-        className={`fixed inset-x-0 top-0 z-50 w-full bg-black/20 py-6 font-display text-white backdrop-blur-[8px] transition-[translate,background-color] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] lg:pt-4 lg:pb-2${headerVisible ? ' translate-y-0 delay-0' : ' -translate-y-full delay-100'}${menuOpen ? ' bg-black' : ''}`}
+        className={`fixed inset-x-0 top-0 z-50 w-full bg-black/20 py-6 font-display text-white backdrop-blur-[8px] transition-[translate,background-color] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] lg:pt-4 lg:pb-2${headerShouldDisplay ? ' translate-y-0 delay-0' : ' -translate-y-full delay-100'}${menuOpen ? ' bg-black' : ''}`}
       >
         <div className="mx-auto flex w-full max-w-[1280px] items-center justify-between px-4 min-[768px]:px-10 min-[768px]:max-[1023px]:px-[30px]">
           <div className="flex-1 lg:hidden">
             <MobileMenuToggle
               isOpen={menuOpen}
-              onToggle={() => setMenuOpen((open) => nextMenuState(open, 'toggle'))}
+              onToggle={toggleMenu}
             />
           </div>
           <Link
