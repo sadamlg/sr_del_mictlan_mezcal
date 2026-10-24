@@ -17,7 +17,7 @@ export default function LandingFooter({ year }) {
       <div className="mx-auto w-full max-w-[1440px] px-6 pt-8 pb-10 md:px-16 md:pt-10 md:pb-12">
         <div className="relative flex flex-col items-center gap-8 pb-4 md:pb-5">
           <a
-            className="group relative z-10 inline-flex min-h-12 shrink-0 self-end items-center gap-3 rounded-full border border-[#0e7490] bg-transparent px-5 py-1 font-ui text-[11px] font-semibold uppercase tracking-[0.2em] text-white/85 no-underline transition-[background-color,border-color,color] duration-300 hover:border-[#97d2c6] hover:bg-[#97d2c6]/15 hover:text-[#97d2c6] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#97d2c6] md:absolute md:top-0 md:right-0"
+            className="group relative z-10 inline-flex min-h-12 shrink-0 self-end items-center gap-3 rounded-full border border-[#0e7490] bg-transparent px-5 py-1 font-ui text-[11px] font-semibold uppercase tracking-[0.2em] text-white/85 no-underline transition-[background-color,border-color,color] duration-300 hover:border-[#97d2c6] hover:bg-[#97d2c6]/15 hover:text-[#97d2c6] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#97d2c6] [@media(min-width:80rem)_and_(min-height:54rem)_and_(orientation:landscape)]:absolute [@media(min-width:80rem)_and_(min-height:54rem)_and_(orientation:landscape)]:top-0 [@media(min-width:80rem)_and_(min-height:54rem)_and_(orientation:landscape)]:right-0"
             href="#coleccion"
           >
             <span>Explorar la colección</span>
