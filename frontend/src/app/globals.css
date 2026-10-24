@@ -94,4 +94,23 @@ body {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
+
+  #preguntas .faq-disclosure::details-content {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@supports (interpolate-size: allow-keywords) and (transition-behavior: allow-discrete) and selector(details::details-content) {
+  #preguntas .faq-disclosure::details-content {
+    block-size: 0;
+    overflow: hidden;
+    interpolate-size: allow-keywords;
+    transition:
+      block-size 300ms cubic-bezier(0.25, 0.1, 0.25, 1),
+      content-visibility 300ms allow-discrete;
+  }
+
+  #preguntas .faq-disclosure[open]::details-content {
+    block-size: auto;
+  }
 }
