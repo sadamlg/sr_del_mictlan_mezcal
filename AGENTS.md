@@ -15,6 +15,15 @@
 
 - Usa Tailwind CSS 4 como sistema predeterminado para los estilos del frontend. Recurre a CSS escrito a mano sólo para necesidades puntuales que no puedan resolverse razonablemente con sus utilidades; mantén esas reglas mínimas y acotadas.
 
+## Migración de secciones de la landing
+
+- Antes de implementar una sección, inspecciona su implementación de referencia completa en `../sr_del_mictlan/frontend/src`: estructura, estilos, assets, breakpoints, interacciones y estados. Resume qué se conserva y detecta diferencias entre el original y el nuevo proyecto antes de editar.
+- Conserva el diseño y comportamiento de referencia. No rediseñes ni agregues interacciones por criterio propio; señala primero cualquier ambigüedad o limitación técnica que cambie el resultado.
+- Mantén una estructura profesional y compacta: agrupa por responsabilidades claras y evita crear un archivo o componente para cada elemento visual. Aplica las clases Tailwind directamente en JSX y usa Lucide React para iconos; usa CSS o SVG manual sólo cuando exista una necesidad concreta.
+- Para cada cambio de lógica o interacción, sigue TDD y guarda las pruebas frontend en `frontend/tests/`. Para cambios sólo visuales, valida la presentación en navegador sin crear pruebas unitarias artificiales.
+- Cierra cada sección sólo después de ejecutar las pruebas y la compilación disponibles, abrir la landing en navegador y revisar los estados relevantes en escritorio y móvil, incluida la interacción afectada. Compara el resultado con la referencia y revisa errores de consola.
+- Al reportar, enumera brevemente los archivos o responsabilidades migradas, las diferencias intencionales, las verificaciones ejecutadas y cualquier pendiente. No declares completa una sección si falta una verificación requerida.
+
 ## Componentes del frontend
 
 - Agrupa cada componente compuesto en una carpeta propia. Extrae sólo piezas con una responsabilidad clara y reutilizable o comportamiento propio; evita un archivo por elemento visual. Escribe las utilidades de Tailwind en las etiquetas JSX y coloca las pruebas del frontend en `frontend/tests/`.
