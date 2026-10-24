@@ -24,6 +24,13 @@ test('queries active products with only public fields in a stable order', async 
       priceCents: true,
       imageKey: true,
       imageAlt: true,
+      lifestyleImageKey: true,
+      labelOne: true,
+      labelTwo: true,
+      sensoryProfile: true,
+      alcoholMinPercent: true,
+      alcoholMaxPercent: true,
+      volumeMl: true,
     },
     orderBy: [{ position: 'asc' }, { slug: 'asc' }],
   });

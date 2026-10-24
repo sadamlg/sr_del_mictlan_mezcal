@@ -2,6 +2,9 @@ import { Suspense } from 'react';
 import Image from 'next/image';
 import { io } from 'next/cache';
 import AgeGate from '../components/age-gate';
+import SiteHeader from '../components/header/header';
+import LandingHero from '../components/landing/landing-hero';
+import MezcalShowcase from '../components/landing/mezcal-showcase/mezcal-showcase';
 
 async function loadCatalog() {
   const apiUrl = process.env.INTERNAL_API_URL;
@@ -21,73 +24,9 @@ async function loadCatalog() {
   }
 }
 
-function Product({ product }) {
-  return (
-    <article className="group flex flex-col border-t border-[#5e503d] pt-6">
-      <div className="relative mb-6 aspect-[4/5] overflow-hidden bg-[#17140f]">
-        <img
-          className="h-full w-full object-contain p-5 transition-transform duration-700 ease-out group-hover:scale-[1.025]"
-          src={product.image.url}
-          alt={product.image.alt}
-          loading="lazy"
-          decoding="async"
-          referrerPolicy="no-referrer"
-        />
-      </div>
-      <div className="flex flex-1 flex-col">
-        <h3 className="font-display text-2xl leading-tight text-[#f1e7d6] sm:text-[1.8rem]">{product.name}</h3>
-        <p className="mt-4 max-w-[42ch] flex-1 text-[0.97rem] leading-7 text-[#c9bead]">{product.description}</p>
-        <p className="mt-6 border-t border-[#5e503d] pt-4 text-lg font-medium tabular-nums text-[#e9bd82]">
-          {new Intl.NumberFormat('es-MX', {
-            style: 'currency',
-            currency: product.price.currency,
-            maximumFractionDigits: 2,
-          }).format(product.price.amount / 100)}
-        </p>
-      </div>
-    </article>
-  );
-}
-
-function Catalog({ products }) {
-  if (products === null) {
-    return (
-      <div className="mt-12 max-w-2xl border-t border-[#5e503d] pt-7" role="status">
-        <p className="font-display text-2xl text-[#f1e7d6]">No pudimos cargar el catálogo.</p>
-        <p className="mt-3 leading-7 text-[#c9bead]">El catálogo no está disponible por el momento. Inténtalo de nuevo en un momento.</p>
-        <a className="mt-5 inline-flex min-h-11 items-center text-sm font-semibold text-[#e9bd82] underline decoration-[#8c6842] underline-offset-4 hover:text-[#f5d7ae]" href="/">
-          Reintentar
-        </a>
-      </div>
-    );
-  }
-
-  if (products.length === 0) {
-    return (
-      <div className="mt-12 grid gap-8 border-t border-[#5e503d] pt-7 md:grid-cols-[minmax(0,1fr)_minmax(17rem,0.7fr)] md:gap-16">
-        <div>
-          <p className="font-display text-2xl leading-snug text-[#f1e7d6] sm:text-3xl">La colección está tomando forma.</p>
-          <p className="mt-4 max-w-[58ch] leading-7 text-[#c9bead]">
-            Aquí aparecerán las fichas, los precios y las imágenes aprobadas de cada botella.
-          </p>
-        </div>
-        <p className="self-end font-display text-lg leading-8 text-[#b8a58c] md:text-xl">
-          Un espacio para descubrir con calma lo que cada destilado tiene para contar.
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="mt-12 grid gap-x-8 gap-y-14 md:grid-cols-2 xl:grid-cols-3">
-      {products.map((product) => <Product product={product} key={product.slug} />)}
-    </div>
-  );
-}
-
 async function CatalogContent() {
   const products = await loadCatalog();
-  return <Catalog products={products} />;
+  return <MezcalShowcase products={products} />;
 }
 
 async function CurrentYear() {
@@ -100,71 +39,14 @@ export default function Home() {
   return (
     <AgeGate>
       <div className="bg-[#100e0b] text-[#f1e7d6]">
-        <header className="absolute inset-x-0 top-0 z-20">
-          <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between px-5 py-3 sm:px-8 lg:px-14">
-            <a href="#inicio" className="inline-flex rounded-sm" aria-label="Señor del Mictlán, inicio">
-              <Image
-                src="/images/brand/senor-del-mictlan-brand.png"
-                alt="Señor del Mictlán"
-                width={1774}
-                height={887}
-                priority
-                sizes="(max-width: 640px) 132px, 176px"
-                className="h-[66px] w-[132px] object-contain sm:h-[88px] sm:w-[176px]"
-              />
-            </a>
-            <nav aria-label="Navegación principal" className="flex items-center gap-4 text-xs font-medium tracking-[0.02em] text-[#f1e7d6] sm:gap-8 sm:text-sm">
-              <a className="underline-offset-4 hover:text-[#e9bd82] hover:underline" href="#coleccion">Colección</a>
-              <a className="underline-offset-4 hover:text-[#e9bd82] hover:underline" href="#ritual">El encuentro</a>
-            </nav>
-          </div>
-        </header>
+        <SiteHeader />
 
         <main>
-          <section id="inicio" className="relative isolate flex min-h-[760px] items-end overflow-hidden sm:min-h-[820px] lg:min-h-[min(920px,100svh)]" aria-labelledby="hero-title">
-            <Image
-              src="/images/hero-background.png"
-              alt=""
-              fill
-              priority
-              sizes="100vw"
-              className="-z-20 object-cover object-[38%_center] sm:object-center"
-            />
-            <div className="absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(10,9,7,0.48)_0%,rgba(10,9,7,0.16)_30%,rgba(10,9,7,0.28)_54%,rgba(10,9,7,0.93)_100%)] lg:bg-[linear-gradient(90deg,rgba(10,9,7,0.02)_0%,rgba(10,9,7,0.08)_37%,rgba(10,9,7,0.66)_69%,rgba(10,9,7,0.82)_100%)]" />
-            <div className="mx-auto grid w-full max-w-[1440px] grid-cols-1 items-end px-6 pb-16 pt-40 sm:px-10 sm:pb-20 lg:grid-cols-2 lg:px-14 lg:pb-28">
-              <div className="lg:col-start-2 lg:pl-8">
-                <h1 id="hero-title" className="max-w-[12ch] font-display text-[clamp(3rem,8vw,6rem)] leading-[0.98] tracking-[-0.035em] text-[#fbf2e4]">
-                  Señor del Mictlán
-                </h1>
-                <p className="mt-6 max-w-[34ch] text-lg leading-8 text-[#e5d8c4] sm:text-xl sm:leading-9">
-                  Una pausa para mirar, compartir y descubrir cada encuentro.
-                </p>
-                <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
-                  <a className="inline-flex min-h-12 items-center justify-center border border-[#d2a16a] px-6 text-sm font-semibold text-[#fff3e2] transition-colors hover:bg-[#d2a16a] hover:text-[#18120b]" href="#coleccion">
-                    Explorar la colección
-                  </a>
-                  <a className="inline-flex min-h-12 items-center text-sm font-medium text-[#f1e7d6] underline decoration-[#b58a5a] underline-offset-4 hover:text-[#e9bd82]" href="#ritual">
-                    El encuentro
-                  </a>
-                </div>
-              </div>
-            </div>
-            <span aria-hidden="true" className="absolute bottom-6 left-6 hidden text-[0.65rem] tracking-[0.22em] text-[#d9c7ab] uppercase sm:block lg:left-14">Señor del Mictlán</span>
-          </section>
+          <LandingHero />
 
-          <section id="coleccion" className="scroll-mt-8 bg-[#17140f] px-6 py-20 sm:px-10 sm:py-28 lg:px-14 lg:py-32" aria-labelledby="collection-title">
-            <div className="mx-auto max-w-[1250px]">
-              <div className="grid gap-6 border-b border-[#5e503d] pb-8 md:grid-cols-[minmax(0,1fr)_minmax(15rem,0.55fr)] md:items-end md:gap-12">
-                <h2 id="collection-title" className="max-w-[12ch] font-display text-4xl leading-[1.08] tracking-[-0.025em] text-[#f1e7d6] sm:text-5xl lg:text-6xl">La colección</h2>
-                <p className="max-w-[55ch] pb-1 text-base leading-7 text-[#c9bead]">
-                  Cada botella tendrá aquí su historia, su precio vigente y la imagen que la acompaña.
-                </p>
-              </div>
-              <Suspense fallback={<p className="mt-12 border-t border-[#5e503d] pt-7 text-[#c9bead]" role="status">Cargando la colección…</p>}>
-                <CatalogContent />
-              </Suspense>
-            </div>
-          </section>
+          <Suspense fallback={<section id="coleccion" className="bg-[#0a0b0a] px-6 py-24 text-center text-white" role="status">Cargando la colección…</section>}>
+            <CatalogContent />
+          </Suspense>
 
           <section id="ritual" className="scroll-mt-8 bg-[#100e0b] px-6 py-20 sm:px-10 sm:py-28 lg:px-14 lg:py-32" aria-labelledby="ritual-title">
             <div className="mx-auto grid max-w-[1250px] gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-24">

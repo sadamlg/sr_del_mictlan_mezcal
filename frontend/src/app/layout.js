@@ -1,3 +1,7 @@
+import '@fontsource/cinzel-decorative/400.css';
+import '@fontsource/cinzel-decorative/700.css';
+import '@fontsource-variable/open-sans/wght.css';
+import '@fontsource-variable/montserrat/wght.css';
 import './globals.css';
 
 export const metadata = {

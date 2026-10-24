@@ -10,6 +10,13 @@ export function createCatalogRepository(prisma) {
           priceCents: true,
           imageKey: true,
           imageAlt: true,
+          lifestyleImageKey: true,
+          labelOne: true,
+          labelTwo: true,
+          sensoryProfile: true,
+          alcoholMinPercent: true,
+          alcoholMaxPercent: true,
+          volumeMl: true,
         },
         orderBy: [{ position: 'asc' }, { slug: 'asc' }],
       });
