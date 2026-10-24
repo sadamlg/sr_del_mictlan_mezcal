@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useId, useRef, useState } from 'react';
-import { FileText, Percent, Wine } from 'lucide-react';
+import { Beaker, FileText, Percent } from 'lucide-react';
 import insightBehavior from './insight-behavior';
 
 const { nextInsight, formatAlcohol } = insightBehavior;
@@ -20,12 +20,12 @@ export default function ProductInsights({ product }) {
     product.alcohol && {
       key: 'alcohol',
       label: `Graduación alcohólica de ${product.name}`,
-      display: <><Percent aria-hidden="true" size={13} strokeWidth={1.8} /> Alc. Vol.</>,
+      display: <Percent aria-hidden="true" size={16} strokeWidth={1.8} />,
     },
     product.volumeMl && {
       key: 'volume',
-      label: `Contenido de ${product.name}`,
-      display: <><Wine aria-hidden="true" size={13} strokeWidth={1.8} /> {product.volumeMl} ml</>,
+      label: `Contenido neto de ${product.name}`,
+      display: <Beaker aria-hidden="true" size={16} strokeWidth={1.8} />,
     },
   ].filter(Boolean);
 
@@ -97,7 +97,7 @@ export default function ProductInsights({ product }) {
               setActive((current) => nextInsight(current, `touch:${key}`));
             }
           }}
-          className={`inline-flex min-h-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 font-ui text-xs font-semibold uppercase tracking-[0.06em] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e9bd82] sm:px-3 ${key === 'profile' ? 'min-w-11' : ''} ${active === key ? 'border-[#e9bd82] bg-[#e9bd82] text-[#17120b] [text-shadow:none]' : 'border-white/55 bg-black/45 text-white hover:border-[#e9bd82] hover:text-[#e9bd82]'}`}
+          className={`inline-flex min-h-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 font-ui text-xs font-semibold uppercase tracking-[0.06em] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e9bd82] sm:px-3 ${['profile', 'alcohol', 'volume'].includes(key) ? 'min-w-11' : ''} ${active === key ? 'border-[#e9bd82] bg-[#e9bd82] text-[#17120b] [text-shadow:none]' : 'border-white/55 bg-black/45 text-white hover:border-[#e9bd82] hover:text-[#e9bd82]'}`}
         >
           {display}
         </button>
