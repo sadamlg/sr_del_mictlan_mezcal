@@ -24,6 +24,9 @@ const fixtureProduct = {
   priceCents: 12345,
   imageKey: 'catalog/fixture/front.webp',
   imageAlt: 'Botella ficticia de prueba',
+  lifestyleImageKey: 'catalog/fixture/context.webp',
+  labelOne: '750 ml',
+  labelTwo: 'Perfil herbal',
 };
 
 test('returns public product fields and resolves the stable media key', async () => {
@@ -47,6 +50,8 @@ test('returns public product fields and resolves the stable media key', async ()
           url: 'https://media.example.test/catalog/fixture/front.webp',
           alt: 'Botella ficticia de prueba',
         },
+        lifestyleImage: { url: 'https://media.example.test/catalog/fixture/context.webp', alt: '' },
+        labels: ['750 ml', 'Perfil herbal'],
       },
     ],
   });
@@ -97,4 +102,16 @@ test('does not publish an active record with missing catalog fields', async () =
 
   assert.equal(response.statusCode, 503);
   assert.equal(response.body.error.code, 'CATALOG_UNAVAILABLE');
+});
+
+test('does not publish a product without its second image and labels', async () => {
+  for (const field of ['lifestyleImageKey', 'labelOne', 'labelTwo']) {
+    const response = createResponse();
+    const handler = createCatalogHandler({
+      findActiveProducts: async () => [{ ...fixtureProduct, [field]: null }],
+      mediaBaseUrl: 'https://media.example.test',
+    });
+    await handler({}, response);
+    assert.equal(response.statusCode, 503, field);
+  }
 });

@@ -17,7 +17,9 @@ La landing muestra únicamente productos activos. El catálogo no incluye catego
   "image": {
     "url": "https://media.example.test/catalogo/identificador/frente.webp",
     "alt": "Texto alternativo aprobado"
-  }
+  },
+  "lifestyleImage": { "url": "https://media.example.test/catalogo/identificador/ambiente.webp", "alt": "" },
+  "labels": ["Materia prima", "Notas de sabor"]
 }
 ```
 
@@ -25,9 +27,9 @@ La landing muestra únicamente productos activos. El catálogo no incluye catego
 
 ## Datos y publicación
 
-La tabla `products` conserva un `slug`, nombre, descripción, precio en centavos, clave del medio, texto alternativo, posición y estado activo. Los campos de publicación pueden permanecer vacíos mientras la ficha está inactiva. PostgreSQL impide activar un producto sin nombre, descripción, precio positivo, clave de medio segura y texto alternativo.
+La tabla `products` conserva un `slug`, nombre, descripción, precio en centavos, claves de ambas imágenes, texto alternativo de la botella, dos etiquetas descriptivas, posición y estado activo. Los campos de publicación pueden permanecer vacíos mientras la ficha está inactiva. PostgreSQL impide activar un producto incompleto. La imagen de ambiente es decorativa, por lo que su texto alternativo público está vacío.
 
-No se incluyen registros de ejemplo ni productos activos hasta recibir y aprobar sus fichas y precios.
+`backend/prisma/dev-showcase.sql` carga tres fichas únicamente para la vista previa local. Sus $250, $350 y $500 MXN por 750 ml son bases provisionales proporcionadas por el proyecto; faltan envase, etiquetas, impuestos, comisiones y otros costos. El cliente definirá precios de venta en una sesión futura. Este archivo no se ejecuta como migración ni se aplica en staging o producción. El botón de compra permanece deshabilitado hasta implementar el carrito y aprobar precios de venta.
 
 ## Medios
 

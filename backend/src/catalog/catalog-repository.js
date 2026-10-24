@@ -10,6 +10,9 @@ export function createCatalogRepository(prisma) {
           priceCents: true,
           imageKey: true,
           imageAlt: true,
+          lifestyleImageKey: true,
+          labelOne: true,
+          labelTwo: true,
         },
         orderBy: [{ position: 'asc' }, { slug: 'asc' }],
       });

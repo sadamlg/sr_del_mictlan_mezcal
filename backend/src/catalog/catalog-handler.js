@@ -15,7 +15,11 @@ function toPublicProduct(product, mediaBaseUrl) {
     !Number.isSafeInteger(product.priceCents) ||
     product.priceCents <= 0 ||
     typeof product.imageAlt !== 'string' ||
-    product.imageAlt.trim().length === 0
+    product.imageAlt.trim().length === 0 ||
+    typeof product.labelOne !== 'string' ||
+    product.labelOne.trim().length === 0 ||
+    typeof product.labelTwo !== 'string' ||
+    product.labelTwo.trim().length === 0
   ) {
     throw new Error('El producto activo no cumple el contrato público del catálogo.');
   }
@@ -29,6 +33,11 @@ function toPublicProduct(product, mediaBaseUrl) {
       url: mediaObjectUrl(mediaBaseUrl, product.imageKey),
       alt: product.imageAlt,
     },
+    lifestyleImage: {
+      url: mediaObjectUrl(mediaBaseUrl, product.lifestyleImageKey),
+      alt: '',
+    },
+    labels: [product.labelOne, product.labelTwo],
   };
 }
 

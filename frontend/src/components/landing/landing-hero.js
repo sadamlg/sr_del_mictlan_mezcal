@@ -50,7 +50,7 @@ export default function LandingHero() {
               aria-hidden="true"
             />
             <span className="pointer-events-none relative z-[1] font-sans leading-[1.25] font-semibold tracking-[.1em] uppercase">
-              Comprar Ahora
+              Conocer la colección
             </span>
           </a>
         </div>

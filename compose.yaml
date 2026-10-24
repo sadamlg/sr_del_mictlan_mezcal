@@ -87,6 +87,7 @@ services:
       NEXT_TELEMETRY_DISABLED: "1"
       INTERNAL_API_URL: ${INTERNAL_API_URL:-http://backend:3000}
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+      MEDIA_BASE_URL: ${MEDIA_BASE_URL:-http://localhost:3000}
       NEXT_ALLOWED_DEV_ORIGIN: ${NEXT_ALLOWED_DEV_ORIGIN:-}
     command: ["npm", "run", "dev", "--", "--hostname", "0.0.0.0"]
     ports:
