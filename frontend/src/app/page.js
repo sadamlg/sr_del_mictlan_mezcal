@@ -5,6 +5,7 @@ import AgeGate from '../components/age-gate';
 import SiteHeader from '../components/header/header';
 import LandingHero from '../components/landing/landing-hero';
 import LandingRitual from '../components/landing/landing-ritual';
+import LandingFaq from '../components/landing/landing-faq';
 import MezcalShowcase from '../components/landing/mezcal-showcase/mezcal-showcase';
 
 async function loadCatalog() {
@@ -50,6 +51,7 @@ export default function Home() {
           </Suspense>
 
           <LandingRitual />
+          <LandingFaq />
         </main>
 
         <footer className="border-t border-[#5e503d] bg-[#17140f] px-6 py-10 sm:px-10 lg:px-14">
