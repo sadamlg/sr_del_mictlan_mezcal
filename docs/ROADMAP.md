@@ -77,7 +77,8 @@ flowchart TB
 
 ## Reglas de ejecución
 
-- Cada módulo de producto aplica TDD a su lógica y completa la parte de frontend correspondiente antes de avanzar al siguiente módulo.
-- La validación final de un módulo combina sus pruebas con verificaciones de aceptación del recorrido completo; una interfaz sin comportamiento conectado no cierra una función.
+- Todo cambio que agregue, modifique o elimine lógica o comportamiento de producto incluye o actualiza pruebas automatizadas. Se aplica TDD: prueba que falla, implementación, prueba aprobada. No se cierra un módulo con lógica nueva validada sólo manualmente.
+- Cada módulo completa su parte de frontend antes de avanzar al siguiente módulo. La validación combina pruebas unitarias o de integración en el nivel adecuado con pruebas de navegador para los recorridos críticos; una interfaz sin comportamiento conectado no cierra una función.
+- Los asistentes de generación de pruebas pueden apoyar el descubrimiento y la exploración, pero las pruebas que cuentan como cobertura del proyecto deben estar revisadas, versionadas y ser reproducibles desde el repositorio.
 - Agregar o reemplazar medios dentro de las superficies aprobadas es trabajo de contenido/presentación y no requiere modificar el alcance por sí solo. Revisar `docs/MVP_SCOPE.md` sólo si cambia una página, un flujo, una capacidad de usuario o una inclusión/exclusión funcional.
 - Las tareas asíncronas se guardan en PostgreSQL y las procesa el worker; no se incorpora Redis ni BullMQ.
