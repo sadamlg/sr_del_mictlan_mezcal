@@ -25,26 +25,26 @@ export default function LandingRitual() {
     >
       <div className="mx-auto max-w-[1400px]">
         <header className="mx-auto mb-16 max-w-3xl text-center sm:mb-20">
-          <p className="inline-block border border-[#4d4635]/60 px-3 py-1 font-ui text-[10px] font-semibold uppercase tracking-[0.25em] text-[#97d2c6]">
-            Tradición ancestral
+          <p className="mb-5 inline-flex rounded-full border border-[#0e7490] px-4 py-1 font-ui text-[10px] font-semibold uppercase tracking-[0.25em] text-white/80">
+            Tradición Ancestral
           </p>
-          <h2 id="ritual-title" className="mt-5 font-display text-[clamp(1.875rem,4vw,2.5rem)] font-normal uppercase leading-[1.3] tracking-[0.06em]">
-            El ritual sagrado
+          <h2 id="ritual-title" className="font-display text-[clamp(2rem,4.5vw,3rem)] font-normal uppercase leading-[1.2] tracking-[0.04em]">
+            Tlapaloa
           </h2>
-          <p className="mx-auto mt-5 max-w-[60ch] font-serif text-base font-light italic leading-relaxed text-[#c6d1ca] sm:text-lg">
-            “El mezcal de agave Cupreata se contempla en la calma antes de cruzar los umbrales del paladar.”
+          <p className="mx-auto mt-4 max-w-[48ch] font-serif text-base font-light italic leading-relaxed text-[#c6d1ca] sm:text-lg lg:text-xl">
+            Probar una bebida y descubrir sus matices.
           </p>
         </header>
 
         <div className="grid gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start lg:gap-16">
           <div className="lg:pr-4">
-            <p className="font-ui text-[10px] font-semibold uppercase tracking-[0.25em] text-[#97d2c6]/80">
+            <p className="font-ui text-[10px] font-semibold uppercase tracking-[0.25em] text-[#97d2c6]/80 lg:text-xs lg:tracking-[0.2em]">
               El arte de beber despacio
             </p>
-            <h3 className="mt-6 font-display text-[clamp(2.25rem,5vw,3.5rem)] font-normal uppercase leading-[1.08] tracking-[0.06em]">
+            <h3 className="mt-6 font-display text-[clamp(1.75rem,3.5vw,2.5rem)] font-normal uppercase leading-[1.12] tracking-[0.04em] lg:text-[clamp(2.5rem,3.2vw,2.875rem)]">
               Un<br className="hidden lg:block" /> momento<br className="hidden lg:block" /> para<br className="hidden lg:block" /> detenerse.
             </h3>
-            <p className="mt-7 max-w-[36ch] text-base font-light leading-[1.75] text-[#c6d1ca] sm:text-[1.0625rem]">
+            <p className="mt-7 max-w-[36ch] text-base font-light leading-[1.75] text-[#c6d1ca] sm:text-[1.0625rem] lg:text-lg xl:text-[1.1875rem]">
               Un vaso. Una conversación. Tiempo para descubrir lo que tienes frente a ti.
             </p>
           </div>
