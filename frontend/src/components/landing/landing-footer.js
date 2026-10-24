@@ -16,7 +16,7 @@ export default function LandingFooter({ year }) {
     <footer className="w-full bg-[radial-gradient(circle_at_50%_100%,rgba(77,15,22,0.72)_0%,rgba(20,8,10,0.96)_50%,#060707_100%)] text-[#e2e3e0]">
       <div className="mx-auto w-full max-w-[1440px] px-6 pt-8 pb-10 md:px-16 md:pt-10 md:pb-12">
         <div className="relative flex flex-col items-center gap-8 pb-4 md:pb-5">
-          <Link
+          <a
             className="group relative z-10 inline-flex min-h-12 shrink-0 self-end items-center gap-3 rounded-full border border-[#0e7490] bg-transparent px-5 py-1 font-ui text-[11px] font-semibold uppercase tracking-[0.2em] text-white/85 no-underline transition-[background-color,border-color,color] duration-300 hover:border-[#97d2c6] hover:bg-[#97d2c6]/15 hover:text-[#97d2c6] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#97d2c6] md:absolute md:top-0 md:right-0"
             href="#coleccion"
           >
@@ -27,7 +27,7 @@ export default function LandingFooter({ year }) {
               strokeWidth={1.6}
               className="text-white/80 transition-[transform,color] duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-[#97d2c6]"
             />
-          </Link>
+          </a>
           <Image
             src="/images/brand/senor-del-mictlan-brand.png"
             alt=""
