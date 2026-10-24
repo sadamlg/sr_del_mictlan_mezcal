@@ -57,12 +57,12 @@ function toPublicProduct(product, mediaBaseUrl) {
   };
 }
 
-export function createCatalogHandler({ findActiveProducts, mediaBaseUrl }) {
+export function createCatalogHandler({ findActiveProducts, mediaBaseUrl, allowPrivateLanHttp = false }) {
   if (typeof findActiveProducts !== 'function') {
     throw new TypeError('findActiveProducts debe ser una función.');
   }
 
-  const safeMediaBaseUrl = normalizeMediaBaseUrl(mediaBaseUrl);
+  const safeMediaBaseUrl = normalizeMediaBaseUrl(mediaBaseUrl, { allowPrivateLanHttp });
 
   return async function catalogHandler(_request, response) {
     try {

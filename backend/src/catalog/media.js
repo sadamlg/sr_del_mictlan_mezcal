@@ -1,7 +1,19 @@
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
 const SAFE_KEY_SEGMENT = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 
-export function normalizeMediaBaseUrl(value) {
+function isPrivateIpv4(hostname) {
+  const octets = hostname.split('.').map(Number);
+  if (octets.length !== 4 || octets.some((octet) => !Number.isInteger(octet) || octet < 0 || octet > 255)) {
+    return false;
+  }
+
+  const [first, second] = octets;
+  return first === 10 ||
+    (first === 172 && second >= 16 && second <= 31) ||
+    (first === 192 && second === 168);
+}
+
+export function normalizeMediaBaseUrl(value, { allowPrivateLanHttp = false } = {}) {
   let url;
 
   try {
@@ -10,7 +22,10 @@ export function normalizeMediaBaseUrl(value) {
     throw new Error('MEDIA_BASE_URL debe ser una URL absoluta válida.');
   }
 
-  if (url.protocol !== 'https:' && !(url.protocol === 'http:' && LOCAL_HOSTS.has(url.hostname))) {
+  const isAllowedHttpOrigin = url.protocol === 'http:' && (
+    LOCAL_HOSTS.has(url.hostname) || (allowPrivateLanHttp && isPrivateIpv4(url.hostname))
+  );
+  if (url.protocol !== 'https:' && !isAllowedHttpOrigin) {
     throw new Error('MEDIA_BASE_URL debe usar HTTPS, excepto para localhost en desarrollo.');
   }
 

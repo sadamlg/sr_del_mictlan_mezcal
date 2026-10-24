@@ -12,6 +12,22 @@ test('allows HTTP only for local development origins', () => {
   assert.throws(() => normalizeMediaBaseUrl('http://media.example.test'), /HTTPS/);
 });
 
+test('allows a private LAN media origin over HTTP only when local preview enables it', () => {
+  assert.equal(
+    normalizeMediaBaseUrl('http://192.168.100.11:3000', { allowPrivateLanHttp: true }),
+    'http://192.168.100.11:3000',
+  );
+  assert.throws(() => normalizeMediaBaseUrl('http://192.168.100.11:3000'), /HTTPS/);
+  assert.throws(
+    () => normalizeMediaBaseUrl('http://media.example.test', { allowPrivateLanHttp: true }),
+    /HTTPS/,
+  );
+  assert.throws(
+    () => normalizeMediaBaseUrl('http://8.8.8.8', { allowPrivateLanHttp: true }),
+    /HTTPS/,
+  );
+});
+
 test('rejects media origins with credentials or query strings', () => {
   assert.throws(() => normalizeMediaBaseUrl('https://user:password@media.example.test'), /credenciales/);
   assert.throws(() => normalizeMediaBaseUrl('https://media.example.test?token=secret'), /ruta base/);
