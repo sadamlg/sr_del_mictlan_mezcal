@@ -3,6 +3,7 @@ const test = require('node:test');
 const {
   getMenuToggleProps,
   getMobileNavigationProps,
+  shouldDisplayHeader,
   lockBodyScroll,
   nextMenuState,
   shouldHideHeaderOnScroll,
@@ -13,6 +14,12 @@ test('el header se oculta al bajar por encima de 80 px y reaparece al subir', ()
   assert.equal(shouldHideHeaderOnScroll(80, 79), false);
   assert.equal(shouldHideHeaderOnScroll(81, 80), true);
   assert.equal(shouldHideHeaderOnScroll(80, 81), false);
+});
+
+test('el header permanece visible mientras el menú móvil está abierto', () => {
+  assert.equal(shouldDisplayHeader(false, true), true);
+  assert.equal(shouldDisplayHeader(false, false), false);
+  assert.equal(shouldDisplayHeader(true, false), true);
 });
 
 test('el menú alterna y se cierra al navegar o cambiar a escritorio', () => {

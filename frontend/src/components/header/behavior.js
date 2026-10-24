@@ -2,6 +2,10 @@ function shouldHideHeaderOnScroll(scrollY, previousScrollY) {
   return scrollY > previousScrollY && scrollY > 80;
 }
 
+function shouldDisplayHeader(headerVisible, menuOpen) {
+  return headerVisible || menuOpen;
+}
+
 function nextMenuState(open, action) {
   if (action === 'toggle') return !open;
   if (action === 'navigate' || action === 'desktop') return false;
@@ -40,5 +44,6 @@ module.exports = {
   getMobileNavigationProps,
   lockBodyScroll,
   nextMenuState,
+  shouldDisplayHeader,
   shouldHideHeaderOnScroll,
 };
