@@ -13,7 +13,7 @@ const footerLinks = [
 
 export default function LandingFooter({ year }) {
   return (
-    <footer className="w-full bg-[radial-gradient(circle_at_50%_100%,rgba(15,24,21,0.7)_0%,rgba(10,12,11,0.95)_50%,#060707_100%)] text-[#e2e3e0]">
+    <footer className="w-full bg-[radial-gradient(circle_at_50%_100%,rgba(77,15,22,0.72)_0%,rgba(20,8,10,0.96)_50%,#060707_100%)] text-[#e2e3e0]">
       <div className="mx-auto w-full max-w-[1440px] px-6 pt-8 pb-10 md:px-16 md:pt-10 md:pb-12">
         <div className="relative flex flex-col items-center gap-8 pb-4 md:pb-5">
           <Link
