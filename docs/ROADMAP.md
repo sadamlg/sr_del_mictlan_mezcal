@@ -6,8 +6,8 @@ Este roadmap ordena la construcción del MVP definido en [MVP_SCOPE.md](MVP_SCOP
 
 ```mermaid
 flowchart TB
-    p01["✅ 01 · Stack y entorno local<br/>Concluida"] --> p02["🔵 02 · Alcance y plan maestro<br/>Actual"]
-    p02 --> p03["▫️ 03 · Landing, catálogo y medios<br/>Planeada"]
+    p01["✅ 01 · Stack y entorno local<br/>Concluida"] --> p02["✅ 02 · Alcance y plan maestro<br/>Concluida"]
+    p02 --> p03["🔵 03 · Landing, catálogo y medios<br/>Actual"]
     p03 --> p04["▫️ 04 · Cuentas y perfil<br/>Planeada"]
     p04 --> p05["▫️ 05 · Carritos<br/>Planeada"]
     p05 --> p06["▫️ 06 · Stripe Checkout y pedidos<br/>Planeada"]
@@ -16,7 +16,7 @@ flowchart TB
     p08 --> p09["▫️ 09 · Preparación y salida a producción<br/>Planeada"]
 ```
 
-**Leyenda:** ✅ concluida · 🔵 actual · ▫️ planeada. El mapa resume el orden y el estado; los resultados, dependencias y criterios de cierre se detallan en cada fase.
+**Leyenda:** ✅ concluida · 🔵 actual · ▫️ planeada. La fase 03 está en curso: las secciones de la landing están migradas; la integración de medios en R2 sigue pendiente. El mapa resume el orden y el estado; los resultados, dependencias y criterios de cierre se detallan en cada fase.
 
 ## Fases
 
@@ -26,13 +26,13 @@ flowchart TB
 - **Resultado esperado:** arquitectura y stack definidos; frontend, API, PostgreSQL, worker y Mailpit disponibles en el entorno local con Docker Compose y sus guías.
 - **Criterio de cierre:** el entorno local y la documentación base permiten continuar el desarrollo desde una copia limpia del repositorio.
 
-### 02. Alcance y plan maestro — actual
+### 02. Alcance y plan maestro — concluida
 
 - **Dependencias:** fase 01.
 - **Resultado esperado:** contrato funcional aprobado, instrucciones duraderas del repositorio, roadmap ordenado y guía de Cloudflare coherente con el momento de integración de medios.
 - **Criterio de cierre:** `docs/MVP_SCOPE.md`, `AGENTS.md`, este roadmap y la guía de Cloudflare concuerdan; quedan identificadas las dependencias y los criterios de cierre de las fases.
 
-### 03. Landing, catálogo y medios
+### 03. Landing, catálogo y medios — actual
 
 - **Dependencias:** fases 01 y 02.
 - **Resultado esperado:** landing y escaparate de productos activos implementados con la identidad visual, el aviso de mayoría de edad y los medios correspondientes. Los datos del catálogo y la carga de archivos se mantienen manualmente.
