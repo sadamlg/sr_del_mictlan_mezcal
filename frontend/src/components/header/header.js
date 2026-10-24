@@ -1,0 +1,90 @@
+'use client';
+
+import Image from 'next/image';
+import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
+import HeaderActions from './header-actions';
+import MobileMenu, { MobileMenuToggle } from './mobile-menu';
+import { lockBodyScroll, nextMenuState, shouldHideHeaderOnScroll } from './behavior';
+
+export default function SiteHeader() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const lastScrollY = useRef(0);
+  const closeMenu = () => setMenuOpen((open) => nextMenuState(open, 'navigate'));
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(min-width: 1024px)');
+    const closeAtDesktop = (event) => {
+      if (event.matches) setMenuOpen((open) => nextMenuState(open, 'desktop'));
+    };
+
+    if (mediaQuery.matches) setMenuOpen((open) => nextMenuState(open, 'desktop'));
+    mediaQuery.addEventListener('change', closeAtDesktop);
+    return () => mediaQuery.removeEventListener('change', closeAtDesktop);
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      setHeaderVisible(!shouldHideHeaderOnScroll(currentScrollY, lastScrollY.current));
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    return lockBodyScroll(document.body);
+  }, [menuOpen]);
+
+  return (
+    <>
+      <MobileMenu isOpen={menuOpen} onClose={closeMenu} />
+      <header
+        className={`fixed inset-x-0 top-0 z-50 w-full bg-black/20 py-6 font-display text-white backdrop-blur-[8px] transition-[translate,background-color] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] lg:pt-4 lg:pb-2${headerVisible ? ' translate-y-0 delay-0' : ' -translate-y-full delay-100'}${menuOpen ? ' bg-black' : ''}`}
+      >
+        <div className="mx-auto flex w-full max-w-[1280px] items-center justify-between px-4 min-[768px]:px-10 min-[768px]:max-[1023px]:px-[30px]">
+          <div className="flex-1 lg:hidden">
+            <MobileMenuToggle
+              isOpen={menuOpen}
+              onToggle={() => setMenuOpen((open) => nextMenuState(open, 'toggle'))}
+            />
+          </div>
+          <Link
+            href="/"
+            className="order-2 flex animate-[blurredFadeIn_0.9s_ease-in-out_both] items-center lg:order-1"
+            onClick={closeMenu}
+            aria-label="Señor del Mictlán, inicio"
+          >
+            <Image
+              src="/images/brand/senor-del-mictlan-brand.png"
+              alt="Señor del Mictlán"
+              className="block h-20 w-auto max-w-full lg:h-auto lg:w-[140px]"
+              width={1774}
+              height={887}
+              sizes="(min-width: 1024px) 140px, 160px"
+              priority
+            />
+          </Link>
+          <nav className="hidden text-lg leading-7 lg:order-2 lg:flex" aria-label="Navegación principal">
+            <ul className="m-0 flex list-none items-center gap-[80px] p-0 uppercase tracking-[0.025em] min-[1280px]:gap-[96px]">
+              <li className="border-b border-b-transparent transition-[color,border-color] duration-300 ease-in-out hover:border-b-[#047857] hover:text-[#d1fae5]">
+                <a className="text-inherit no-underline" href="#coleccion">Mezcales</a>
+              </li>
+              <li className="border-b border-b-transparent transition-[color,border-color] duration-300 ease-in-out hover:border-b-[#047857] hover:text-[#d1fae5]">
+                <a className="text-inherit no-underline" href="#origen">Nosotros</a>
+              </li>
+              <li className="border-b border-b-transparent transition-[color,border-color] duration-300 ease-in-out hover:border-b-[#047857] hover:text-[#d1fae5]">
+                <a className="text-inherit no-underline" href="#coleccion">Promociones</a>
+              </li>
+            </ul>
+          </nav>
+          <HeaderActions />
+        </div>
+      </header>
+    </>
+  );
+}

@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import Image from 'next/image';
 import { io } from 'next/cache';
 import AgeGate from '../components/age-gate';
+import SiteHeader from '../components/header/header';
 
 async function loadCatalog() {
   const apiUrl = process.env.INTERNAL_API_URL;
@@ -100,25 +101,7 @@ export default function Home() {
   return (
     <AgeGate>
       <div className="bg-[#100e0b] text-[#f1e7d6]">
-        <header className="absolute inset-x-0 top-0 z-20">
-          <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between px-5 py-3 sm:px-8 lg:px-14">
-            <a href="#inicio" className="inline-flex rounded-sm" aria-label="Señor del Mictlán, inicio">
-              <Image
-                src="/images/brand/senor-del-mictlan-brand.png"
-                alt="Señor del Mictlán"
-                width={1774}
-                height={887}
-                priority
-                sizes="(max-width: 640px) 132px, 176px"
-                className="h-[66px] w-[132px] object-contain sm:h-[88px] sm:w-[176px]"
-              />
-            </a>
-            <nav aria-label="Navegación principal" className="flex items-center gap-4 text-xs font-medium tracking-[0.02em] text-[#f1e7d6] sm:gap-8 sm:text-sm">
-              <a className="underline-offset-4 hover:text-[#e9bd82] hover:underline" href="#coleccion">Colección</a>
-              <a className="underline-offset-4 hover:text-[#e9bd82] hover:underline" href="#ritual">El encuentro</a>
-            </nav>
-          </div>
-        </header>
+        <SiteHeader />
 
         <main>
           <section id="inicio" className="relative isolate flex min-h-[760px] items-end overflow-hidden sm:min-h-[820px] lg:min-h-[min(920px,100svh)]" aria-labelledby="hero-title">

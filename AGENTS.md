@@ -15,6 +15,10 @@
 
 - Usa Tailwind CSS 4 como sistema predeterminado para los estilos del frontend. Recurre a CSS escrito a mano sólo para necesidades puntuales que no puedan resolverse razonablemente con sus utilidades; mantén esas reglas mínimas y acotadas.
 
+## Componentes del frontend
+
+- Agrupa cada componente compuesto en una carpeta propia. Extrae sólo piezas con una responsabilidad clara y reutilizable o comportamiento propio; evita un archivo por elemento visual. Escribe las utilidades de Tailwind en las etiquetas JSX y coloca las pruebas del frontend en `frontend/tests/`.
+
 ## Pruebas automatizadas
 
 - Todo cambio que agregue, modifique o elimine lógica o comportamiento del producto debe incluir o actualizar pruebas automatizadas que expresen el contrato afectado. No cierres un cambio lógico cubierto sólo con verificación manual.

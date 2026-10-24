@@ -93,6 +93,7 @@ services:
       - "${FRONTEND_BIND_ADDRESS:-127.0.0.1}:${FRONTEND_PORT:-3000}:3000"
     volumes:
       - ./frontend/src:/app/src
+      - ./frontend/tests:/app/tests
       - ./frontend/public:/app/public
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"]
