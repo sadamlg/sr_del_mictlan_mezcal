@@ -5,39 +5,50 @@ export default function LandingFaq() {
   return (
     <section
       id="preguntas"
-      className="relative isolate scroll-mt-[212px] grid grid-cols-1 items-start gap-[30px] overflow-visible bg-[#0c0e0c] px-6 py-[62px] text-[#f1e9da] min-[641px]:py-[72px] min-[768px]:grid-cols-2 min-[768px]:gap-[7vw] min-[901px]:py-24 lg:px-[max(24px,calc((100vw-1400px)/2))]"
+      className="relative isolate scroll-mt-[200px] bg-[linear-gradient(180deg,#111a14_0%,#0d0f0e_40%,#0a0c0b_100%)] px-6 pb-24 pt-28 text-[#e2e3e0] sm:px-10 sm:pb-28 sm:pt-36 lg:scroll-mt-[220px] lg:px-14 lg:pt-40"
       aria-labelledby="faq-title"
     >
-      <Image
-        className="pointer-events-none absolute left-6 top-0 z-10 h-auto w-[min(420px,calc(100vw-48px))] -translate-y-1/2 min-[641px]:w-[min(500px,calc(100vw-48px))] lg:left-[max(24px,calc((100vw-1400px)/2))]"
-        src="/images/landing/cupreata-label.png"
-        width={2172}
-        height={724}
-        sizes="(max-width: 468px) calc(100vw - 48px), (max-width: 640px) 420px, 500px"
-        alt="Mezcal 100% agave cupreata, hecho en México, Etúcuaro, Michoacán"
-      />
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 mx-auto max-w-[1512px] px-6 sm:px-10 lg:px-14">
+        <Image
+          className="h-auto w-[min(31.25rem,calc(100vw-48px))] -translate-y-1/2"
+          src="/images/landing/cupreata-label.png"
+          width={2172}
+          height={724}
+          sizes="(max-width: 548px) calc(100vw - 48px), 500px"
+          alt="Mezcal 100% agave cupreata, hecho en México, Etúcuaro, Michoacán"
+        />
+      </div>
+      <div className="mx-auto grid max-w-[1400px] gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start lg:gap-16">
+        <div>
+          <p className="font-ui text-[10px] font-semibold uppercase tracking-[0.25em] text-[#97d2c6]/80">
+            Conocimiento y origen
+          </p>
+          <h2 id="faq-title" className="mt-6 max-w-[18ch] font-display text-[clamp(2rem,3.4vw,2.5rem)] font-normal uppercase leading-[1.3] tracking-[0.06em]">
+            Antes del primer encuentro.
+          </h2>
+          <p className="mt-6 max-w-[42ch] text-base font-light leading-[1.75] text-[#d0c5af] sm:text-[1.0625rem]">
+            Conoce el origen, el agave y los detalles disponibles de nuestra colección antes de elegir tu botella.
+          </p>
+        </div>
 
-      <h2 id="faq-title" className="relative max-w-none font-display text-[clamp(1.5rem,8vw,2.5rem)] font-normal leading-[1.15] min-[768px]:max-w-[10ch] min-[768px]:text-[clamp(2.5rem,4vw,3.625rem)]">
-        Antes del<br className="hidden min-[641px]:block" /> primer encuentro.
-      </h2>
-
-      <div className="relative">
-        {questions.map(({ id, question, answer }) => (
-          <details
-            className="group/faq scroll-mt-[128px] border-t border-[#44493e] py-5 last:border-b lg:scroll-mt-[120px]"
-            id={id}
-            key={question}
-          >
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-[18px] text-base leading-6 marker:hidden focus-visible:outline-2 focus-visible:outline-offset-[6px] focus-visible:outline-[#d5c29e] [&::-webkit-details-marker]:hidden">
-              {question}
-              <span className="relative block h-6 w-6 shrink-0" aria-hidden="true">
-                <span className="absolute top-1/2 left-1/2 h-px w-4 -translate-x-1/2 -translate-y-1/2 bg-[#d5c29e]" />
-                <span className="absolute top-1/2 left-1/2 h-4 w-px -translate-x-1/2 -translate-y-1/2 bg-[#d5c29e] transition-transform group-open/faq:scale-y-0" />
-              </span>
-            </summary>
-            <p className="mt-[18px] text-[15px] leading-[1.65] text-[#c2bba9]">{answer}</p>
-          </details>
-        ))}
+        <div className="border-b border-[#4d4635]/50">
+          {questions.map(({ id, question, answer }) => (
+            <details
+              className="group/faq scroll-mt-[128px] border-t border-[#4d4635]/50 py-6 lg:scroll-mt-[120px]"
+              id={id}
+              key={question}
+            >
+              <summary className="flex min-h-8 cursor-pointer list-none items-center justify-between gap-6 font-display text-base font-normal leading-[1.5] text-[#e2e3e0] transition-colors duration-200 marker:hidden hover:text-[#f2ca50] focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f2ca50] group-open/faq:text-[#f2ca50] sm:text-xl [&::-webkit-details-marker]:hidden">
+                {question}
+                <span className="relative block h-6 w-6 shrink-0 text-[#d4af37]" aria-hidden="true">
+                  <span className="absolute top-1/2 left-1/2 h-px w-4 -translate-x-1/2 -translate-y-1/2 bg-current" />
+                  <span className="absolute top-1/2 left-1/2 h-4 w-px -translate-x-1/2 -translate-y-1/2 bg-current transition-transform duration-200 group-open/faq:scale-y-0" />
+                </span>
+              </summary>
+              <p className="mb-1 mt-5 max-w-[65ch] pr-9 text-[0.9375rem] font-light leading-[1.7] text-[#c6d1ca] sm:text-base">{answer}</p>
+            </details>
+          ))}
+        </div>
       </div>
     </section>
   );

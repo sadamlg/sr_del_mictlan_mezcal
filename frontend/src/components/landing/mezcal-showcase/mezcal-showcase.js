@@ -62,6 +62,7 @@ export default function MezcalShowcase({ products }) {
         <img src={`${mediaBaseUrl}/images/mezcal-showcase-background.png`} alt="" width="1672" height="941" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
       </picture>
       <div className="absolute inset-0 -z-10 bg-black/80 max-sm:bg-black/55" aria-hidden="true" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-[5] h-36 bg-[linear-gradient(to_bottom,transparent,#0a0b0a)]" aria-hidden="true" />
       <div className="mx-auto max-w-[1440px] lg:flex lg:h-full lg:flex-col">
         <header className="text-center">
           <h2 id="mezcal-showcase-title" className="font-display text-[clamp(2rem,5vw,2.3rem)] font-medium uppercase leading-[1.12] text-[#2dd4bf] lg:text-[clamp(2.3rem,2.8vw,2.75rem)]">Totonalhuan</h2>
