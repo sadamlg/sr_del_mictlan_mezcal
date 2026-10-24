@@ -19,7 +19,17 @@ function toPublicProduct(product, mediaBaseUrl) {
     typeof product.labelOne !== 'string' ||
     product.labelOne.trim().length === 0 ||
     typeof product.labelTwo !== 'string' ||
-    product.labelTwo.trim().length === 0
+    product.labelTwo.trim().length === 0 ||
+    (product.sensoryProfile != null && (typeof product.sensoryProfile !== 'string' || !product.sensoryProfile.trim())) ||
+    ((product.alcoholMinPercent == null) !== (product.alcoholMaxPercent == null)) ||
+    (product.alcoholMinPercent != null && (
+      !Number.isFinite(product.alcoholMinPercent) ||
+      !Number.isFinite(product.alcoholMaxPercent) ||
+      product.alcoholMinPercent <= 0 ||
+      product.alcoholMaxPercent < product.alcoholMinPercent ||
+      product.alcoholMaxPercent > 100
+    )) ||
+    (product.volumeMl != null && (!Number.isSafeInteger(product.volumeMl) || product.volumeMl <= 0))
   ) {
     throw new Error('El producto activo no cumple el contrato público del catálogo.');
   }
@@ -38,6 +48,12 @@ function toPublicProduct(product, mediaBaseUrl) {
       alt: '',
     },
     labels: [product.labelOne, product.labelTwo],
+    sensoryProfile: product.sensoryProfile ?? null,
+    alcohol: product.alcoholMinPercent == null ? null : {
+      minPercent: product.alcoholMinPercent,
+      maxPercent: product.alcoholMaxPercent,
+    },
+    volumeMl: product.volumeMl ?? null,
   };
 }
 

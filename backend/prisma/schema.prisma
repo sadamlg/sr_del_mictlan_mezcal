@@ -22,6 +22,10 @@ model Product {
   lifestyleImageKey String?  @map("lifestyle_image_key") @db.VarChar(512)
   labelOne          String?  @map("label_one") @db.VarChar(80)
   labelTwo          String?  @map("label_two") @db.VarChar(80)
+  sensoryProfile    String?  @map("sensory_profile") @db.Text
+  alcoholMinPercent Float?   @map("alcohol_min_percent")
+  alcoholMaxPercent Float?   @map("alcohol_max_percent")
+  volumeMl          Int?     @map("volume_ml")
   position          Int      @default(0)
   active            Boolean  @default(false)
   createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)

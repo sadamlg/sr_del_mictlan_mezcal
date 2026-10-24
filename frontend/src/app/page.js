@@ -4,7 +4,7 @@ import { io } from 'next/cache';
 import AgeGate from '../components/age-gate';
 import SiteHeader from '../components/header/header';
 import LandingHero from '../components/landing/landing-hero';
-import MezcalShowcase from '../components/landing/mezcal-showcase';
+import MezcalShowcase from '../components/landing/mezcal-showcase/mezcal-showcase';
 
 async function loadCatalog() {
   const apiUrl = process.env.INTERNAL_API_URL;

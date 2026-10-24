@@ -27,6 +27,10 @@ const fixtureProduct = {
   lifestyleImageKey: 'catalog/fixture/context.webp',
   labelOne: '750 ml',
   labelTwo: 'Perfil herbal',
+  sensoryProfile: 'Aromas de hierba y tierra húmeda.',
+  alcoholMinPercent: 45,
+  alcoholMaxPercent: 45,
+  volumeMl: 750,
 };
 
 test('returns public product fields and resolves the stable media key', async () => {
@@ -52,9 +56,41 @@ test('returns public product fields and resolves the stable media key', async ()
         },
         lifestyleImage: { url: 'https://media.example.test/catalog/fixture/context.webp', alt: '' },
         labels: ['750 ml', 'Perfil herbal'],
+        sensoryProfile: 'Aromas de hierba y tierra húmeda.',
+        alcohol: { minPercent: 45, maxPercent: 45 },
+        volumeMl: 750,
       },
     ],
   });
+});
+
+test('publishes a documented alcohol range without choosing an arbitrary exact value', async () => {
+  const response = createResponse();
+  const handler = createCatalogHandler({
+    findActiveProducts: async () => [{ ...fixtureProduct, alcoholMinPercent: 36, alcoholMaxPercent: 42 }],
+    mediaBaseUrl: 'https://media.example.test',
+  });
+
+  await handler({}, response);
+
+  assert.equal(response.statusCode, 200);
+  assert.deepEqual(response.body.products[0].alcohol, { minPercent: 36, maxPercent: 42 });
+});
+
+test('rejects incomplete or inverted alcohol information', async () => {
+  for (const alcohol of [
+    { alcoholMinPercent: 36, alcoholMaxPercent: null },
+    { alcoholMinPercent: 45, alcoholMaxPercent: 40 },
+    { alcoholMinPercent: 0, alcoholMaxPercent: 40 },
+  ]) {
+    const response = createResponse();
+    const handler = createCatalogHandler({
+      findActiveProducts: async () => [{ ...fixtureProduct, ...alcohol }],
+      mediaBaseUrl: 'https://media.example.test',
+    });
+    await handler({}, response);
+    assert.equal(response.statusCode, 503);
+  }
 });
 
 test('returns an empty active catalog as a successful response', async () => {
