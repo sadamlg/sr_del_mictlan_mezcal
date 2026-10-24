@@ -4,6 +4,7 @@ import { io } from 'next/cache';
 import AgeGate from '../components/age-gate';
 import SiteHeader from '../components/header/header';
 import LandingHero from '../components/landing/landing-hero';
+import LandingRitual from '../components/landing/landing-ritual';
 import MezcalShowcase from '../components/landing/mezcal-showcase/mezcal-showcase';
 
 async function loadCatalog() {
@@ -48,28 +49,7 @@ export default function Home() {
             <CatalogContent />
           </Suspense>
 
-          <section id="ritual" className="scroll-mt-8 bg-[#100e0b] px-6 py-20 sm:px-10 sm:py-28 lg:px-14 lg:py-32" aria-labelledby="ritual-title">
-            <div className="mx-auto grid max-w-[1250px] gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-24">
-              <div>
-                <h2 id="ritual-title" className="max-w-[10ch] font-display text-4xl leading-[1.08] tracking-[-0.025em] text-[#f1e7d6] sm:text-5xl lg:text-6xl">Un momento para detenerse.</h2>
-                <p className="mt-6 max-w-[48ch] text-base leading-7 text-[#c9bead]">
-                  Un vaso, una conversación y tiempo para descubrir lo que tienes frente a ti.
-                </p>
-              </div>
-              <ol className="grid gap-8 sm:grid-cols-3 sm:gap-6">
-                {[
-                  { title: 'Mira.', description: 'Sirve una pequeña cantidad y obsérvala a la luz.' },
-                  { title: 'Acerca.', description: 'Tómate un momento para reconocer sus aromas.' },
-                  { title: 'Prueba.', description: 'Da un sorbo pequeño y disfruta con responsabilidad.' },
-                ].map((step) => (
-                  <li key={step.title} className="border-t border-[#5e503d] pt-5">
-                    <h3 className="font-display text-2xl text-[#e9bd82]">{step.title}</h3>
-                    <p className="mt-4 max-w-[28ch] text-sm leading-6 text-[#c9bead]">{step.description}</p>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </section>
+          <LandingRitual />
         </main>
 
         <footer className="border-t border-[#5e503d] bg-[#17140f] px-6 py-10 sm:px-10 lg:px-14">
