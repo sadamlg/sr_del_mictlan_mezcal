@@ -1,7 +1,7 @@
 const steps = [
   {
     title: 'Mira.',
-    label: 'Paso I · El perlado',
+    label: 'Paso I · A contraluz',
     description: 'Sirve una pequeña cantidad y observa el mezcal a la luz.',
   },
   {
