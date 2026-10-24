@@ -8,6 +8,10 @@
     "start": "next start"
   },
   "dependencies": {
+    "@fontsource-variable/montserrat": "5.2.8",
+    "@fontsource-variable/open-sans": "5.2.7",
+    "@fontsource/cinzel-decorative": "5.2.8",
+    "lucide-react": "1.18.0",
     "next": "16.4.1",
     "react": "19.3.0",
     "react-dom": "19.3.0"
