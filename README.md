@@ -131,7 +131,7 @@ feature/* ── pull request ──> develop ──> Railway staging
 
 Se requiere Git, Docker Engine y Docker Compose. Desde la carpeta donde guardarás el proyecto:
 
-Para construir paso a paso los archivos de esta infraestructura local desde una copia limpia, sigue la [guía de construcción con Docker Compose](docs/docker/guia-de-construccion-docker-compose.md).
+Para entender o reproducir la construcción de la infraestructura local desde cero, consulta la [guía de construcción con Docker Compose](docs/docker/guia-de-construccion-docker-compose.md). Si clonaste la aplicación actual, usa los archivos ya incluidos y sigue los comandos de esta sección.
 
 ```bash
 git clone https://github.com/sadamlg/sr_del_mictlan_mezcal.git
@@ -159,6 +159,7 @@ Docker Compose construye las imágenes del frontend y backend, y levanta fronten
 |---|---|
 | Tienda frontend | [http://localhost:3000](http://localhost:3000) |
 | API; comprobar salud | [http://localhost:4000/health](http://localhost:4000/health) |
+| API; catálogo público | [http://localhost:4000/api/catalog/products](http://localhost:4000/api/catalog/products) |
 | Mailpit; bandeja de correo de desarrollo | [http://localhost:8025](http://localhost:8025) |
 | PostgreSQL | `localhost:5432` |
 

@@ -1,6 +1,6 @@
 # Guía de construcción del entorno local con Docker Compose
 
-Esta guía establece, en orden, cómo construir desde una copia limpia del repositorio la infraestructura local de desarrollo: Next.js, Express, PostgreSQL con Prisma, un proceso worker y Mailpit. Los pasos crean los archivos de configuración y el esqueleto mínimo necesario para comprobar la comunicación entre servicios.
+Esta guía documenta cómo construir la base de infraestructura local de desarrollo: Next.js, Express, PostgreSQL con Prisma, un proceso worker y Mailpit. Los pasos de creación reproducen el esqueleto mínimo y sus conexiones. Si ya clonaste la aplicación actual, esos archivos están presentes: sigue el arranque del [README](../../README.md#clonar-y-configurar-el-repositorio) y usa esta guía para entender o adaptar su configuración.
 
 El worker de esta base comprueba la conexión con PostgreSQL. La lógica de lectura y actualización de trabajos de correo, así como su envío mediante Resend, se implementará con el modelo de datos de la aplicación. Cloudflare R2, Stripe y Resend son integraciones externas; no se levantan como contenedores locales. Mailpit queda disponible para pruebas de correo durante el desarrollo.
 
@@ -110,6 +110,7 @@ FRONTEND_PORT=3000
 
 INTERNAL_API_URL=http://backend:3000
 NEXT_PUBLIC_API_URL=http://localhost:4000
+MEDIA_BASE_URL=http://localhost:3000
 NEXT_ALLOWED_DEV_ORIGIN=
 ~~~
 
@@ -377,15 +378,23 @@ El scaffold de <code>create-next-app</code> configura Tailwind para el bundler T
 
 ~~~js
 /** @type {import('next').NextConfig} */
+const mediaBaseUrl = new URL(process.env.MEDIA_BASE_URL || 'http://localhost:3000');
+const mediaBasePath = mediaBaseUrl.pathname.replace(/\/+$/, '');
+const mediaRemotePattern = new URL(`${mediaBaseUrl.origin}${mediaBasePath}/**`);
+
 const nextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
+  images: {
+    remotePatterns: [mediaRemotePattern],
+  },
   allowedDevOrigins: process.env.NEXT_ALLOWED_DEV_ORIGIN
     ? [process.env.NEXT_ALLOWED_DEV_ORIGIN]
     : [],
   turbopack: {
     rules: {
       "*.css": {
+        condition: { path: /src\/app\/globals\.css$/ },
         loaders: ["@tailwindcss/turbopack"],
         as: "*.css",
       },
@@ -395,6 +404,8 @@ const nextConfig = {
 
 export default nextConfig;
 ~~~
+
+<code>images.remotePatterns</code> toma el origen y la ruta de <code>MEDIA_BASE_URL</code> para permitir imágenes de R2 en <code>next/image</code>. Esta variable se entrega a backend y frontend en Compose; no cambia la publicación de puertos.
 
 Confirma también que <code>frontend/src/app/globals.css</code> conserva la importación:
 
@@ -538,6 +549,7 @@ services:
       NODE_ENV: development
       PORT: 3000
       DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
+      MEDIA_BASE_URL: ${MEDIA_BASE_URL:-http://localhost:3000}
     ports:
       - "${BACKEND_BIND_ADDRESS:-127.0.0.1}:${BACKEND_PORT:-4000}:3000"
     volumes:
@@ -587,6 +599,7 @@ services:
       NEXT_TELEMETRY_DISABLED: "1"
       INTERNAL_API_URL: ${INTERNAL_API_URL:-http://backend:3000}
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+      MEDIA_BASE_URL: ${MEDIA_BASE_URL:-http://localhost:3000}
       NEXT_ALLOWED_DEV_ORIGIN: ${NEXT_ALLOWED_DEV_ORIGIN:-}
     command: ["npm", "run", "dev", "--", "--hostname", "0.0.0.0"]
     ports:
@@ -716,7 +729,7 @@ No confirmes un reset si hay datos locales que necesites conservar. Prisma docum
 
 ## 9. Acceso opcional desde la red local
 
-Este frontend usa Next.js 16.4.1 y ejecuta <code>next dev</code>; este repositorio no usa Vite. Next ya lee <code>NEXT_ALLOWED_DEV_ORIGIN</code> en <code>frontend/next.config.mjs</code> y lo pasa a la opción <code>allowedDevOrigins</code>. No hay que editar una configuración de Vite.
+La aplicación actual usa Next.js 16.4.1 y ejecuta <code>next dev</code>; este repositorio no usa Vite. Next ya lee <code>NEXT_ALLOWED_DEV_ORIGIN</code> en <code>frontend/next.config.mjs</code> y lo pasa a la opción <code>allowedDevOrigins</code>. No hay que editar una configuración de Vite.
 
 Estas tres variables resuelven cosas distintas:
 
@@ -726,14 +739,16 @@ Estas tres variables resuelven cosas distintas:
 | <code>NEXT_ALLOWED_DEV_ORIGIN</code> | El host desde el que Next permite solicitudes de recursos y endpoints de desarrollo. Next compara sólo el hostname; omite protocolo y puerto. | La IP LAN del anfitrión, por ejemplo <code>192.168.1.20</code> |
 | <code>MEDIA_BASE_URL</code> | La base para formar URL de imágenes. No publica puertos ni autoriza orígenes de desarrollo. En LAN permite que el backend genere URL de catálogo accesibles desde el teléfono. | <code>http://192.168.1.20:3000</code> |
 
+Si pruebas el frontend en la LAN con medios de R2, conserva las dos primeras variables y usa la URL pública HTTPS de R2 como <code>MEDIA_BASE_URL</code>. El procedimiento de prueba está en la [guía de R2](../cloudflare/r2.md#estado-actual-y-prueba-local).
+
 Next y Express escuchan en <code>0.0.0.0</code> dentro de sus contenedores; la dirección izquierda de <code>ports</code> controla qué interfaces del anfitrión publican los puertos. Next sigue llamando a Express por <code>INTERNAL_API_URL=http://backend:3000</code> dentro de la red bridge. Si el navegador necesita llamar directamente a Express, aplica también los pasos opcionales de <code>BACKEND_BIND_ADDRESS</code>, <code>NEXT_PUBLIC_API_URL</code> y CORS descritos más abajo.
 
 Si necesitas probar la tienda desde otro dispositivo de tu LAN:
 
 1. En <code>.env</code>, cambia <code>FRONTEND_BIND_ADDRESS</code> a <code>0.0.0.0</code>.
 2. Establece <code>NEXT_ALLOWED_DEV_ORIGIN</code> con la IP LAN del equipo anfitrión, sin protocolo ni puerto, por ejemplo <code>192.168.1.20</code>.
-3. Establece <code>MEDIA_BASE_URL</code> al origen del frontend con esa misma IP, por ejemplo <code>http://192.168.1.20:3000</code>. El backend usa ese valor para construir las URL del catálogo; el teléfono no debe recibir URL con <code>localhost</code>. Los medios estáticos del frontend usan rutas locales en desarrollo.
-4. Recrea el frontend y el backend para aplicar la configuración:
+3. Si sirves medios locales, establece <code>MEDIA_BASE_URL</code> al origen del frontend con esa misma IP, por ejemplo <code>http://192.168.1.20:3000</code>. El backend usa ese valor para construir las URL del catálogo; el teléfono no debe recibir URL con <code>localhost</code>. Los medios estáticos del frontend usan rutas locales en este caso.
+4. Para medios locales, recrea el frontend y el backend para aplicar la configuración. Si usas R2, ejecuta el comando de la guía de R2:
 
 ~~~bash
 docker compose up --detach --force-recreate frontend backend
@@ -741,7 +756,7 @@ docker compose up --detach --force-recreate frontend backend
 
 Desde el otro dispositivo abre <code>http://&lt;IP-LAN-del-anfitrión&gt;:3000</code>. <code>0.0.0.0</code> en <code>ports</code> enlaza el puerto publicado a todas las interfaces IPv4 del anfitrión; no es la IP de la red bridge ni cambia las conexiones privadas entre contenedores. Usa esta opción sólo en una red local confiable y permite el puerto en el firewall si tu sistema lo bloquea. [Opción <code>allowedDevOrigins</code> de Next.js](https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins)
 
-Si editas <code>frontend/next.config.mjs</code>, Compose no toma el archivo actualizado al recrear el contenedor porque no está montado como volumen; reconstruye la imagen con <code>--build</code>. La configuración de <code>images.remotePatterns</code> para Cloudflare R2 se explica en la [guía dedicada de R2](../cloudflare/r2.md).
+Si editas <code>frontend/next.config.mjs</code>, Compose no toma el archivo actualizado al recrear el contenedor porque no está montado como volumen; reconstruye la imagen con <code>--build</code>. La configuración de <code>images.remotePatterns</code> aparece en la sección 3; la [guía dedicada de R2](../cloudflare/r2.md) explica cuándo usar el origen público de medios.
 
 Esta opción sólo publica el frontend en la LAN. Si la página necesita enviar peticiones desde ese dispositivo a Express, también debes cambiar <code>BACKEND_BIND_ADDRESS</code> a <code>0.0.0.0</code>, actualizar <code>NEXT_PUBLIC_API_URL</code> con la IP LAN y puerto de la API, y permitir ese origen en la configuración CORS de Express. El acceso LAN del frontend no activa esas opciones por defecto.
 
