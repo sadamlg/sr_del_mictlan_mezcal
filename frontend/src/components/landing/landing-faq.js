@@ -1,7 +1,8 @@
 import Image from 'next/image';
 import questions from './landing-faq-content';
+import { mediaObjectUrl } from '../../lib/media-url';
 
-export default function LandingFaq() {
+export default function LandingFaq({ mediaBaseUrl }) {
   return (
     <section
       id="preguntas"
@@ -11,7 +12,7 @@ export default function LandingFaq() {
       <div className="pointer-events-none absolute inset-x-0 top-0 z-10 mx-auto max-w-[1512px] px-6 sm:px-10 lg:px-14">
         <Image
           className="h-auto w-[min(31.25rem,calc(100vw-48px))] -translate-y-1/2"
-          src="/images/landing/cupreata-label.png"
+          src={mediaObjectUrl(mediaBaseUrl, 'images/landing/cupreata-label.png')}
           width={2172}
           height={724}
           sizes="(max-width: 548px) calc(100vw - 48px), 500px"

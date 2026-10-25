@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import HeaderActions from './header-actions';
 import MobileMenu, { MobileMenuToggle } from './mobile-menu';
+import { mediaObjectUrl } from '../../lib/media-url';
 import {
   lockBodyScroll,
   nextMenuState,
@@ -12,7 +13,7 @@ import {
   shouldHideHeaderOnScroll,
 } from './behavior';
 
-export default function SiteHeader() {
+export default function SiteHeader({ mediaBaseUrl }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
@@ -70,7 +71,7 @@ export default function SiteHeader() {
             aria-label="Señor del Mictlán, inicio"
           >
             <Image
-              src="/images/brand/senor-del-mictlan-brand.png"
+              src={mediaObjectUrl(mediaBaseUrl, 'images/brand/senor-del-mictlan-brand.png')}
               alt="Señor del Mictlán"
               className="block h-20 w-auto max-w-full lg:h-auto lg:w-[140px]"
               width={1774}
