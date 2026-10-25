@@ -26,9 +26,9 @@ async function loadCatalog() {
   }
 }
 
-async function CatalogContent() {
+async function CatalogContent({ mediaBaseUrl }) {
   const products = await loadCatalog();
-  return <MezcalShowcase products={products} />;
+  return <MezcalShowcase products={products} mediaBaseUrl={mediaBaseUrl} />;
 }
 
 async function CurrentYear() {
@@ -37,23 +37,24 @@ async function CurrentYear() {
 }
 
 export default function Home() {
+  const mediaBaseUrl = process.env.MEDIA_BASE_URL || '';
 
   return (
     <AgeGate>
       <div className="bg-[#100e0b] text-[#f1e7d6]">
-        <SiteHeader />
+        <SiteHeader mediaBaseUrl={mediaBaseUrl} />
 
         <main>
-          <LandingHero />
+          <LandingHero mediaBaseUrl={mediaBaseUrl} />
 
           <Suspense fallback={<section id="coleccion" className="bg-[#0a0b0a] px-6 py-24 text-center text-white" role="status">Cargando la colección…</section>}>
-            <CatalogContent />
+            <CatalogContent mediaBaseUrl={mediaBaseUrl} />
           </Suspense>
 
           <LandingRitual />
-          <LandingFaq />
+          <LandingFaq mediaBaseUrl={mediaBaseUrl} />
         </main>
-        <LandingFooter year={<Suspense fallback="2026"><CurrentYear /></Suspense>} />
+        <LandingFooter mediaBaseUrl={mediaBaseUrl} year={<Suspense fallback="2026"><CurrentYear /></Suspense>} />
       </div>
     </AgeGate>
   );

@@ -1,9 +1,10 @@
 import { getImageProps } from 'next/image';
+import { mediaObjectUrl } from '../../lib/media-url';
 
-export default function LandingHero() {
+export default function LandingHero({ mediaBaseUrl }) {
   const { props: heroImageProps } = getImageProps({
     alt: '',
-    src: '/images/hero-background.png',
+    src: mediaObjectUrl(mediaBaseUrl, 'images/hero-background.png'),
     width: 1672,
     height: 941,
     sizes: '100vw',

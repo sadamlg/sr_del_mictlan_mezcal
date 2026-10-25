@@ -1,4 +1,5 @@
 import ProductInsights from './product-insights';
+import { mediaObjectUrl } from '../../../lib/media-url';
 
 const priceFormatter = new Intl.NumberFormat('es-MX', {
   style: 'currency',
@@ -52,14 +53,12 @@ function MezcalCard({ product, className = '' }) {
   );
 }
 
-export default function MezcalShowcase({ products }) {
-  const mediaBaseUrl = process.env.MEDIA_BASE_URL?.replace(/\/+$/, '') || '';
-
+export default function MezcalShowcase({ products, mediaBaseUrl }) {
   return (
     <section id="coleccion" className="relative isolate scroll-mt-24 overflow-hidden bg-[#0a0b0a] px-6 pb-20 pt-24 text-white sm:px-10 lg:min-h-dvh lg:px-14 lg:py-5 [@media(min-width:80rem)_and_(min-height:54rem)]:h-dvh [@media(min-width:80rem)_and_(min-height:54rem)]:py-12" aria-labelledby="mezcal-showcase-title">
       <picture className="absolute inset-0 -z-20">
-        <source media="(max-width: 640px)" srcSet={`${mediaBaseUrl}/images/mezcal-showcase-background-mobile.png`} />
-        <img src={`${mediaBaseUrl}/images/mezcal-showcase-background.png`} alt="" width="1672" height="941" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
+        <source media="(max-width: 640px)" srcSet={mediaObjectUrl(mediaBaseUrl, 'images/mezcal-showcase-background-mobile.png')} />
+        <img src={mediaObjectUrl(mediaBaseUrl, 'images/mezcal-showcase-background.png')} alt="" width="1672" height="941" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
       </picture>
       <div className="absolute inset-0 -z-10 bg-black/80 max-sm:bg-black/55" aria-hidden="true" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-[5] h-36 bg-[linear-gradient(to_bottom,transparent,#0a0b0a)]" aria-hidden="true" />
