@@ -716,13 +716,23 @@ No confirmes un reset si hay datos locales que necesites conservar. Prisma docum
 
 ## 9. Acceso opcional desde la red local
 
-La configuración base enlaza frontend, API y PostgreSQL a <code>127.0.0.1</code>, de modo que sólo se abren desde el equipo anfitrión. Los servidores Next.js y Express escuchan en <code>0.0.0.0</code> dentro de sus contenedores; Compose controla por separado qué interfaces del anfitrión publican los puertos.
+Este frontend usa Next.js 16.4.1 y ejecuta <code>next dev</code>; este repositorio no usa Vite. Next ya lee <code>NEXT_ALLOWED_DEV_ORIGIN</code> en <code>frontend/next.config.mjs</code> y lo pasa a la opción <code>allowedDevOrigins</code>. No hay que editar una configuración de Vite.
+
+Estas tres variables resuelven cosas distintas:
+
+| Variable | Qué controla | Valor para una prueba LAN |
+| --- | --- | --- |
+| <code>FRONTEND_BIND_ADDRESS</code> | La interfaz del anfitrión donde Compose publica el puerto del frontend. No cambia la red bridge ni la escucha interna del contenedor. | <code>0.0.0.0</code> |
+| <code>NEXT_ALLOWED_DEV_ORIGIN</code> | El host desde el que Next permite solicitudes de recursos y endpoints de desarrollo. Next compara sólo el hostname; omite protocolo y puerto. | La IP LAN del anfitrión, por ejemplo <code>192.168.1.20</code> |
+| <code>MEDIA_BASE_URL</code> | La base para formar URL de imágenes. No publica puertos ni autoriza orígenes de desarrollo. En LAN permite que el backend genere URL de catálogo accesibles desde el teléfono. | <code>http://192.168.1.20:3000</code> |
+
+Next y Express escuchan en <code>0.0.0.0</code> dentro de sus contenedores; la dirección izquierda de <code>ports</code> controla qué interfaces del anfitrión publican los puertos. Next sigue llamando a Express por <code>INTERNAL_API_URL=http://backend:3000</code> dentro de la red bridge. Si el navegador necesita llamar directamente a Express, aplica también los pasos opcionales de <code>BACKEND_BIND_ADDRESS</code>, <code>NEXT_PUBLIC_API_URL</code> y CORS descritos más abajo.
 
 Si necesitas probar la tienda desde otro dispositivo de tu LAN:
 
 1. En <code>.env</code>, cambia <code>FRONTEND_BIND_ADDRESS</code> a <code>0.0.0.0</code>.
 2. Establece <code>NEXT_ALLOWED_DEV_ORIGIN</code> con la IP LAN del equipo anfitrión, sin protocolo ni puerto, por ejemplo <code>192.168.1.20</code>.
-3. Establece <code>MEDIA_BASE_URL</code> al origen del frontend con esa misma IP, por ejemplo <code>http://192.168.1.20:3000</code>. Así las imágenes del catálogo y el fondo del showcase apuntan al equipo anfitrión y no a <code>localhost</code> del celular.
+3. Establece <code>MEDIA_BASE_URL</code> al origen del frontend con esa misma IP, por ejemplo <code>http://192.168.1.20:3000</code>. El backend usa ese valor para construir las URL del catálogo; el teléfono no debe recibir URL con <code>localhost</code>. Los medios estáticos del frontend usan rutas locales en desarrollo.
 4. Recrea el frontend y el backend para aplicar la configuración:
 
 ~~~bash
@@ -730,6 +740,8 @@ docker compose up --detach --force-recreate frontend backend
 ~~~
 
 Desde el otro dispositivo abre <code>http://&lt;IP-LAN-del-anfitrión&gt;:3000</code>. <code>0.0.0.0</code> en <code>ports</code> enlaza el puerto publicado a todas las interfaces IPv4 del anfitrión; no es la IP de la red bridge ni cambia las conexiones privadas entre contenedores. Usa esta opción sólo en una red local confiable y permite el puerto en el firewall si tu sistema lo bloquea. [Opción <code>allowedDevOrigins</code> de Next.js](https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins)
+
+Si editas <code>frontend/next.config.mjs</code>, Compose no toma el archivo actualizado al recrear el contenedor porque no está montado como volumen; reconstruye la imagen con <code>--build</code>. La configuración de <code>images.remotePatterns</code> para Cloudflare R2 se explica en la [guía dedicada de R2](../cloudflare/r2.md).
 
 Esta opción sólo publica el frontend en la LAN. Si la página necesita enviar peticiones desde ese dispositivo a Express, también debes cambiar <code>BACKEND_BIND_ADDRESS</code> a <code>0.0.0.0</code>, actualizar <code>NEXT_PUBLIC_API_URL</code> con la IP LAN y puerto de la API, y permitir ese origen en la configuración CORS de Express. El acceso LAN del frontend no activa esas opciones por defecto.
 
