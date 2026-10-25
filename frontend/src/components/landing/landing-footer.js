@@ -1,5 +1,4 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import { ArrowUp, ArrowUpRight } from 'lucide-react';
 
 const footerLinks = [
@@ -44,12 +43,12 @@ export default function LandingFooter({ year }) {
             <ul className="m-0 flex list-none flex-wrap items-center justify-center gap-x-6 gap-y-4 p-0 lg:justify-between lg:gap-x-3">
               {footerLinks.map(({ href, label }, index) => (
                 <li className="flex items-center gap-6 lg:gap-3" key={label}>
-                  <Link
+                  <a
                     className="font-ui text-[10px] font-medium uppercase tracking-[0.16em] text-[#d0c5af] no-underline transition-colors duration-200 hover:text-[#97d2c6] focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#97d2c6] sm:text-[11px] lg:text-[10px] xl:text-[11px]"
                     href={href}
                   >
                     {label}
-                  </Link>
+                  </a>
                   {index < footerLinks.length - 1 && (
                     <span className="hidden text-xs text-[#4d4635]/70 lg:inline" aria-hidden="true">
                       ·
@@ -75,13 +74,13 @@ export default function LandingFooter({ year }) {
           <div className="order-3 flex shrink-0 items-center gap-5 whitespace-nowrap text-[9px] font-medium uppercase tracking-[0.15em] text-[#99907c] sm:text-[10px]">
             <span>MX / ESP</span>
             <span className="h-3 w-px bg-[#4d4635]/70" aria-hidden="true" />
-            <Link
+            <a
               className="inline-flex items-center gap-1 text-[#d0c5af] no-underline transition-colors duration-200 hover:text-[#97d2c6] focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#97d2c6]"
               href="#inicio"
             >
               Volver arriba
               <ArrowUp aria-hidden="true" size={13} strokeWidth={1.6} />
-            </Link>
+            </a>
           </div>
         </div>
       </div>
