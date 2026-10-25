@@ -104,5 +104,23 @@ services:
       start_period: 20s
     restart: unless-stopped
 
+  frontend-e2e:
+    image: ${COMPOSE_PROJECT_NAME:-mictlan-mezcal}-frontend-e2e:dev
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.e2e
+    init: true
+    environment:
+      NODE_ENV: development
+      NEXT_TELEMETRY_DISABLED: "1"
+      INTERNAL_API_URL: ""
+      MEDIA_BASE_URL: http://localhost:3100
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/e2e:/app/e2e
+      - ./frontend/playwright.config.js:/app/playwright.config.js:ro
+    command: ["npm", "run", "test:e2e"]
+
 volumes:
   postgres_data:
