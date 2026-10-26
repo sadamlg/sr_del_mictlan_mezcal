@@ -40,7 +40,7 @@ export default function Home() {
   const mediaBaseUrl = process.env.MEDIA_BASE_URL || '';
 
   return (
-    <AgeGate>
+    <AgeGate mediaBaseUrl={mediaBaseUrl}>
       <div className="bg-[#100e0b] text-[#f1e7d6]">
         <SiteHeader mediaBaseUrl={mediaBaseUrl} />
 

@@ -1,11 +1,13 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
+import { mediaObjectUrl } from '../lib/media-url';
 
 const AGE_CONFIRMATION_KEY = 'mictlan-age-confirmed-v1';
 
-export default function AgeGate({ children }) {
+export default function AgeGate({ children, mediaBaseUrl }) {
   const [isVerified, setIsVerified] = useState(false);
   const contentRef = useRef(null);
   const yesButtonRef = useRef(null);
@@ -78,9 +80,19 @@ export default function AgeGate({ children }) {
             aria-labelledby="age-gate-title"
             className="relative isolate flex aspect-square w-[min(100%,calc(100svh-2.5rem))] max-w-[34rem] flex-col items-center justify-center overflow-y-auto overscroll-contain rounded-full border border-[#e2e3e0]/15 bg-[radial-gradient(circle_at_50%_100%,rgba(77,15,22,0.72)_0%,rgba(20,8,10,0.96)_50%,#060707_100%)] p-4 text-center shadow-[0_28px_90px_rgba(0,0,0,0.78)] min-[375px]:p-6 sm:p-12"
           >
-            <div aria-hidden="true" className="pointer-events-none absolute inset-3 rounded-full border border-[#e2e3e0]/10 sm:inset-4 sm:rounded-full" />
-            <div aria-hidden="true" className="pointer-events-none absolute inset-x-16 top-0 h-40 rounded-full bg-[#4d0f16]/25 blur-3xl" />
-            <div aria-hidden="true" className="pointer-events-none absolute inset-x-20 bottom-0 h-32 rounded-full bg-[#711d28]/12 blur-3xl" />
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-full">
+              <Image
+                src={mediaObjectUrl(mediaBaseUrl, 'images/age-gate/skull.png')}
+                alt=""
+                fill
+                sizes="(max-width: 640px) calc(100vw - 40px), 30rem"
+                className="translate-y-[1%] scale-[1.12] object-contain opacity-[0.11] grayscale contrast-125 mix-blend-screen"
+              />
+            </div>
+            <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(circle_at_50%_52%,rgba(20,8,10,0.54)_0%,rgba(20,8,10,0.3)_46%,rgba(6,7,7,0.18)_100%)]" />
+            <div aria-hidden="true" className="pointer-events-none absolute inset-3 z-20 rounded-full border border-[#e2e3e0]/10 sm:inset-4" />
+            <div aria-hidden="true" className="pointer-events-none absolute inset-x-16 top-0 z-[2] h-40 rounded-full bg-[#4d0f16]/25 blur-3xl" />
+            <div aria-hidden="true" className="pointer-events-none absolute inset-x-20 bottom-0 z-[2] h-32 rounded-full bg-[#711d28]/12 blur-3xl" />
 
             <div className="relative z-10 w-full">
               <p className="font-display text-base leading-tight tracking-[0.025em] text-[#e2e3e0] uppercase min-[375px]:text-lg sm:text-xl">
@@ -103,7 +115,7 @@ export default function AgeGate({ children }) {
               </h1>
             </div>
 
-            <div className="relative z-10 mt-4 flex w-full max-w-[21rem] flex-col gap-2 sm:mt-7 sm:gap-3">
+            <div className="relative z-10 mt-4 flex w-[78%] max-w-[18rem] flex-col gap-2 sm:mt-7 sm:w-full sm:max-w-[21rem] sm:gap-3">
               <button
                 ref={yesButtonRef}
                 className="age-gate-primary group flex min-h-10 w-full items-center justify-center gap-1.5 border border-[#97d2c6]/35 bg-[#0f5047] px-3 py-2.5 font-ui text-[0.625rem] font-semibold uppercase tracking-[0.12em] text-[#e2e3e0] shadow-[0_8px_24px_rgba(15,80,71,0.3)] transition-colors hover:bg-[#15695d] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#97d2c6] min-[375px]:text-[0.675rem] min-[375px]:tracking-[0.14em] sm:min-h-12 sm:gap-2 sm:px-5 sm:py-3.5 sm:text-xs sm:tracking-[0.16em]"
