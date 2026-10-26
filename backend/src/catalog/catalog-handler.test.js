@@ -69,7 +69,7 @@ test('resolves media URLs to the LAN host for an explicitly enabled local previe
   const handler = createCatalogHandler({
     findActiveProducts: async () => [fixtureProduct],
     mediaBaseUrl: 'http://192.168.100.11:3000',
-    allowPrivateLanHttp: true,
+    allowInsecureDevHttp: true,
   });
 
   await handler({}, response);
@@ -115,6 +115,7 @@ test('returns an empty active catalog as a successful response', async () => {
   const handler = createCatalogHandler({
     findActiveProducts: async () => [],
     mediaBaseUrl: 'http://localhost:3000',
+    allowInsecureDevHttp: true,
   });
 
   await handler({}, response);
@@ -130,6 +131,7 @@ test('does not expose database errors to visitors', async () => {
       throw new Error('database password leaked');
     },
     mediaBaseUrl: 'http://localhost:3000',
+    allowInsecureDevHttp: true,
   });
 
   await handler({}, response);
@@ -149,6 +151,7 @@ test('does not publish an active record with missing catalog fields', async () =
   const handler = createCatalogHandler({
     findActiveProducts: async () => [{ ...fixtureProduct, priceCents: null }],
     mediaBaseUrl: 'http://localhost:3000',
+    allowInsecureDevHttp: true,
   });
 
   await handler({}, response);

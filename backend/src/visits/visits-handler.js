@@ -10,7 +10,11 @@ export function createVisitsHandlers({ countVisits, registerVisit }) {
       response.set('Cache-Control', 'no-store');
       try {
         return response.status(200).json({ count: await countVisits() });
-      } catch {
+      } catch (error) {
+        console.error('[visits] failed to read the counter', {
+          name: error instanceof Error ? error.name : 'UnknownError',
+          code: error && typeof error === 'object' && 'code' in error ? error.code : undefined,
+        });
         return response.status(503).json(unavailable);
       }
     },
@@ -23,7 +27,11 @@ export function createVisitsHandlers({ countVisits, registerVisit }) {
       }
       try {
         return response.status(200).json({ count: await registerVisit(body.visitId.toLowerCase()) });
-      } catch {
+      } catch (error) {
+        console.error('[visits] failed to register a visit', {
+          name: error instanceof Error ? error.name : 'UnknownError',
+          code: error && typeof error === 'object' && 'code' in error ? error.code : undefined,
+        });
         return response.status(503).json(unavailable);
       }
     },

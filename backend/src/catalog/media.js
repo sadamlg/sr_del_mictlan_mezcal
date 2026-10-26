@@ -13,7 +13,7 @@ function isPrivateIpv4(hostname) {
     (first === 192 && second === 168);
 }
 
-export function normalizeMediaBaseUrl(value, { allowPrivateLanHttp = false } = {}) {
+export function normalizeMediaBaseUrl(value, { allowInsecureDevHttp = false } = {}) {
   let url;
 
   try {
@@ -22,11 +22,10 @@ export function normalizeMediaBaseUrl(value, { allowPrivateLanHttp = false } = {
     throw new Error('MEDIA_BASE_URL debe ser una URL absoluta válida.');
   }
 
-  const isAllowedHttpOrigin = url.protocol === 'http:' && (
-    LOCAL_HOSTS.has(url.hostname) || (allowPrivateLanHttp && isPrivateIpv4(url.hostname))
-  );
+  const isAllowedHttpOrigin = allowInsecureDevHttp && url.protocol === 'http:' &&
+    (LOCAL_HOSTS.has(url.hostname) || isPrivateIpv4(url.hostname));
   if (url.protocol !== 'https:' && !isAllowedHttpOrigin) {
-    throw new Error('MEDIA_BASE_URL debe usar HTTPS, excepto para localhost en desarrollo.');
+    throw new Error('MEDIA_BASE_URL debe usar HTTPS, excepto para localhost o una IPv4 privada en desarrollo.');
   }
 
   if (url.username || url.password) {

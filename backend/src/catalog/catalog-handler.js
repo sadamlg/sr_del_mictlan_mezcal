@@ -6,12 +6,16 @@ const CATALOG_ERROR = {
     message: 'No se pudo cargar el catálogo. Intenta de nuevo en unos minutos.',
   },
 };
+const PRODUCT_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 function toPublicProduct(product, mediaBaseUrl) {
   if (
     typeof product.slug !== 'string' ||
+    !PRODUCT_SLUG.test(product.slug) ||
     typeof product.name !== 'string' ||
+    product.name.trim().length === 0 ||
     typeof product.description !== 'string' ||
+    product.description.trim().length === 0 ||
     !Number.isSafeInteger(product.priceCents) ||
     product.priceCents <= 0 ||
     typeof product.imageAlt !== 'string' ||
@@ -20,6 +24,8 @@ function toPublicProduct(product, mediaBaseUrl) {
     product.labelOne.trim().length === 0 ||
     typeof product.labelTwo !== 'string' ||
     product.labelTwo.trim().length === 0 ||
+    typeof product.imageKey !== 'string' ||
+    typeof product.lifestyleImageKey !== 'string' ||
     (product.sensoryProfile != null && (typeof product.sensoryProfile !== 'string' || !product.sensoryProfile.trim())) ||
     ((product.alcoholMinPercent == null) !== (product.alcoholMaxPercent == null)) ||
     (product.alcoholMinPercent != null && (
@@ -57,12 +63,12 @@ function toPublicProduct(product, mediaBaseUrl) {
   };
 }
 
-export function createCatalogHandler({ findActiveProducts, mediaBaseUrl, allowPrivateLanHttp = false }) {
+export function createCatalogHandler({ findActiveProducts, mediaBaseUrl, allowInsecureDevHttp = false }) {
   if (typeof findActiveProducts !== 'function') {
     throw new TypeError('findActiveProducts debe ser una función.');
   }
 
-  const safeMediaBaseUrl = normalizeMediaBaseUrl(mediaBaseUrl, { allowPrivateLanHttp });
+  const safeMediaBaseUrl = normalizeMediaBaseUrl(mediaBaseUrl, { allowInsecureDevHttp });
 
   return async function catalogHandler(_request, response) {
     try {
@@ -74,7 +80,11 @@ export function createCatalogHandler({ findActiveProducts, mediaBaseUrl, allowPr
       return response.status(200).json({
         products: products.map((product) => toPublicProduct(product, safeMediaBaseUrl)),
       });
-    } catch {
+    } catch (error) {
+      console.error('[catalog] failed to produce the public catalog', {
+        name: error instanceof Error ? error.name : 'UnknownError',
+        code: error && typeof error === 'object' && 'code' in error ? error.code : undefined,
+      });
       return response.status(503).json(CATALOG_ERROR);
     }
   };
