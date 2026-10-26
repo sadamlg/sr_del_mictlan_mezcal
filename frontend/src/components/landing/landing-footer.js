@@ -4,11 +4,8 @@ import { mediaObjectUrl } from '../../lib/media-url';
 
 const footerLinks = [
   { href: '#coleccion', label: 'Mezcales' },
-  { href: '#origen', label: 'Origen Etúcuaro' },
-  { href: '#ritual', label: 'Ritual' },
   { href: '#preguntas', label: 'Preguntas frecuentes' },
-  { href: '#ritual', label: 'Consumo responsable' },
-  { href: '#aviso-edad', label: 'Aviso de edad' },
+  { href: '#aviso-edad', label: 'Consumo responsable' },
 ];
 
 export default function LandingFooter({ mediaBaseUrl, year }) {
