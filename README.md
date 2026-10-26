@@ -160,6 +160,7 @@ Docker Compose construye las imágenes del frontend y backend, y levanta fronten
 | Tienda frontend | [http://localhost:3000](http://localhost:3000) |
 | API; comprobar salud | [http://localhost:4000/health](http://localhost:4000/health) |
 | API; catálogo público | [http://localhost:4000/api/catalog/products](http://localhost:4000/api/catalog/products) |
+| API; contador de visitas | [http://localhost:4000/api/visits](http://localhost:4000/api/visits) |
 | Mailpit; bandeja de correo de desarrollo | [http://localhost:8025](http://localhost:8025) |
 | PostgreSQL | `localhost:5432` |
 

@@ -2,12 +2,15 @@ import express from 'express';
 import { prisma } from './database/prisma-client.js';
 import { createCatalogHandler } from './catalog/catalog-handler.js';
 import { createCatalogRepository } from './catalog/catalog-repository.js';
+import { createVisitsHandlers } from './visits/visits-handler.js';
+import { createVisitsRepository } from './visits/visits-repository.js';
 
 const port = Number(process.env.PORT || 3000);
 
 export function createApp({ database, mediaBaseUrl, allowPrivateLanHttp = false }) {
   const app = express();
   const catalogRepository = createCatalogRepository(database);
+  const visitsHandlers = createVisitsHandlers(createVisitsRepository(database));
 
   app.get('/health', async (_request, response) => {
     try {
@@ -26,6 +29,15 @@ export function createApp({ database, mediaBaseUrl, allowPrivateLanHttp = false 
       allowPrivateLanHttp,
     }),
   );
+
+  app.get('/api/visits', visitsHandlers.get);
+  app.post('/api/visits', express.json({ limit: '256b' }), visitsHandlers.post);
+  app.use('/api/visits', (error, _request, response, next) => {
+    if (error instanceof SyntaxError || error?.type === 'entity.too.large') {
+      return response.status(400).json({ error: { code: 'INVALID_VISIT_ID', message: 'Identificador de visita inválido.' } });
+    }
+    return next(error);
+  });
 
   return app;
 }
