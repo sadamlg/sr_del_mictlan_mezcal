@@ -11,18 +11,30 @@ import LandingFooter from '../components/landing/landing-footer';
 
 async function loadCatalog() {
   const apiUrl = process.env.INTERNAL_API_URL;
-  if (!apiUrl) return null;
+  if (!apiUrl) {
+    console.error('[catalog] INTERNAL_API_URL is not configured');
+    return null;
+  }
 
   try {
     const response = await fetch(`${apiUrl.replace(/\/$/, '')}/api/catalog/products`, {
       cache: 'no-store',
       signal: AbortSignal.timeout(5000),
     });
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.error('[catalog] backend returned an unsuccessful response', { status: response.status });
+      return null;
+    }
 
     const body = await response.json();
-    return Array.isArray(body.products) ? body.products : null;
-  } catch {
+    if (Array.isArray(body.products)) return body.products;
+    console.error('[catalog] backend response did not match the catalog contract');
+    return null;
+  } catch (error) {
+    console.error('[catalog] backend request failed', {
+      name: error instanceof Error ? error.name : 'UnknownError',
+      code: error && typeof error === 'object' && 'code' in error ? error.code : undefined,
+    });
     return null;
   }
 }
@@ -42,13 +54,13 @@ export default function Home() {
 
   return (
     <AgeGate mediaBaseUrl={mediaBaseUrl}>
-      <div className="bg-[#100e0b] text-[#f1e7d6]">
+      <div className="bg-mictlan-background text-mictlan-ivory">
         <SiteHeader mediaBaseUrl={mediaBaseUrl} />
 
         <main>
           <LandingHero mediaBaseUrl={mediaBaseUrl} />
 
-          <Suspense fallback={<section id="coleccion" className="bg-[#0a0b0a] px-6 py-24 text-center text-white" role="status">Cargando la colección…</section>}>
+          <Suspense fallback={<section id="coleccion" className="bg-mictlan-night px-6 py-24 text-center text-white" role="status">Cargando la colección…</section>}>
             <CatalogContent mediaBaseUrl={mediaBaseUrl} />
           </Suspense>
 
@@ -56,7 +68,7 @@ export default function Home() {
           <LandingFaq mediaBaseUrl={mediaBaseUrl} />
           <LandingVisitorCounter />
         </main>
-        <LandingFooter mediaBaseUrl={mediaBaseUrl} year={<Suspense fallback="2026"><CurrentYear /></Suspense>} />
+        <LandingFooter mediaBaseUrl={mediaBaseUrl} year={<Suspense fallback="…"><CurrentYear /></Suspense>} />
       </div>
     </AgeGate>
   );

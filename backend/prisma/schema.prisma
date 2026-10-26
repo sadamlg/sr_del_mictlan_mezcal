@@ -41,3 +41,10 @@ model SiteVisit {
 
   @@map("site_visits")
 }
+
+model SiteVisitCounter {
+  id         Int      @id @default(1) @db.SmallInt
+  visitCount BigInt   @default(0) @map("visit_count")
+
+  @@map("site_visit_counter")
+}

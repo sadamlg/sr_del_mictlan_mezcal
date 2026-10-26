@@ -12,7 +12,7 @@ export function MobileMenuToggle({ isOpen, onToggle }) {
     >
       <span className={`relative h-8 w-8 transition-transform duration-[800ms] ease-in-out${isOpen ? ' rotate-180' : ''}`} aria-hidden="true">
         <Menu className={`absolute inset-0 h-9 w-9 text-[#79716b] transition-opacity duration-500${isOpen ? ' opacity-0' : ' opacity-100'}`} />
-        <X className={`absolute inset-0 h-9 w-9 text-[#e0cdb8]/80 transition-opacity duration-1000${isOpen ? ' opacity-100' : ' opacity-0'}`} />
+        <X className={`absolute inset-0 h-9 w-9 text-mictlan-sand/80 transition-opacity duration-1000${isOpen ? ' opacity-100' : ' opacity-0'}`} />
       </span>
     </button>
   );
@@ -22,7 +22,7 @@ export default function MobileMenu({ isOpen, onClose }) {
   return (
     <aside
       id="mobile-navigation"
-      className={`fixed left-0 top-[120px] z-[60] h-[calc(100dvh-120px)] w-full touch-none overflow-hidden bg-[#050505] font-display text-white transition-transform duration-300 ease-in-out lg:hidden${isOpen ? ' translate-x-0' : ' -translate-x-full'}`}
+      className={`fixed left-0 top-[120px] z-[60] h-[calc(100dvh-120px)] w-full touch-none overflow-hidden bg-mictlan-carbon font-display text-white transition-transform duration-300 ease-in-out lg:hidden${isOpen ? ' translate-x-0' : ' -translate-x-full'}`}
       {...getMobileNavigationProps(isOpen)}
     >
       <div className="flex h-full flex-col gap-0.5 overflow-y-auto p-0">

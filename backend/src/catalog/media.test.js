@@ -6,24 +6,31 @@ test('accepts an HTTPS media origin and trims trailing slashes', () => {
   assert.equal(normalizeMediaBaseUrl('https://media.example.test/catalog///'), 'https://media.example.test/catalog');
 });
 
-test('allows HTTP only for local development origins', () => {
-  assert.equal(normalizeMediaBaseUrl('http://localhost:3000/'), 'http://localhost:3000');
-  assert.equal(normalizeMediaBaseUrl('http://127.0.0.1:3000'), 'http://127.0.0.1:3000');
+test('allows HTTP for localhost only when development explicitly enables it', () => {
+  assert.equal(
+    normalizeMediaBaseUrl('http://localhost:3000/', { allowInsecureDevHttp: true }),
+    'http://localhost:3000',
+  );
+  assert.equal(
+    normalizeMediaBaseUrl('http://127.0.0.1:3000', { allowInsecureDevHttp: true }),
+    'http://127.0.0.1:3000',
+  );
+  assert.throws(() => normalizeMediaBaseUrl('http://localhost:3000'), /HTTPS/);
   assert.throws(() => normalizeMediaBaseUrl('http://media.example.test'), /HTTPS/);
 });
 
 test('allows a private LAN media origin over HTTP only when local preview enables it', () => {
   assert.equal(
-    normalizeMediaBaseUrl('http://192.168.100.11:3000', { allowPrivateLanHttp: true }),
+    normalizeMediaBaseUrl('http://192.168.100.11:3000', { allowInsecureDevHttp: true }),
     'http://192.168.100.11:3000',
   );
   assert.throws(() => normalizeMediaBaseUrl('http://192.168.100.11:3000'), /HTTPS/);
   assert.throws(
-    () => normalizeMediaBaseUrl('http://media.example.test', { allowPrivateLanHttp: true }),
+    () => normalizeMediaBaseUrl('http://media.example.test', { allowInsecureDevHttp: true }),
     /HTTPS/,
   );
   assert.throws(
-    () => normalizeMediaBaseUrl('http://8.8.8.8', { allowPrivateLanHttp: true }),
+    () => normalizeMediaBaseUrl('http://8.8.8.8', { allowInsecureDevHttp: true }),
     /HTTPS/,
   );
 });
