@@ -1,7 +1,23 @@
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
 import { getImageProps } from 'next/image';
 import { mediaObjectUrl } from '../../lib/media-url';
 
 export default function LandingHero({ mediaBaseUrl }) {
+  const [heroImageReady, setHeroImageReady] = useState(false);
+  const [fontReady, setFontReady] = useState(false);
+  const heroImageRef = useRef(null);
+
+  useEffect(() => {
+    let active = true;
+    if (heroImageRef.current?.complete) setHeroImageReady(true);
+    document.fonts.ready.then(() => {
+      if (active) setFontReady(true);
+    });
+    return () => { active = false; };
+  }, []);
+
   const { props: heroImageProps } = getImageProps({
     alt: '',
     src: mediaObjectUrl(mediaBaseUrl, 'images/hero-background.png'),
@@ -20,7 +36,10 @@ export default function LandingHero({ mediaBaseUrl }) {
       <picture className="absolute inset-0 block max-lg:relative max-lg:inset-auto max-lg:aspect-[1672/941] max-[40rem]:aspect-[3/2]" aria-hidden="true">
         <img
           {...heroImageProps}
+          ref={heroImageRef}
           className="h-full w-full object-cover max-[40rem]:object-[-6vw_center]"
+          onLoad={() => setHeroImageReady(true)}
+          onError={() => setHeroImageReady(true)}
         />
       </picture>
       <div
@@ -32,7 +51,7 @@ export default function LandingHero({ mediaBaseUrl }) {
         aria-hidden="true"
       />
 
-      <div className="relative z-10 mx-auto h-full w-full max-w-[1700px] px-[clamp(1.5rem,6vw,5rem)] [animation:fade-in-up_1s_ease-in-out_both] max-lg:absolute max-lg:inset-[8rem_0_0] max-lg:h-auto max-lg:px-[4vw]">
+      <div className={`relative z-10 mx-auto h-full w-full max-w-[1700px] px-[clamp(1.5rem,6vw,5rem)] max-lg:absolute max-lg:inset-[8rem_0_0] max-lg:h-auto max-lg:px-[4vw] ${heroImageReady && fontReady ? 'motion-safe:[animation:fade-in-up_1s_ease-in-out_both]' : 'motion-safe:opacity-0'}`}>
         <div className="ml-auto mr-[clamp(3rem,6vw,8rem)] flex h-full w-[min(46vw,38rem)] flex-col items-end justify-center text-right max-lg:mr-0 max-lg:w-[46%] min-[40.0625rem]:max-lg:w-[56%] min-[40.0625rem]:max-lg:-translate-x-[clamp(1rem,3.5vw,1.75rem)] max-[40rem]:m-0 max-[40rem]:w-full max-[40rem]:gap-[clamp(.5rem,1.8vw,.75rem)]">
           <span className="mb-6 max-w-full rounded-full border border-[#0e7490] px-4 py-1 text-[clamp(.6rem,.8vw,.9rem)] leading-[1.5] font-semibold tracking-[.3em] text-white/80 uppercase max-lg:mb-[clamp(.375rem,1.5vw,.875rem)] max-lg:px-[.8em] max-lg:py-[.2em] max-lg:text-[clamp(.45rem,1.1vw,.65rem)] max-lg:tracking-[.2em] min-[40.0625rem]:max-lg:text-[clamp(.55rem,1.2vw,.75rem)] max-[40rem]:mb-0 max-[40rem]:text-[clamp(.55rem,1.5vw,.7rem)] max-[40rem]:tracking-[.15em]">
             Tradición Ancestral
