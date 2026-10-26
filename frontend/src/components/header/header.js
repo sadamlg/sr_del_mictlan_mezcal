@@ -16,6 +16,8 @@ import {
 export default function SiteHeader({ mediaBaseUrl }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
+  const [brandImageReady, setBrandImageReady] = useState(false);
+  const brandImageRef = useRef(null);
   const lastScrollY = useRef(0);
   const headerShouldDisplay = shouldDisplayHeader(headerVisible, menuOpen);
   const closeMenu = () => setMenuOpen((open) => nextMenuState(open, 'navigate'));
@@ -23,6 +25,10 @@ export default function SiteHeader({ mediaBaseUrl }) {
     setHeaderVisible(true);
     setMenuOpen((open) => nextMenuState(open, 'toggle'));
   };
+
+  useEffect(() => {
+    if (brandImageRef.current?.complete) setBrandImageReady(true);
+  }, []);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(min-width: 1024px)');
@@ -66,11 +72,12 @@ export default function SiteHeader({ mediaBaseUrl }) {
           </div>
           <Link
             href="/"
-            className="order-2 flex animate-[blurredFadeIn_0.9s_ease-in-out_both] items-center lg:order-1"
+            className={`order-2 flex items-center lg:order-1 ${brandImageReady ? 'motion-safe:animate-[blurredFadeIn_0.9s_ease-in-out_both]' : 'motion-safe:opacity-0'}`}
             onClick={closeMenu}
             aria-label="Señor del Mictlán, inicio"
           >
             <Image
+              ref={brandImageRef}
               src={mediaObjectUrl(mediaBaseUrl, 'images/brand/senor-del-mictlan-brand.png')}
               alt="Señor del Mictlán"
               className="block h-20 w-auto max-w-full lg:h-auto lg:w-[140px]"
@@ -78,6 +85,8 @@ export default function SiteHeader({ mediaBaseUrl }) {
               height={887}
               sizes="(min-width: 1024px) 140px, 160px"
               priority
+              onLoad={() => setBrandImageReady(true)}
+              onError={() => setBrandImageReady(true)}
             />
           </Link>
           <nav className="hidden text-lg leading-7 lg:order-2 lg:flex" aria-label="Navegación principal">
