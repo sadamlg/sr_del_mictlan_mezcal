@@ -7,8 +7,8 @@ Este roadmap ordena la construcción del MVP definido en [MVP_SCOPE.md](MVP_SCOP
 ```mermaid
 flowchart TB
     p01["✅ 01 · Stack y entorno local<br/>Concluida"] --> p02["✅ 02 · Alcance y plan maestro<br/>Concluida"]
-    p02 --> p03["🔵 03 · Landing, catálogo y medios<br/>Actual"]
-    p03 --> p04["▫️ 04 · Cuentas y perfil<br/>Planeada"]
+    p02 --> p03["✅ 03 · Landing, catálogo y medios<br/>Concluida"]
+    p03 --> p04["🔵 04 · Cuentas y perfil<br/>Siguiente"]
     p04 --> p05["▫️ 05 · Carritos<br/>Planeada"]
     p05 --> p06["▫️ 06 · Stripe Checkout y pedidos<br/>Planeada"]
     p06 --> p07["▫️ 07 · Correo transaccional y PDF<br/>Planeada"]
@@ -16,7 +16,7 @@ flowchart TB
     p08 --> p09["▫️ 09 · Preparación y salida a producción<br/>Planeada"]
 ```
 
-**Leyenda:** ✅ concluida · 🔵 actual · ▫️ planeada. La fase 03 está en curso: las secciones de la landing están migradas; la integración de medios en R2 sigue pendiente. El mapa resume el orden y el estado; los resultados, dependencias y criterios de cierre se detallan en cada fase.
+**Leyenda:** ✅ concluida · 🔵 siguiente · ▫️ posterior. La fase 03 quedó concluida. La landing y el catálogo están implementados, las doce imágenes de desarrollo están en R2 y los componentes resuelven sus medios mediante `MEDIA_BASE_URL`. La siguiente fase será cuentas y perfil; no implica que ya haya comenzado su implementación. El mapa resume el orden y el estado; los resultados, dependencias y criterios de cierre se detallan en cada fase.
 
 ## Fases
 
@@ -32,12 +32,12 @@ flowchart TB
 - **Resultado esperado:** contrato funcional aprobado, instrucciones duraderas del repositorio, roadmap ordenado y guía de Cloudflare coherente con el momento de integración de medios.
 - **Criterio de cierre:** `docs/MVP_SCOPE.md`, `AGENTS.md`, este roadmap y la guía de Cloudflare concuerdan; quedan identificadas las dependencias y los criterios de cierre de las fases.
 
-### 03. Landing, catálogo y medios — actual
+### 03. Landing, catálogo y medios — concluida
 
 - **Dependencias:** fases 01 y 02.
 - **Resultado esperado:** landing y escaparate de productos activos implementados con la identidad visual, el aviso de mayoría de edad, el contador de sesiones persistente y los medios correspondientes. Los datos del catálogo y la carga de archivos se mantienen manualmente.
 - **Cloudflare R2:** durante esta fase, justo antes de integrar archivos reales, el responsable del proyecto crea y configura la cuenta de Cloudflare. R2 se prepara para desarrollo/staging por separado de producción. `r2.dev` puede usarse sólo en entornos no productivos; no se configura DNS ni un dominio personalizado como parte de la integración local de R2.
-- **Criterio de cierre:** la landing y el escaparate cumplen el alcance; los productos activos y sus medios se muestran correctamente y el aviso de edad funciona. Las claves estables y metadatos de medios se pueden resolver a partir de la configuración del entorno.
+- **Criterio de cierre:** la landing y el escaparate cumplen el alcance; los productos activos y sus medios se muestran correctamente y el aviso de edad funciona. Las claves estables y metadatos de medios se resuelven desde la configuración del entorno. **Completado:** los doce medios de desarrollo están cargados en R2; `MEDIA_BASE_URL` está configurado en frontend y backend, y la API local devuelve las URL públicas R2 de las imágenes del catálogo.
 
 ### 04. Cuentas y perfil
 
