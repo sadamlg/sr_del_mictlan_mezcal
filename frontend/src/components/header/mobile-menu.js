@@ -22,7 +22,7 @@ export default function MobileMenu({ isOpen, onClose }) {
   return (
     <aside
       id="mobile-navigation"
-      className={`fixed left-0 top-[120px] z-[60] h-[calc(100dvh-120px)] w-full touch-none overflow-hidden bg-black font-display text-white transition-transform duration-300 ease-in-out lg:hidden${isOpen ? ' translate-x-0' : ' -translate-x-full'}`}
+      className={`fixed left-0 top-[120px] z-[60] h-[calc(100dvh-120px)] w-full touch-none overflow-hidden bg-[#050505] font-display text-white transition-transform duration-300 ease-in-out lg:hidden${isOpen ? ' translate-x-0' : ' -translate-x-full'}`}
       {...getMobileNavigationProps(isOpen)}
     >
       <div className="flex h-full flex-col gap-0.5 overflow-y-auto p-0">

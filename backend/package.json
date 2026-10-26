@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "test": "node --test src/catalog/*.test.js",
+    "test": "node --test src/catalog/*.test.js src/visits/*.test.js",
     "worker:dev": "node --watch src/worker.js",
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",

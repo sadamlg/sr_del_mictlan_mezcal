@@ -27,6 +27,10 @@ export default function LandingHero({ mediaBaseUrl }) {
         className="absolute inset-0 bg-[linear-gradient(90deg,transparent_35%,rgb(0_0_0_/_38%)_100%)] max-lg:top-32 max-[40rem]:bg-[linear-gradient(180deg,transparent_8%,rgb(0_0_0_/_55%)_38%,rgb(0_0_0_/_82%)_70%,rgb(0_0_0_/_90%)_100%)]"
         aria-hidden="true"
       />
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-24 bg-[linear-gradient(to_bottom,transparent,#0a0b0a)] sm:h-32 lg:h-36"
+        aria-hidden="true"
+      />
 
       <div className="relative z-10 mx-auto h-full w-full max-w-[1700px] px-[clamp(1.5rem,6vw,5rem)] [animation:fade-in-up_1s_ease-in-out_both] max-lg:absolute max-lg:inset-[8rem_0_0] max-lg:h-auto max-lg:px-[4vw]">
         <div className="ml-auto mr-[clamp(3rem,6vw,8rem)] flex h-full w-[min(46vw,38rem)] flex-col items-end justify-center text-right max-lg:mr-0 max-lg:w-[46%] min-[40.0625rem]:max-lg:w-[56%] min-[40.0625rem]:max-lg:-translate-x-[clamp(1rem,3.5vw,1.75rem)] max-[40rem]:m-0 max-[40rem]:w-full max-[40rem]:gap-[clamp(.5rem,1.8vw,.75rem)]">

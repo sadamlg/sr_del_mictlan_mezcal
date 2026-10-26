@@ -55,7 +55,7 @@ export default function SiteHeader({ mediaBaseUrl }) {
     <>
       <MobileMenu isOpen={menuOpen} onClose={closeMenu} />
       <header
-        className={`fixed inset-x-0 top-0 z-50 w-full bg-black/20 py-6 font-display text-white backdrop-blur-[8px] transition-[translate,background-color] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] lg:pt-4 lg:pb-2${headerShouldDisplay ? ' translate-y-0 delay-0' : ' -translate-y-full delay-100'}${menuOpen ? ' bg-black' : ''}`}
+        className={`fixed inset-x-0 top-0 z-50 w-full bg-[#050505] py-6 font-display text-white transition-[translate] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] lg:pt-4 lg:pb-2${headerShouldDisplay ? ' translate-y-0 delay-0' : ' -translate-y-full delay-100'}`}
       >
         <div className="mx-auto flex w-full max-w-[1280px] items-center justify-between px-4 min-[768px]:px-10 min-[768px]:max-[1023px]:px-[30px]">
           <div className="flex-1 lg:hidden">

@@ -1,10 +1,31 @@
 const { test, expect } = require('@playwright/test');
 
+test('visitor counter shows the API total and reuses its session after reload', async ({ page }) => {
+  const visitIds = [];
+  await page.route('**/api/visits', async (route) => {
+    visitIds.push(route.request().postDataJSON().visitId);
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ count: 27 }) });
+  });
+
+  await page.goto('/');
+  const counter = page.locator('section[aria-labelledby="visitor-counter-title"]');
+  await expect(counter).toContainText('27');
+  await page.reload();
+  await expect(counter).toContainText('27');
+  expect(visitIds.length).toBeGreaterThanOrEqual(2);
+  expect(new Set(visitIds).size).toBe(1);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(counter).toContainText('27');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
 test('age confirmation unlocks the landing and is remembered for the session', async ({ page }) => {
   await page.goto('/');
+  await page.locator('#coleccion').scrollIntoViewIfNeeded();
 
   const dialog = page.getByRole('dialog', { name: '¿Eres mayor de edad?' });
-  const confirmButton = dialog.getByRole('button', { name: 'Sí' });
+  const confirmButton = dialog.getByRole('button', { name: 'Entrar al Mictlán' });
 
   await expect(dialog).toBeVisible();
   await expect(confirmButton).toBeFocused();
@@ -21,7 +42,8 @@ test('age confirmation unlocks the landing and is remembered for the session', a
 
 test('footer collection navigation scrolls when #coleccion is already active', async ({ page }) => {
   await page.goto('/#coleccion');
-  await page.getByRole('dialog').getByRole('button', { name: 'Sí' }).click();
+  await page.locator('#coleccion').scrollIntoViewIfNeeded();
+  await page.getByRole('dialog').getByRole('button', { name: 'Entrar al Mictlán' }).click();
 
   const collection = page.locator('#coleccion');
   const mezcalesLink = page
@@ -38,7 +60,8 @@ test('footer collection navigation scrolls when #coleccion is already active', a
 
 test('footer collection CTA also returns to the collection from the same fragment', async ({ page }) => {
   await page.goto('/#coleccion');
-  await page.getByRole('dialog').getByRole('button', { name: 'Sí' }).click();
+  await page.locator('#coleccion').scrollIntoViewIfNeeded();
+  await page.getByRole('dialog').getByRole('button', { name: 'Entrar al Mictlán' }).click();
 
   const collection = page.locator('#coleccion');
   await page.getByRole('link', { name: 'Explorar la colección' }).click();

@@ -11,6 +11,7 @@ Publicar una tienda en línea que presente la marca y sus productos, permita a v
 ### Landing y catálogo
 
 - La landing incluye encabezado, navegación, sección principal y escaparate de productos con la identidad visual de la marca.
+- La landing muestra un contador persistente de sesiones que la visitaron. Una recarga en la misma pestaña no suma otra visita; una sesión nueva sí. El contador no guarda IP ni identifica personas.
 - Agregar, sustituir o ajustar imágenes, video y otros medios destinados a la landing o al escaparate es trabajo de contenido y presentación dentro de este alcance; por sí solo no requiere modificar este contrato. Se revisa el alcance si el cambio añade una página, un flujo o una capacidad nueva para el usuario.
 - El alcance de contenido se limita a la landing. Una página sencilla de “Nosotros” o información de la empresa podrá definirse durante el diseño del módulo de landing.
 - Los productos, precios, descripciones, estado activo y referencias de sus medios se mantienen manualmente en la base de datos. No habrá una interfaz administrativa para editarlos ni para cargar archivos.

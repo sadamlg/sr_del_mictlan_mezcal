@@ -6,7 +6,7 @@ export default function LandingFaq({ mediaBaseUrl }) {
   return (
     <section
       id="preguntas"
-      className="relative isolate scroll-mt-[200px] bg-[linear-gradient(180deg,#111a14_0%,#0d0f0e_40%,#0a0c0b_100%)] px-6 pb-24 pt-28 text-[#e2e3e0] sm:px-10 sm:pb-28 sm:pt-36 lg:scroll-mt-[220px] lg:px-14 lg:pt-40"
+      className="relative isolate scroll-mt-[200px] bg-[linear-gradient(180deg,#111a14_0%,#0d0f0e_40%,#0a0c0b_100%)] px-6 pb-16 pt-28 text-[#e2e3e0] sm:px-10 sm:pb-20 sm:pt-36 lg:scroll-mt-[220px] lg:px-14 lg:pt-40"
       aria-labelledby="faq-title"
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 z-10 mx-auto max-w-[1512px] px-6 sm:px-10 lg:px-14">

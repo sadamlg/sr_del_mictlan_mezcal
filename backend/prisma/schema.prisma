@@ -34,3 +34,10 @@ model Product {
   @@index([active, position, slug])
   @@map("products")
 }
+
+model SiteVisit {
+  id        String   @id @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("site_visits")
+}

@@ -6,6 +6,7 @@ import LandingHero from '../components/landing/landing-hero';
 import LandingRitual from '../components/landing/landing-ritual';
 import MezcalShowcase from '../components/landing/mezcal-showcase/mezcal-showcase';
 import LandingFaq from '../components/landing/landing-faq';
+import LandingVisitorCounter from '../components/landing/landing-visitor-counter';
 import LandingFooter from '../components/landing/landing-footer';
 
 async function loadCatalog() {
@@ -40,7 +41,7 @@ export default function Home() {
   const mediaBaseUrl = process.env.MEDIA_BASE_URL || '';
 
   return (
-    <AgeGate>
+    <AgeGate mediaBaseUrl={mediaBaseUrl}>
       <div className="bg-[#100e0b] text-[#f1e7d6]">
         <SiteHeader mediaBaseUrl={mediaBaseUrl} />
 
@@ -53,6 +54,7 @@ export default function Home() {
 
           <LandingRitual />
           <LandingFaq mediaBaseUrl={mediaBaseUrl} />
+          <LandingVisitorCounter />
         </main>
         <LandingFooter mediaBaseUrl={mediaBaseUrl} year={<Suspense fallback="2026"><CurrentYear /></Suspense>} />
       </div>

@@ -3,17 +3,19 @@ import { ArrowUp, ArrowUpRight } from 'lucide-react';
 import { mediaObjectUrl } from '../../lib/media-url';
 
 const footerLinks = [
+  { href: '#inicio', label: 'Inicio' },
   { href: '#coleccion', label: 'Mezcales' },
-  { href: '#origen', label: 'Origen Etúcuaro' },
-  { href: '#ritual', label: 'Ritual' },
   { href: '#preguntas', label: 'Preguntas frecuentes' },
-  { href: '#ritual', label: 'Consumo responsable' },
-  { href: '#aviso-edad', label: 'Aviso de edad' },
+  {
+    href: 'https://github.com/sadamlg/sr_del_mictlan_mezcal',
+    label: 'Créditos',
+    external: true,
+  },
 ];
 
 export default function LandingFooter({ mediaBaseUrl, year }) {
   return (
-    <footer className="w-full bg-[radial-gradient(circle_at_50%_100%,rgba(77,15,22,0.72)_0%,rgba(20,8,10,0.96)_50%,#060707_100%)] text-[#e2e3e0]">
+    <footer className="w-full bg-[linear-gradient(180deg,#0f0b0c_0%,rgba(15,11,12,0.88)_12%,transparent_42%),radial-gradient(circle_at_50%_100%,rgba(77,15,22,0.72)_0%,rgba(20,8,10,0.96)_50%,#060707_100%)] text-[#e2e3e0]">
       <div className="mx-auto w-full max-w-[1440px] px-6 pt-8 pb-10 md:px-16 md:pt-10 md:pb-12">
         <div className="relative flex flex-col items-center gap-8 pb-4 md:pb-5">
           <a
@@ -42,11 +44,18 @@ export default function LandingFooter({ mediaBaseUrl, year }) {
         <div className="w-full border-t border-[#4d4635]/30 pt-6 pb-8">
           <nav aria-label="Navegación del pie de página">
             <ul className="m-0 flex list-none flex-wrap items-center justify-center gap-x-6 gap-y-4 p-0 lg:justify-between lg:gap-x-3">
-              {footerLinks.map(({ href, label }, index) => (
+              {footerLinks.map(({ href, label, external }, index) => (
                 <li className="flex items-center gap-6 lg:gap-3" key={label}>
                   <a
                     className="font-ui text-[10px] font-medium uppercase tracking-[0.16em] text-[#d0c5af] no-underline transition-colors duration-200 hover:text-[#97d2c6] focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#97d2c6] sm:text-[11px] lg:text-[10px] xl:text-[11px]"
                     href={href}
+                    {...(external
+                      ? {
+                          target: '_blank',
+                          rel: 'noopener noreferrer',
+                          'aria-label': `${label}, abre GitHub en una pestaña nueva`,
+                        }
+                      : {})}
                   >
                     {label}
                   </a>
@@ -62,15 +71,17 @@ export default function LandingFooter({ mediaBaseUrl, year }) {
         </div>
 
         <div className="flex flex-col items-center justify-between gap-6 border-t border-[#4d4635]/20 pt-6 font-ui text-center md:flex-row md:text-left">
-          <p id="creditos" className="order-2 m-0 text-[9px] font-medium uppercase tracking-[0.13em] text-[#d0c5af]/80 sm:text-[10px] md:order-1">
-            © {year} Señor del Mictlán. Todos los derechos reservados.
-          </p>
+          <div className="order-2 flex flex-col items-center gap-1.5 text-[9px] font-medium uppercase tracking-[0.13em] text-[#d0c5af]/80 sm:text-[10px] md:order-1 md:items-start">
+            <p className="m-0">© {year} Señor del Mictlán. Todos los derechos reservados.</p>
+            <p className="m-0 text-[#99907c] normal-case tracking-[0.08em]">
+              Hecho con <span className="text-[#7d1f2a]" aria-label="amor">♥</span> por sadamlg
+            </p>
+          </div>
           <div
-            id="aviso-edad"
             className="order-1 flex max-w-[34ch] flex-col gap-1 text-[9px] font-medium uppercase tracking-[0.15em] text-[#97d2c6]/90 sm:text-[10px] md:order-2 md:max-w-none"
           >
             <span>Hecho en México · Etúcuaro, Michoacán · 100% agave cupreata</span>
-            <span className="text-[#d0c5af]/80">Disfruta con responsabilidad. Exclusivo para mayores de edad.</span>
+            <span className="text-[#d0c5af]/80">Venta exclusiva a mayores de 18 años · Evite el exceso</span>
           </div>
           <div className="order-3 flex shrink-0 items-center gap-5 whitespace-nowrap text-[9px] font-medium uppercase tracking-[0.15em] text-[#99907c] sm:text-[10px]">
             <span>MX / ESP</span>
