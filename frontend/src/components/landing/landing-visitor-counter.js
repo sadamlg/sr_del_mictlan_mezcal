@@ -1,14 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { registerBrowserVisit } from '../../lib/visitor-count';
+import { createVisitId, registerBrowserVisit } from '../../lib/visitor-count';
 
 export default function LandingVisitorCounter() {
   const [count, setCount] = useState(null);
 
   useEffect(() => {
     let active = true;
-    registerBrowserVisit({ storage: window.sessionStorage, randomUUID: () => crypto.randomUUID(), fetcher: fetch })
+    registerBrowserVisit({ storage: window.sessionStorage, randomUUID: () => createVisitId(window.crypto), fetcher: fetch })
       .then((visits) => { if (active) setCount(visits); })
       .catch(() => { if (active) setCount(null); });
     return () => { active = false; };
