@@ -24,7 +24,7 @@ html {
 }
 
 @supports selector(::-webkit-scrollbar) {
-  html::-webkit-scrollbar:vertical {
+  html::-webkit-scrollbar {
     width: 12px;
   }
 
