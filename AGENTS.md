@@ -11,6 +11,12 @@
 - Incorporar o cambiar imágenes, video y otros medios dentro de las superficies aprobadas de landing y catálogo es trabajo de contenido o presentación. No propongas ampliar el alcance por cada recurso visual.
 - Revisa `docs/MVP_SCOPE.md` si el cambio agrega una página, un flujo o una capacidad de usuario, o altera una inclusión o exclusión funcional.
 
+## Reutilizar referencias del proyecto anterior
+
+- Al iniciar cada fase funcional de implementación, revisa `../sr_del_mictlan` en busca de contratos, decisiones, flujos, casos límite, pruebas y código relacionado que se pueda aprovechar.
+- Trata ese repositorio como referencia, no como fuente de verdad. Conserva la arquitectura y el alcance actuales; adapta los casos y patrones compatibles, y reconstruye las partes ligadas a tecnologías o modelos de datos distintos.
+- Registra en el contrato del módulo qué se reutilizó, qué se adaptó y qué se rehízo, y la razón cuando no convenga portar código.
+
 ## Estilos del frontend
 
 - Usa Tailwind CSS 4 como sistema predeterminado para los estilos del frontend. Recurre a CSS escrito a mano sólo para necesidades puntuales que no puedan resolverse razonablemente con sus utilidades; mantén esas reglas mínimas y acotadas.

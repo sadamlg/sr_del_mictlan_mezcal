@@ -42,8 +42,10 @@ flowchart TB
 ### 04. Cuentas y perfil
 
 - **Dependencias:** fases 01 y 02; las pantallas se integran con las superficies definidas en fase 03.
-- **Resultado esperado:** registro con validación de mayoría de edad y dirección, inicio/cierre de sesión, recuperación de contraseña, edición de datos personales y vista “Mis pedidos”.
-- **Criterio de cierre:** los recorridos de cuenta incluidos en el alcance funcionan de extremo a extremo, con validaciones y pruebas correspondientes.
+- **Resultado esperado:** registro con validación de mayoría de edad y dirección, inicio/cierre y restauración de sesión, recuperación de contraseña, edición de nombre, correo, fecha de nacimiento y dirección, y las vistas de perfil y “Mis pedidos”.
+- **Correo:** se envía confirmación tras el registro. Un cambio de correo sólo se aplica después de confirmar el nuevo destino. Esta fase incorpora el trabajo persistido en PostgreSQL y activa el worker existente con Mailpit para probar los mensajes de cuenta; Resend de producción se integra en la fase 07.
+- **Pedidos:** la vista protegida muestra un estado vacío hasta que la fase 06 cree y conecte las órdenes reales; no presenta pedidos de ejemplo.
+- **Criterio de cierre:** los recorridos incluidos funcionan de extremo a extremo en Docker Compose, con validaciones del backend, pruebas automatizadas y estados de interfaz completos. Las contraseñas y tokens no se exponen en respuestas ni logs.
 
 ### 05. Carritos
 
@@ -60,7 +62,7 @@ flowchart TB
 ### 07. Correo transaccional y PDF
 
 - **Dependencias:** fase 06 y worker con trabajos persistidos en PostgreSQL.
-- **Resultado esperado:** correos de recuperación de contraseña y confirmación de compra. Cada compra confirmada incluye exactamente el comprobante de pago y la copia de la orden en PDF.
+- **Resultado esperado:** integrar Resend para los mensajes transaccionales y enviar la confirmación de compra. Los mensajes de registro, cambio de correo y recuperación ya usan el worker probado con Mailpit desde la fase 04. Cada compra confirmada incluye exactamente el comprobante de pago y la copia de la orden en PDF.
 - **Criterio de cierre:** los trabajos se guardan y procesan con el worker; los correos y sus dos adjuntos se generan para las condiciones acordadas, con reintentos y errores verificables.
 
 ### 08. Integración y aceptación en staging
