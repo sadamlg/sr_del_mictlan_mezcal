@@ -11,6 +11,93 @@ datasource db {
   provider = "postgresql"
 }
 
+enum AccountTokenPurpose {
+  ACCOUNT_CONFIRMATION
+  PASSWORD_RESET
+  EMAIL_CHANGE
+}
+
+enum EmailJobType {
+  ACCOUNT_CONFIRMATION
+  PASSWORD_RESET
+  EMAIL_CHANGE_CONFIRMATION
+}
+
+enum EmailJobStatus {
+  PENDING
+  PROCESSING
+  RETRY
+  SENT
+  FAILED
+}
+
+model Account {
+  id              String           @id @default(uuid()) @db.Uuid
+  name            String           @db.VarChar(120)
+  email           String           @unique @db.VarChar(254)
+  pendingEmail    String?          @unique @map("pending_email") @db.VarChar(254)
+  passwordHash    String           @map("password_hash") @db.VarChar(220)
+  dateOfBirth     DateTime         @map("date_of_birth") @db.Date
+  street          String           @db.VarChar(120)
+  number          String           @db.VarChar(120)
+  neighborhood    String           @db.VarChar(120)
+  locality        String           @db.VarChar(120)
+  state           String           @db.VarChar(120)
+  postalCode      String           @map("postal_code") @db.VarChar(5)
+  emailVerifiedAt DateTime?        @map("email_verified_at") @db.Timestamptz(6)
+  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+  sessions        AccountSession[]
+  tokens          AccountToken[]
+  emailJobs       EmailJob[]
+
+  @@map("accounts")
+}
+
+model AccountSession {
+  id        String   @id @default(uuid()) @db.Uuid
+  accountId String   @map("account_id") @db.Uuid
+  tokenHash String   @unique @map("token_hash") @db.Char(64)
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  revokedAt DateTime? @map("revoked_at") @db.Timestamptz(6)
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, expiresAt])
+  @@map("account_sessions")
+}
+
+model AccountToken {
+  id        String              @id @default(uuid()) @db.Uuid
+  accountId String              @map("account_id") @db.Uuid
+  purpose   AccountTokenPurpose
+  tokenHash String              @unique @map("token_hash") @db.Char(64)
+  expiresAt DateTime            @map("expires_at") @db.Timestamptz(6)
+  consumedAt DateTime?          @map("consumed_at") @db.Timestamptz(6)
+  createdAt DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  account   Account             @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, purpose, expiresAt])
+  @@map("account_tokens")
+}
+
+model EmailJob {
+  id            String        @id @default(uuid()) @db.Uuid
+  accountId     String        @map("account_id") @db.Uuid
+  type          EmailJobType
+  status        EmailJobStatus @default(PENDING)
+  attempts      Int           @default(0)
+  nextAttemptAt DateTime      @default(now()) @map("next_attempt_at") @db.Timestamptz(6)
+  lockedAt      DateTime?     @map("locked_at") @db.Timestamptz(6)
+  sentAt        DateTime?     @map("sent_at") @db.Timestamptz(6)
+  lastError     String?       @map("last_error") @db.VarChar(120)
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  account       Account       @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([status, nextAttemptAt, createdAt])
+  @@map("email_jobs")
+}
+
 model Product {
   id                String   @id @default(uuid()) @db.Uuid
   slug              String   @unique @db.VarChar(80)

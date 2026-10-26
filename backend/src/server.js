@@ -4,13 +4,26 @@ import { createCatalogHandler } from './catalog/catalog-handler.js';
 import { createCatalogRepository } from './catalog/catalog-repository.js';
 import { createVisitsHandlers } from './visits/visits-handler.js';
 import { createVisitsRepository } from './visits/visits-repository.js';
+import { createAccountHandlers } from './accounts/account-handler.js';
+import { createAccountRateLimit } from './accounts/account-rate-limit.js';
+import { createAccountRepository } from './accounts/account-repository.js';
+import { createAccountService } from './accounts/account-service.js';
 
 const port = Number(process.env.PORT || 3000);
 
-export function createApp({ database, mediaBaseUrl, allowInsecureDevHttp = false }) {
+export function createApp({
+  database,
+  mediaBaseUrl,
+  allowInsecureDevHttp = false,
+  frontendOrigin = process.env.FRONTEND_ORIGIN || 'http://localhost:3000',
+  secureCookies = process.env.NODE_ENV === 'production',
+}) {
   const app = express();
   const catalogRepository = createCatalogRepository(database);
   const visitsHandlers = createVisitsHandlers(createVisitsRepository(database));
+  const accountService = createAccountService({ repository: createAccountRepository(database) });
+  const accountHandlers = createAccountHandlers(accountService, { secureCookies });
+  const accountRateLimit = createAccountRateLimit();
 
   app.get('/health', async (_request, response) => {
     try {
@@ -33,6 +46,71 @@ export function createApp({ database, mediaBaseUrl, allowInsecureDevHttp = false
       allowInsecureDevHttp,
     }),
   );
+
+  app.use('/api', (request, response, next) => {
+    const path = request.originalUrl.split('?')[0];
+    const isAccountPath = /^\/api\/(?:auth|profile|orders)(?:\/|$)/.test(path);
+    if (!isAccountPath) return next();
+
+    response.set('Cache-Control', 'no-store');
+    response.set('X-Content-Type-Options', 'nosniff');
+    response.set('X-Frame-Options', 'DENY');
+    response.set('Referrer-Policy', 'no-referrer');
+    const requestOrigin = request.get('Origin');
+    if (requestOrigin && requestOrigin !== frontendOrigin) {
+      return response.status(403).json({
+        error: { code: 'ORIGIN_NOT_ALLOWED', message: 'El origen de la solicitud no está permitido.' },
+      });
+    }
+    if (requestOrigin) {
+      response.set('Access-Control-Allow-Origin', frontendOrigin);
+      response.set('Access-Control-Allow-Credentials', 'true');
+      response.vary('Origin');
+    }
+    if (request.method === 'OPTIONS') {
+      response.set('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
+      response.set('Access-Control-Allow-Headers', 'Content-Type');
+      return response.status(204).end();
+    }
+    if (['POST', 'PATCH'].includes(request.method) && /^\/api\/(?:auth|profile)(?:\/|$)/.test(path)) {
+      return accountRateLimit(request, response, next);
+    }
+    return next();
+  });
+
+  app.use('/api/auth', express.json({ limit: '16kb' }));
+  app.post('/api/auth/register', accountHandlers.register);
+  app.post('/api/auth/login', accountHandlers.login);
+  app.post('/api/auth/logout', accountHandlers.logout);
+  app.get('/api/auth/session', accountHandlers.session);
+  app.post('/api/auth/password-reset-requests', accountHandlers.requestPasswordReset);
+  app.post('/api/auth/password-resets', accountHandlers.resetPassword);
+  app.post('/api/auth/email-confirmations', accountHandlers.confirmEmail);
+  app.use('/api/auth', (error, _request, response, next) => {
+    response.set('Cache-Control', 'no-store');
+    if (error?.type === 'entity.too.large') {
+      return response.status(413).json({ error: { code: 'REQUEST_TOO_LARGE', message: 'La solicitud excede el tamaño permitido.' } });
+    }
+    if (error instanceof SyntaxError && 'body' in error) {
+      return response.status(400).json({ error: { code: 'INVALID_JSON', message: 'El contenido de la solicitud no es válido.' } });
+    }
+    return next(error);
+  });
+
+  app.use('/api/profile', express.json({ limit: '16kb' }));
+  app.get('/api/profile', accountHandlers.getProfile);
+  app.patch('/api/profile', accountHandlers.updateProfile);
+  app.use('/api/profile', (error, _request, response, next) => {
+    response.set('Cache-Control', 'no-store');
+    if (error?.type === 'entity.too.large') {
+      return response.status(413).json({ error: { code: 'REQUEST_TOO_LARGE', message: 'La solicitud excede el tamaño permitido.' } });
+    }
+    if (error instanceof SyntaxError && 'body' in error) {
+      return response.status(400).json({ error: { code: 'INVALID_JSON', message: 'El contenido de la solicitud no es válido.' } });
+    }
+    return next(error);
+  });
+  app.get('/api/orders', accountHandlers.orders);
 
   app.get('/api/visits', visitsHandlers.get);
   app.post('/api/visits', express.json({ limit: '256b' }), visitsHandlers.post);

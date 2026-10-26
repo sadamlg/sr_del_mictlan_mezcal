@@ -7,7 +7,7 @@
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
     "lint": "eslint .",
-    "test": "node --test src/catalog/*.test.js src/visits/*.test.js",
+    "test": "node --test src/catalog/*.test.js src/visits/*.test.js src/accounts/*.test.js src/email/*.test.js",
     "worker:dev": "node --watch src/worker.js",
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",
@@ -19,6 +19,7 @@
     "@prisma/adapter-pg": "7.10.1",
     "@prisma/client": "7.10.1",
     "express": "5.3.0",
+    "nodemailer": "10.2.1",
     "pg": "8.23.1"
   },
   "devDependencies": {

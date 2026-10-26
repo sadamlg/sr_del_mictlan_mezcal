@@ -1,29 +1,41 @@
 import { prisma } from './database/prisma-client.js';
+import { createAccountRepository } from './accounts/account-repository.js';
+import { createSmtpTransport } from './email/smtp-transport.js';
+import { createEmailWorker } from './email/email-worker.js';
 
-let interval;
+const emailWorker = createEmailWorker({
+  repository: createAccountRepository(prisma),
+  transport: createSmtpTransport(),
+  from: process.env.MAIL_FROM || 'noreply@senordelmictlan.local',
+  appBaseUrl: process.env.APP_BASE_URL || 'http://localhost:3000',
+});
+
 let stopping = false;
-
-async function stop(exitCode = 0) {
-  if (stopping) return;
-  stopping = true;
-  clearInterval(interval);
-  await prisma.$disconnect();
-  process.exit(exitCode);
-}
-
-async function checkDatabase() {
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-  } catch (error) {
-    console.error('El worker perdió la conexión con PostgreSQL:', error);
-    await stop(1);
-  }
-}
-
 for (const signal of ['SIGINT', 'SIGTERM']) {
-  process.once(signal, () => void stop());
+  process.once(signal, () => { stopping = true; });
 }
 
-await checkDatabase();
-console.log('Worker iniciado; PostgreSQL está disponible.');
-interval = setInterval(() => void checkDatabase(), 30_000);
+function logError(label, error) {
+  console.error(label, {
+    name: error instanceof Error ? error.name : 'UnknownError',
+    code: error && typeof error === 'object' && 'code' in error ? error.code : undefined,
+  });
+}
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+console.log('Worker de correo iniciado.');
+while (!stopping) {
+  let processed = false;
+  try {
+    processed = await emailWorker.processNext();
+  } catch (error) {
+    logError('[email-worker] database or queue check failed', error);
+    await delay(5000);
+  }
+  if (!stopping && !processed) await delay(3000);
+}
+
+await prisma.$disconnect();
