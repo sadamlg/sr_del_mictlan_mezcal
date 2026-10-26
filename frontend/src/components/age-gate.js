@@ -16,6 +16,7 @@ export default function AgeGate({ children, mediaBaseUrl }) {
   const [phase, setPhase] = useState(AGE_GATE_PHASES.CHECKING);
   const contentRef = useRef(null);
   const hasOpenedRef = useRef(false);
+  const previousFocusRef = useRef(null);
   const yesButtonRef = useRef(null);
   const noLinkRef = useRef(null);
   const isVisible = phase === AGE_GATE_PHASES.VISIBLE;
@@ -58,6 +59,7 @@ export default function AgeGate({ children, mediaBaseUrl }) {
     if (!isVisible) return undefined;
 
     hasOpenedRef.current = true;
+    previousFocusRef.current = document.activeElement;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     yesButtonRef.current?.focus({ preventScroll: true });
@@ -69,7 +71,16 @@ export default function AgeGate({ children, mediaBaseUrl }) {
 
   useEffect(() => {
     if (isVerified && hasOpenedRef.current) {
-      contentRef.current?.querySelector('a, button, [tabindex="0"]')?.focus({ preventScroll: true });
+      const previousFocus = previousFocusRef.current;
+      if (
+        previousFocus
+        && previousFocus !== document.body
+        && previousFocus !== document.documentElement
+        && previousFocus.isConnected
+      ) {
+        previousFocus.focus({ preventScroll: true });
+      }
+      previousFocusRef.current = null;
     }
   }, [isVerified]);
 
