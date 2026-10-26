@@ -1,11 +1,11 @@
 import { Suspense } from 'react';
 import { io } from 'next/cache';
-import AgeGate from '../components/age-gate';
+import AgeGate from '../components/age-gate/age-gate';
 import SiteHeader from '../components/header/header';
 import LandingHero from '../components/landing/landing-hero';
 import LandingRitual from '../components/landing/landing-ritual';
 import MezcalShowcase from '../components/landing/mezcal-showcase/mezcal-showcase';
-import LandingFaq from '../components/landing/landing-faq';
+import LandingFaq from '../components/landing/faq/landing-faq';
 import LandingVisitorCounter from '../components/landing/landing-visitor-counter';
 import LandingFooter from '../components/landing/landing-footer';
 
