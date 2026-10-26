@@ -10,8 +10,10 @@ test('retries of one session do not increase the persisted count', async () => {
         assert.equal(skipDuplicates, true);
         for (const visit of data) ids.add(visit.id);
       },
-      async count() {
-        return ids.size;
+    },
+    siteVisitCounter: {
+      async findUnique() {
+        return { visitCount: BigInt(ids.size) };
       },
     },
   };
