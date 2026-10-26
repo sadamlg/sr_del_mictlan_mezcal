@@ -105,6 +105,8 @@ services:
     restart: unless-stopped
 
   frontend-e2e:
+    profiles:
+      - e2e
     image: ${COMPOSE_PROJECT_NAME:-mictlan-mezcal}-frontend-e2e:dev
     build:
       context: ./frontend

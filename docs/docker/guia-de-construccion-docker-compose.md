@@ -51,7 +51,7 @@ Compose publica la API para que el navegador del anfitrión pueda alcanzarla, pe
 
 ## Imágenes y versiones de referencia
 
-Las etiquetas siguientes fijan las versiones de esta guía, revisadas el 17 de octubre de 2026. Los tags exactos evitan que una reconstrucción normal cambie de versión sin una modificación explícita del repositorio. Antes de actualizar una etiqueta, revisa la página oficial y valida el cambio en el entorno local.
+Las etiquetas siguientes fijan las versiones de referencia de esta guía. Los tags exactos evitan que una reconstrucción normal cambie de versión sin una modificación explícita del repositorio. Next.js y <code>create-next-app</code> coinciden con la versión actual del frontend. Antes de actualizar una etiqueta, revisa la página oficial y valida el cambio en el entorno local.
 
 | Uso | Imagen / versión | Motivo |
 |---|---|---|
@@ -64,7 +64,7 @@ Las dependencias JavaScript de referencia también se fijan al crear los manifie
 | Área | Paquetes de referencia |
 |---|---|
 | Backend y worker | Express <code>5.3.0</code>; Prisma CLI, <code>@prisma/client</code> y <code>@prisma/adapter-pg</code> <code>7.10.1</code>; <code>pg</code> <code>8.23.1</code> |
-| Frontend | <code>create-next-app</code> y Next.js <code>16.4.0</code>; React y React DOM <code>19.3.0</code>; Tailwind CSS, <code>@tailwindcss/postcss</code> y <code>@tailwindcss/turbopack</code> <code>4.3.3</code>; PostCSS <code>8.5.29</code> |
+| Frontend | <code>create-next-app</code> y Next.js <code>16.4.1</code>; React y React DOM <code>19.3.0</code>; Tailwind CSS, <code>@tailwindcss/postcss</code> y <code>@tailwindcss/turbopack</code> <code>4.3.3</code>; PostCSS <code>8.5.29</code> |
 
 El <code>package-lock.json</code> registra las dependencias transitivas. Se conserva en Git y las imágenes instalan con <code>npm ci</code>; no se instala <code>node_modules</code> en el anfitrión. Prisma 7 usa un adaptador para conectarse a PostgreSQL y su configuración CLI define <code>DATABASE_URL</code> en <code>prisma.config.ts</code>. [Configuración oficial de Prisma Client 7](https://www.prisma.io/docs/orm/prisma-client/setup-and-configuration/introduction)
 
@@ -334,7 +334,7 @@ docker run --rm \
   --volume "$PWD:/workspace" \
   --workdir /workspace \
   node:24.21.0-bookworm-slim \
-  npx --yes create-next-app@16.4.0 frontend \
+  npx --yes create-next-app@16.4.1 frontend \
     --js \
     --app \
     --src-dir \
@@ -357,7 +357,7 @@ docker run --rm \
   --workdir /app \
   node:24.21.0-bookworm-slim \
   npm install --package-lock-only --save-exact \
-    next@16.4.0 react@19.3.0 react-dom@19.3.0
+    next@16.4.1 react@19.3.0 react-dom@19.3.0
 ~~~
 
 ~~~bash

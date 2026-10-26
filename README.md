@@ -27,7 +27,14 @@ El entorno local de desarrollo se construye con Docker Compose e incluye fronten
 | Capa pública | Cloudflare Free | DNS autoritativo; proxy/CDN y TLS para hostnames configurados como *Proxied*; WAF, protección DDoS y Bot Fight Mode (requiere habilitación) |
 | Despliegue | Railway | Alojar frontend, backend, worker y PostgreSQL |
 
-Para las cuotas, tarifas y supuestos de costo por proveedor, consulta [Servicios y costos](docs/servicios-y-costos.md).
+## Documentación
+
+- [Alcance funcional del MVP](docs/MVP_SCOPE.md) y [roadmap con el estado de las fases](docs/ROADMAP.md).
+- [Desarrollo local con Docker Compose](docs/docker/guia-de-construccion-docker-compose.md).
+- [Mapa de implementación de Cloudflare](docs/cloudflare/implementacion.md) y [guía de R2 e inventario de medios](docs/cloudflare/r2.md).
+- [Contratos del catálogo](docs/contracts/catalogo-landing.md) y [contador de visitas](docs/contracts/visitas-landing.md).
+- [Servicios, cuotas y costos](docs/servicios-y-costos.md).
+- Pruebas E2E opcionales con Playwright, previstas para la aceptación de fase 08: `docker compose run --build --rm frontend-e2e`.
 
 ## Arquitectura
 

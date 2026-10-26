@@ -20,10 +20,10 @@ Publicar una tienda en línea que presente la marca y sus productos, permita a v
 
 ### Aviso de mayoría de edad
 
-- Al entrar, la tienda muestra un modal que solo pregunta “¿Eres mayor de edad?” y ofrece “Sí” y “No”.
-- Al elegir “Sí”, la persona puede continuar. La respuesta afirmativa se recuerda para que el modal no reaparezca con cada recarga.
-- Al elegir “No”, se abre Google en una pestaña nueva y la tienda permanece abierta en la pestaña original; esa respuesta no concede acceso a la tienda.
-- El aviso de edad es independiente de cualquier consentimiento de cookies. Rechazar cookies no bloquea la navegación.
+- Si la persona no ha confirmado su mayoría de edad en la pestaña actual, el modal aparece cuando llega a la sección de colección; el hero puede verse antes.
+- El modal pregunta “¿Eres mayor de edad?” y permite elegir “Entrar al Mictlán” o “No, salir del sitio”.
+- Al elegir “Entrar al Mictlán”, la persona puede continuar. La confirmación se conserva en `sessionStorage` de esa pestaña para que el modal no reaparezca al recargarla.
+- Al elegir “No, salir del sitio”, se abre Google en una pestaña nueva y la tienda permanece abierta en la pestaña original; esa respuesta no concede acceso a la tienda.
 - El aviso es una declaración de edad, no una verificación de identidad. El registro realiza la validación de edad indicada en la sección de cuentas.
 
 ### Cuentas y perfil

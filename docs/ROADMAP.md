@@ -37,7 +37,7 @@ flowchart TB
 - **Dependencias:** fases 01 y 02.
 - **Resultado esperado:** landing y escaparate de productos activos implementados con la identidad visual, el aviso de mayoría de edad, el contador de sesiones persistente y los medios correspondientes. Los datos del catálogo y la carga de archivos se mantienen manualmente.
 - **Cloudflare R2:** durante esta fase, justo antes de integrar archivos reales, el responsable del proyecto crea y configura la cuenta de Cloudflare. R2 se prepara para desarrollo/staging por separado de producción. `r2.dev` puede usarse sólo en entornos no productivos; no se configura DNS ni un dominio personalizado como parte de la integración local de R2.
-- **Criterio de cierre:** la landing y el escaparate cumplen el alcance; los productos activos y sus medios se muestran correctamente y el aviso de edad funciona. Las claves estables y metadatos de medios se resuelven desde la configuración del entorno. **Completado:** los doce medios de desarrollo están cargados en R2; `MEDIA_BASE_URL` está configurado en frontend y backend, y la API local devuelve las URL públicas R2 de las imágenes del catálogo.
+- **Criterio de cierre:** la landing y el escaparate cumplen el alcance; los productos activos y sus medios se muestran correctamente y el aviso de edad funciona. Las claves estables y metadatos de medios se resuelven desde la configuración del entorno. **Completado:** los doce medios de desarrollo están cargados en R2. La integración de `MEDIA_BASE_URL` está implementada y se validó en Compose con una sobreescritura temporal hacia R2; la configuración habitual local conserva el origen de Compose. El despliegue de staging queda para la fase 08.
 
 ### 04. Cuentas y perfil
 

@@ -12,13 +12,11 @@ Cloudflare administra la entrada pública y los medios; Railway ejecuta Next.js,
 
 ## Orden por fase
 
-### 1. Preparar R2 para desarrollo/staging
+### 1. Preparar R2 para desarrollo/staging — completado
 
-Sigue la [guía dedicada de R2](r2.md) para crear la cuenta, activar R2, preparar el bucket de staging, integrar el inventario completo de medios, cargar los archivos y configurar <code>MEDIA_BASE_URL</code>. El bucket de producción se prepara por separado en su fase.
+La cuenta, el bucket no productivo, la URL pública de desarrollo y la integración de las doce imágenes ya están preparados. La [guía dedicada de R2](r2.md) conserva los pasos reproducibles y el estado detallado. La configuración pública de staging y el bucket de producción quedan para sus fases correspondientes.
 
 La integración local de R2 no requiere cambios DNS ni dominio personalizado. La carga del MVP es manual; no agregues credenciales de escritura a la aplicación. Consulta [Servicios y costos](../servicios-y-costos.md) antes de activar servicios para un entorno real.
-
-**Criterio de avance:** la aplicación muestra los medios previstos desde el entorno no productivo con claves estables, sin guardar URL temporales ni exponer credenciales.
 
 ### 2. Configurar la capa pública de Cloudflare en staging
 
