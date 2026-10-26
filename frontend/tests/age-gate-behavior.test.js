@@ -4,7 +4,7 @@ const {
   AGE_GATE_PHASES,
   getShowcaseObserverOptions,
   nextAgeGatePhase,
-} = require('../src/components/age-gate-behavior');
+} = require('../src/components/age-gate/age-gate-behavior');
 
 test('the age gate remains armed until the mezcal showcase enters the viewport', () => {
   assert.equal(

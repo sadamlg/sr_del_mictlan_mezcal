@@ -20,8 +20,8 @@ test('every footer fragment link points to an existing landing section or footer
     source('../src/components/landing/landing-hero.js'),
     source('../src/components/landing/mezcal-showcase/mezcal-showcase.js'),
     source('../src/components/landing/landing-ritual.js'),
-    source('../src/components/landing/landing-faq.js'),
-    source('../src/components/landing/landing-faq-content.js'),
+    source('../src/components/landing/faq/landing-faq.js'),
+    source('../src/components/landing/faq/landing-faq-content.js'),
     footer,
     page,
   ].join('\n');

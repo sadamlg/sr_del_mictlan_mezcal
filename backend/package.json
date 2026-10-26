@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
+    "lint": "eslint .",
     "test": "node --test src/catalog/*.test.js src/visits/*.test.js",
     "worker:dev": "node --watch src/worker.js",
     "prisma:generate": "prisma generate",
@@ -21,6 +22,9 @@
     "pg": "8.23.1"
   },
   "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "eslint": "10.13.0",
+    "globals": "17.13.0",
     "prisma": "7.10.1"
   }
 }

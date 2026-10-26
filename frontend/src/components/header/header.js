@@ -36,7 +36,6 @@ export default function SiteHeader({ mediaBaseUrl }) {
       if (event.matches) setMenuOpen((open) => nextMenuState(open, 'desktop'));
     };
 
-    if (mediaQuery.matches) setMenuOpen((open) => nextMenuState(open, 'desktop'));
     mediaQuery.addEventListener('change', closeAtDesktop);
     return () => mediaQuery.removeEventListener('change', closeAtDesktop);
   }, []);

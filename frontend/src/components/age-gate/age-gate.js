@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
-import { mediaObjectUrl } from '../lib/media-url';
+import { mediaObjectUrl } from '../../lib/media-url';
 import {
   AGE_GATE_PHASES,
   getShowcaseObserverOptions,

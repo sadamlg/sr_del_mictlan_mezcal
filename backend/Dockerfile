@@ -12,6 +12,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY --chown=node:node prisma.config.ts ./prisma.config.ts
+COPY --chown=node:node eslint.config.mjs ./eslint.config.mjs
 COPY --chown=node:node prisma ./prisma
 COPY --chown=node:node src ./src
 

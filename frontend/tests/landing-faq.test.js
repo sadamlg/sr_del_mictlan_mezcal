@@ -3,8 +3,8 @@ const { readFileSync } = require('node:fs');
 const path = require('node:path');
 const test = require('node:test');
 
-const componentPath = path.join(__dirname, '../src/components/landing/landing-faq.js');
-const contentPath = path.join(__dirname, '../src/components/landing/landing-faq-content.js');
+const componentPath = path.join(__dirname, '../src/components/landing/faq/landing-faq.js');
+const contentPath = path.join(__dirname, '../src/components/landing/faq/landing-faq-content.js');
 
 test('FAQ preserves the approved origin, agave, and provisional-price information', () => {
   const questions = require(contentPath);

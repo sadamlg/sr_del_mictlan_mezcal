@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import questions from './landing-faq-content';
-import { mediaObjectUrl } from '../../lib/media-url';
+import { mediaObjectUrl } from '../../../lib/media-url';
 
 export default function LandingFaq({ mediaBaseUrl }) {
   return (
