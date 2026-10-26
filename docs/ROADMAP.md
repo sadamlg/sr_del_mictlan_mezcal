@@ -8,15 +8,15 @@ Este roadmap ordena la construcción del MVP definido en [MVP_SCOPE.md](MVP_SCOP
 flowchart TB
     p01["✅ 01 · Stack y entorno local<br/>Concluida"] --> p02["✅ 02 · Alcance y plan maestro<br/>Concluida"]
     p02 --> p03["✅ 03 · Landing, catálogo y medios<br/>Concluida"]
-    p03 --> p04["🔵 04 · Cuentas y perfil<br/>Siguiente"]
-    p04 --> p05["▫️ 05 · Carritos<br/>Planeada"]
+    p03 --> p04["✅ 04 · Cuentas y perfil<br/>Concluida"]
+    p04 --> p05["🔵 05 · Carritos<br/>Siguiente"]
     p05 --> p06["▫️ 06 · Stripe Checkout y pedidos<br/>Planeada"]
     p06 --> p07["▫️ 07 · Correo transaccional y PDF<br/>Planeada"]
     p07 --> p08["▫️ 08 · Integración y aceptación en staging<br/>Planeada"]
     p08 --> p09["▫️ 09 · Preparación y salida a producción<br/>Planeada"]
 ```
 
-**Leyenda:** ✅ concluida · 🔵 siguiente · ▫️ posterior. La fase 03 quedó concluida. La landing y el catálogo están implementados, las doce imágenes de desarrollo están en R2 y los componentes resuelven sus medios mediante `MEDIA_BASE_URL`. La siguiente fase será cuentas y perfil; no implica que ya haya comenzado su implementación. El mapa resume el orden y el estado; los resultados, dependencias y criterios de cierre se detallan en cada fase.
+**Leyenda:** ✅ concluida · 🔵 siguiente · ▫️ posterior. Las fases 03 y 04 quedaron concluidas. La landing y el catálogo están implementados, las doce imágenes de desarrollo están en R2 y los componentes resuelven sus medios mediante `MEDIA_BASE_URL`. El mapa resume el orden y el estado; los resultados, dependencias y criterios de cierre se detallan en cada fase.
 
 ## Fases
 
@@ -41,8 +41,10 @@ flowchart TB
 
 ### 04. Cuentas y perfil
 
+**Estado: concluida.** Registro con nombre(s) y apellidos separados, sesiones, saludo y menú de cuenta, perfil editable, confirmación y cambio de correo, recuperación de contraseña y vista vacía de pedidos están conectados en Compose. Mailpit recibió y permitió confirmar los mensajes de registro y cambio de correo. Las suites del backend, frontend y navegador, ESLint y el build de producción del frontend terminaron correctamente.
+
 - **Dependencias:** fases 01 y 02; las pantallas se integran con las superficies definidas en fase 03.
-- **Resultado esperado:** registro con validación de mayoría de edad y dirección, inicio/cierre y restauración de sesión, recuperación de contraseña, edición de nombre, correo, fecha de nacimiento y dirección, y las vistas de perfil y “Mis pedidos”.
+- **Resultado esperado:** registro con validación de mayoría de edad y dirección, inicio/cierre y restauración de sesión, recuperación de contraseña, edición de nombre(s), apellidos, correo, fecha de nacimiento y dirección, y las vistas de perfil y “Mis pedidos”.
 - **Correo:** se envía confirmación tras el registro. Un cambio de correo sólo se aplica después de confirmar el nuevo destino. Esta fase incorpora el trabajo persistido en PostgreSQL y activa el worker existente con Mailpit para probar los mensajes de cuenta; Resend de producción se integra en la fase 07.
 - **Pedidos:** la vista protegida muestra un estado vacío hasta que la fase 06 cree y conecte las órdenes reales; no presenta pedidos de ejemplo.
 - **Criterio de cierre:** los recorridos incluidos funcionan de extremo a extremo en Docker Compose, con validaciones del backend, pruebas automatizadas y estados de interfaz completos. Las contraseñas y tokens no se exponen en respuestas ni logs.

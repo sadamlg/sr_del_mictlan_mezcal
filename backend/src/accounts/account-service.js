@@ -19,7 +19,8 @@ export class AccountError extends Error {
 export function toPublicAccount(account) {
   return {
     id: account.id,
-    name: account.name,
+    firstName: account.firstName,
+    lastName: account.lastName,
     email: account.email,
     pendingEmail: account.pendingEmail ?? null,
     emailVerified: Boolean(account.emailVerifiedAt),

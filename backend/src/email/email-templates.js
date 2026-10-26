@@ -15,7 +15,7 @@ function linkFor(baseUrl, path, token) {
 }
 
 export function createAccountEmail({ type, account, token, appBaseUrl }) {
-  const name = account.name;
+  const name = account.firstName;
   const safeName = escapeHtml(name);
   let subject;
   let text;

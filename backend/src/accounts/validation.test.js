@@ -10,7 +10,8 @@ const today = new Date('2026-10-26T12:00:00.000Z');
 
 function validRegistration(overrides = {}) {
   return {
-    name: '  Ana   Martínez  ',
+    firstName: '  Ana   María  ',
+    lastName: '  Martínez   López  ',
     email: ' ANA@example.com ',
     password: 'mezcalSeguro2026',
     dateOfBirth: '2000-04-12',
@@ -34,7 +35,8 @@ test('accepts a complete account whose 18th birthday is today', () => {
   const result = validateRegistrationInput(validRegistration({ dateOfBirth: '2008-10-26' }), today);
 
   assert.equal(result.success, true);
-  assert.equal(result.data.name, 'Ana Martínez');
+  assert.equal(result.data.firstName, 'Ana María');
+  assert.equal(result.data.lastName, 'Martínez López');
   assert.equal(result.data.email, 'ana@example.com');
   assert.equal(result.data.address.state, 'Michoacán');
 });
@@ -78,10 +80,20 @@ test('rejects short passwords and unexpected registration fields', () => {
   assert.equal(extra.errors.input, 'La solicitud contiene campos no permitidos.');
 });
 
+test('requires a first name and surnames as separate registration fields', () => {
+  const firstName = validateRegistrationInput(validRegistration({ firstName: ' ' }), today);
+  const lastName = validateRegistrationInput(validRegistration({ lastName: ' ' }), today);
+
+  assert.equal(firstName.success, false);
+  assert.equal(firstName.errors.firstName, 'Escribe tu nombre.');
+  assert.equal(lastName.success, false);
+  assert.equal(lastName.errors.lastName, 'Escribe tus apellidos.');
+});
+
 test('accepts a partial profile update and rejects empty or unknown fields', () => {
-  assert.deepEqual(validateProfileInput({ name: ' Ana María ' }, today), {
+  assert.deepEqual(validateProfileInput({ firstName: ' Ana María ', lastName: ' López Pérez ' }, today), {
     success: true,
-    data: { name: 'Ana María' },
+    data: { firstName: 'Ana María', lastName: 'López Pérez' },
   });
   assert.equal(validateProfileInput({}, today).success, false);
   assert.equal(validateProfileInput({ isAdmin: true }, today).success, false);

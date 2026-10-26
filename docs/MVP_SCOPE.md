@@ -29,12 +29,13 @@ Publicar una tienda en línea que presente la marca y sus productos, permita a v
 ### Cuentas y perfil
 
 - Una persona puede registrarse, iniciar y cerrar sesión, y recuperar su contraseña mediante un enlace enviado por correo.
-- El registro solicita nombre, correo electrónico, fecha de nacimiento y dirección en México. La fecha debe ser válida y acreditar que la persona tiene al menos 18 años.
+- El registro solicita nombre(s), apellidos, correo electrónico, fecha de nacimiento y dirección en México. La fecha debe ser válida y acreditar que la persona tiene al menos 18 años.
 - La dirección incluye calle, número, colonia, ciudad o delegación, estado y código postal. Se validan los campos y el formato básico del código postal; no se consulta una base externa de direcciones.
-- La información personal editable incluye nombre, correo electrónico, fecha de nacimiento y todos los campos de dirección. La fecha de nacimiento nueva debe seguir acreditando que la persona tiene al menos 18 años.
+- La información personal editable incluye nombre(s), apellidos, correo electrónico, fecha de nacimiento y todos los campos de dirección. La fecha de nacimiento nueva debe seguir acreditando que la persona tiene al menos 18 años.
 - Al registrarse se envía un correo de confirmación de cuenta. La persona puede iniciar sesión sin esperar la entrega del correo.
 - Para cambiar el correo, la persona debe confirmar el nuevo correo mediante un enlace enviado a esa dirección. El correo vigente permanece activo hasta que se confirme el cambio.
 - La cuenta contiene dos vistas: información personal editable y “Mis pedidos”. La vista aparece en esta fase; los pedidos reales se conectan cuando se implementen pagos y órdenes.
+- Con la sesión iniciada, el encabezado muestra “Hola” y el primer nombre. El menú ofrece “Mis pedidos”, “Cuenta” y “Cerrar sesión”.
 - Se requiere iniciar sesión para pagar, no para visitar la tienda ni para usar el carrito.
 
 ### Carrito y compra

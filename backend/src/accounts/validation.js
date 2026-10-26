@@ -1,9 +1,10 @@
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const POSTAL_CODE_PATTERN = /^\d{5}$/;
-const PROFILE_FIELDS = new Set(['name', 'email', 'dateOfBirth', 'address', 'currentPassword']);
+const PROFILE_FIELDS = new Set(['firstName', 'lastName', 'email', 'dateOfBirth', 'address', 'currentPassword']);
 const REGISTRATION_FIELDS = new Set([
-  'name',
+  'firstName',
+  'lastName',
   'email',
   'password',
   'dateOfBirth',
@@ -105,10 +106,10 @@ function addressFieldMessage(field) {
   return labels[field];
 }
 
-function validateName(value, errors) {
+function validatePersonName(value, field, errors) {
   const name = normalizeText(value);
-  if (name.length < 2) errors.name = 'Escribe tu nombre.';
-  else if (name.length > 120) errors.name = 'El nombre no puede superar 120 caracteres.';
+  if (name.length < 2) errors[field] = field === 'firstName' ? 'Escribe tu nombre.' : 'Escribe tus apellidos.';
+  else if (name.length > 120) errors[field] = 'El campo no puede superar 120 caracteres.';
   return name;
 }
 
@@ -129,7 +130,8 @@ export function validateRegistrationInput(input, today = new Date()) {
     errors.input = 'La solicitud contiene campos no permitidos.';
   }
 
-  const name = validateName(input.name, errors);
+  const firstName = validatePersonName(input.firstName, 'firstName', errors);
+  const lastName = validatePersonName(input.lastName, 'lastName', errors);
   const email = validateEmail(input.email, errors);
   const password = typeof input.password === 'string' ? input.password : '';
   if (password.length < 12) errors.password = 'La contraseña debe tener al menos 12 caracteres.';
@@ -141,7 +143,7 @@ export function validateRegistrationInput(input, today = new Date()) {
   if (Object.keys(errors).length > 0) return { success: false, errors };
   return {
     success: true,
-    data: { name, email, password, dateOfBirth: input.dateOfBirth, address },
+    data: { firstName, lastName, email, password, dateOfBirth: input.dateOfBirth, address },
   };
 }
 
@@ -154,7 +156,8 @@ export function validateProfileInput(input, today = new Date()) {
   if (Object.keys(input).length === 0) errors.input = 'Actualiza al menos un campo.';
 
   const data = {};
-  if ('name' in input) data.name = validateName(input.name, errors);
+  if ('firstName' in input) data.firstName = validatePersonName(input.firstName, 'firstName', errors);
+  if ('lastName' in input) data.lastName = validatePersonName(input.lastName, 'lastName', errors);
   if ('email' in input) data.email = validateEmail(input.email, errors);
   if ('dateOfBirth' in input) {
     validateDateOfBirth(input.dateOfBirth, errors, today);

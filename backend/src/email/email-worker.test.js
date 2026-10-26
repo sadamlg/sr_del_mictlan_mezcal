@@ -5,7 +5,8 @@ import { createEmailWorker } from './email-worker.js';
 function sampleAccount(overrides = {}) {
   return {
     id: 'account-id',
-    name: 'Ana <Martínez>',
+    firstName: 'Ana <Martínez>',
+    lastName: 'López',
     email: 'ana@example.com',
     pendingEmail: null,
     emailVerifiedAt: null,

@@ -8,7 +8,7 @@ No implementa carrito, pagos, administración de usuarios ni verificación de id
 
 ## Datos de cuenta
 
-- `name`: nombre obligatorio, normalizado y con límite de longitud.
+- `firstName` y `lastName`: nombre(s) y apellidos obligatorios, normalizados por separado y con límite de 120 caracteres cada uno. El saludo de cuenta y los correos usan `firstName`.
 - `email`: obligatorio y único tras quitar espacios y convertirlo a minúsculas.
 - `dateOfBirth`: fecha de calendario válida; al registrarse y al editarla debe acreditar al menos 18 años.
 - `address`: calle, número, colonia, ciudad o delegación, estado y código postal. Todos los campos son obligatorios; el código postal debe tener cinco dígitos. No se consulta un servicio externo de direcciones.
@@ -20,8 +20,8 @@ Los cuatro campos personales anteriores se pueden editar. Cambiar el correo exig
 
 - El backend crea sesiones aleatorias persistidas en PostgreSQL. En la base se guarda el hash del identificador; el valor original sólo viaja en una cookie `HttpOnly`, `SameSite=Lax`, `Path=/` y con vencimiento acotado. En entornos HTTPS la cookie también es `Secure`.
 - Cerrar sesión revoca la sesión actual. Restablecer la contraseña revoca las sesiones existentes.
-- Las solicitudes del navegador se aceptan desde el origen frontend configurado. No se habilita CORS con comodín y credenciales.
-- La API valida y normaliza entradas en el límite. Las respuestas usan `{ "error": { "code", "message" } }`; errores de validación son `422`, sesión ausente `401` y correo ocupado `409`.
+- Las solicitudes del navegador se aceptan desde el origen frontend configurado. No se habilita CORS con comodín y credenciales. Las rutas de escritura de cuenta limitan cada combinación de IP y ruta a 30 solicitudes en 15 minutos; cada proceso mantiene hasta 5000 contadores.
+- La API valida y normaliza entradas en el límite. Las respuestas usan `{ "error": { "code", "message", "fields?" } }`; `fields` es opcional y describe errores de campos. Errores de validación son `422`, sesión ausente `401`, correo ocupado `409` y exceso de solicitudes `429`.
 - Recuperación de contraseña responde igual exista o no el correo. Tokens de recuperación y confirmación son aleatorios, de un solo uso, tienen vencimiento y se guardan como hash.
 - El remitente, contraseñas, tokens, direcciones y fechas de nacimiento no aparecen en logs.
 
@@ -38,11 +38,13 @@ Todas las rutas de negocio usan `/api` y JSON.
 | `POST /api/auth/password-reset-requests` | No | Encola recuperación de forma genérica, sin indicar si existe la cuenta. |
 | `POST /api/auth/password-resets` | No | Consume un token vigente y cambia la contraseña. |
 | `POST /api/auth/email-confirmations` | No | Consume un token de confirmación de registro o cambio de correo. |
-| `GET /api/profile` | Sí | Devuelve nombre, correo, estado de confirmación, fecha de nacimiento y dirección del usuario de la sesión. |
-| `PATCH /api/profile` | Sí | Actualiza campos permitidos; cambiar correo requiere contraseña vigente y encola confirmación. |
+| `GET /api/profile` | Sí | Devuelve `firstName`, `lastName`, correo, estado de confirmación, fecha de nacimiento y dirección del usuario de la sesión. |
+| `PATCH /api/profile` | Sí | Actualiza `firstName`, `lastName` y los demás campos permitidos; cambiar correo requiere contraseña vigente y encola confirmación. |
 | `GET /api/orders` | Sí | Devuelve la lista real cuando exista el módulo de órdenes; en esta fase es una lista vacía. |
 
 Los cuerpos de registro y perfil no aceptan campos adicionales. El perfil y cualquier recurso posterior se resuelven desde el usuario autenticado; el cliente no puede elegir otro `userId`.
+
+El límite de solicitudes es local a cada proceso y cubre el entorno actual de un backend. Si producción ejecuta varias réplicas, el límite compartido debe guardarse en PostgreSQL para conservar el mismo umbral entre instancias.
 
 ## Correo y procesamiento asíncrono
 
@@ -54,6 +56,8 @@ Se reintentan los fallos transitorios con espera acotada y se deja un estado fin
 
 La interfaz utiliza la paleta, tipografías, encabezado y controles del sistema actual. Los flujos cubren estados de carga, error, éxito, validación y sesión vencida, con formularios etiquetados y navegación usable con teclado y en móvil. “Mis pedidos” presenta un estado vacío claro y un enlace al catálogo; no simula órdenes.
 
+Al iniciar sesión, el acceso de cuenta muestra “Hola” y el nombre de pila. Su menú permite abrir “Mis pedidos” o “Cuenta” y cerrar la sesión; en el móvil las mismas opciones aparecen dentro del menú principal.
+
 ## Referencia revisada
 
-Se revisó `../sr_del_mictlan`: el checkout contiene el acceso visual de cuenta en escritorio y móvil, pero no implementa registro, autenticación, perfil u órdenes. Su hoja de ruta propone adaptar casos de autenticación y separar rutas/controladores/servicios. Su código usa CommonJS, Mongoose/MongoDB y Redis/BullMQ; no se porta porque este proyecto usa ESM, Express, Prisma/PostgreSQL y prohíbe Redis/BullMQ. Se adapta el acceso visual con los componentes actuales y se rehace la persistencia y la lógica con el contrato presente.
+Se revisó `../sr_del_mictlan`: el checkout contiene el acceso visual de cuenta en escritorio y móvil, pero no implementa registro, autenticación, perfil u órdenes. Su hoja de ruta propone adaptar casos de autenticación y separar rutas/controladores/servicios. Su código usa CommonJS, Mongoose/MongoDB y Redis/BullMQ; no se porta porque este proyecto usa ESM, Express, Prisma/PostgreSQL y prohíbe Redis/BullMQ. Se adapta el acceso visual con los componentes actuales y se rehace la persistencia y la lógica con el contrato presente. Para nombre(s) y apellidos, no había un contrato ni datos separados que portar: se agrega una migración que conserva nombres existentes y separa la primera palabra del resto para que cada persona pueda corregirlos en su perfil.

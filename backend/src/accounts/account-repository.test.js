@@ -14,7 +14,7 @@ test('registration creates account, session, and confirmation job in one transac
   const repository = createAccountRepository({ $transaction: async (operation) => operation(tx) });
 
   await repository.createAccount({
-    account: { email: 'ana@example.com', name: 'Ana' },
+    account: { email: 'ana@example.com', firstName: 'Ana', lastName: 'Martínez' },
     passwordHash: 'scrypt-hash',
     sessionTokenHash: 'a'.repeat(64),
     sessionExpiresAt: new Date('2026-11-02T12:00:00Z'),
@@ -83,7 +83,7 @@ test('email change remains pending and its confirmation job is atomic with profi
 
   await repository.updateProfile({
     accountId,
-    updates: { name: 'Ana María' },
+    updates: { firstName: 'Ana María', lastName: 'López Pérez' },
     pendingEmail: 'new@example.com',
     emailJobType: 'EMAIL_CHANGE_CONFIRMATION',
   });

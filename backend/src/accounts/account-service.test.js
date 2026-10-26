@@ -5,7 +5,8 @@ import { AccountError, createAccountService } from './account-service.js';
 function account(overrides = {}) {
   return {
     id: '4aa4f6d0-c64f-4c25-b3e0-f426775cf859',
-    name: 'Ana Martínez',
+    firstName: 'Ana',
+    lastName: 'Martínez',
     email: 'ana@example.com',
     pendingEmail: null,
     passwordHash: 'stored-hash',
@@ -59,7 +60,8 @@ function createHarness(overrides = {}) {
 
 function validRegistration(overrides = {}) {
   return {
-    name: 'Ana Martínez',
+    firstName: 'Ana',
+    lastName: 'Martínez',
     email: ' ANA@example.com ',
     password: 'mezcalSeguro2026',
     dateOfBirth: '2000-04-12',
@@ -81,11 +83,15 @@ test('register normalizes input, stores only a password hash, creates a session,
   const result = await service.register(validRegistration());
 
   assert.equal(calls.registration.account.email, 'ana@example.com');
+  assert.equal(calls.registration.account.firstName, 'Ana');
+  assert.equal(calls.registration.account.lastName, 'Martínez');
   assert.equal(calls.registration.passwordHash, 'hashed:mezcalSeguro2026');
   assert.equal(calls.registration.emailJobType, 'ACCOUNT_CONFIRMATION');
   assert.notEqual(calls.registration.sessionTokenHash, result.sessionToken);
   assert.equal(result.sessionToken, 'opaque-session-token-12345678901234567890');
   assert.equal(result.account.email, 'ana@example.com');
+  assert.equal(result.account.firstName, 'Ana');
+  assert.equal(result.account.lastName, 'Martínez');
   assert.equal('passwordHash' in result.account, false);
 });
 

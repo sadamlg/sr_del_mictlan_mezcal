@@ -17,7 +17,8 @@ function response() {
 function publicAccount() {
   return {
     id: 'account-id',
-    name: 'Ana Martínez',
+    firstName: 'Ana',
+    lastName: 'Martínez',
     email: 'ana@example.com',
     pendingEmail: null,
     emailVerified: false,
