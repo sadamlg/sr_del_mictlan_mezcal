@@ -61,6 +61,7 @@ export default function MezcalShowcase({ products, mediaBaseUrl }) {
         <img src={mediaObjectUrl(mediaBaseUrl, 'images/mezcal-showcase-background.png')} alt="" width="1672" height="941" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
       </picture>
       <div className="absolute inset-0 -z-10 bg-black/80 max-sm:bg-black/55" aria-hidden="true" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-[5] h-32 bg-[linear-gradient(to_bottom,#0a0b0a,transparent)] sm:h-48 lg:h-56" aria-hidden="true" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-[5] h-36 bg-[linear-gradient(to_bottom,transparent,#0a0b0a)]" aria-hidden="true" />
       <div className="mx-auto max-w-[1440px] lg:flex lg:flex-col [@media(min-width:80rem)_and_(min-height:54rem)]:h-full">
         <header className="text-center">
