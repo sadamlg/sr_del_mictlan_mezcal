@@ -85,6 +85,15 @@ body {
   outline-offset: 3px;
 }
 
+.age-gate-overlay ::selection {
+  background: #0e7490;
+  color: #e2e3e0;
+}
+
+.age-gate-overlay :focus-visible {
+  outline-color: #97d2c6;
+}
+
 @keyframes age-gate-enter {
   from {
     opacity: 0;
