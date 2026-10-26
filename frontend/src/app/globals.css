@@ -86,11 +86,15 @@ body {
 }
 
 .age-gate-overlay ::selection {
-  background: #0e7490;
-  color: #e2e3e0;
+  background: #e2e3e0;
+  color: #060707;
 }
 
 .age-gate-overlay :focus-visible {
+  outline-color: #e2e3e0;
+}
+
+.age-gate-overlay .age-gate-primary:focus-visible {
   outline-color: #97d2c6;
 }
 
