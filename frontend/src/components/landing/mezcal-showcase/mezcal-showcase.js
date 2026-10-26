@@ -13,7 +13,7 @@ function MezcalCard({ product, className = '' }) {
 
   return (
     <article className={`relative mx-auto flex w-full max-w-[340px] flex-col items-center text-center text-white lg:max-w-[360px] ${className}`}>
-      <div className="group/visual relative aspect-[4/5] w-full overflow-hidden outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#e9bd82] lg:w-[min(100%,clamp(15rem,calc(90dvh_-_23rem),20.4rem))]" tabIndex={0} aria-label={`${product.name}. Enfoca para ver una segunda fotografía`}>
+      <div className="group/visual relative aspect-[4/5] w-full overflow-hidden outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-mictlan-gold lg:w-[min(100%,clamp(15rem,calc(90dvh_-_23rem),20.4rem))]" tabIndex={0} aria-label={`${product.name}. Enfoca para ver una segunda fotografía`}>
         <img
           src={product.image.url}
           alt={product.image.alt}
@@ -42,9 +42,9 @@ function MezcalCard({ product, className = '' }) {
           <span className="font-display text-xl leading-6">{name}</span>
           {descriptor && <span className="font-ui text-sm font-semibold uppercase leading-5 tracking-[0.08em] text-white/95">{descriptor}</span>}
         </h3>
-        <p className="mt-1 font-serif text-lg font-medium italic leading-7 text-[#f4ede3]">{product.labels[1]}</p>
+        <p className="mt-1 font-serif text-lg font-medium italic leading-7 text-mictlan-cream">{product.labels[1]}</p>
         <ProductInsights product={product} />
-        <p className="mt-4 font-ui text-lg font-medium tabular-nums text-[#e9bd82] lg:mt-2">MXN {priceFormatter.format(product.price.amount / 100)}</p>
+        <p className="mt-4 font-ui text-lg font-medium tabular-nums text-mictlan-gold lg:mt-2">MXN {priceFormatter.format(product.price.amount / 100)}</p>
         <button type="button" disabled className="mt-4 inline-flex min-h-11 w-full cursor-not-allowed items-center justify-center rounded-full border border-white/65 bg-black/30 px-6 font-ui text-xs font-semibold uppercase tracking-[0.14em] text-white/90 lg:mt-2" aria-label={`Compra de ${product.name} disponible próximamente`}>
           Disponible próximamente
         </button>
@@ -55,24 +55,24 @@ function MezcalCard({ product, className = '' }) {
 
 export default function MezcalShowcase({ products, mediaBaseUrl }) {
   return (
-    <section id="coleccion" className="relative isolate scroll-mt-24 overflow-hidden bg-[#0a0b0a] px-6 pb-20 pt-24 text-white sm:px-10 lg:min-h-dvh lg:px-14 lg:py-5 [@media(min-width:80rem)_and_(min-height:54rem)]:h-dvh [@media(min-width:80rem)_and_(min-height:54rem)]:py-12" aria-labelledby="mezcal-showcase-title">
+    <section id="coleccion" className="relative isolate scroll-mt-24 overflow-hidden bg-mictlan-night px-6 pb-20 pt-24 text-white sm:px-10 lg:min-h-dvh lg:px-14 lg:py-5 [@media(min-width:80rem)_and_(min-height:54rem)]:h-dvh [@media(min-width:80rem)_and_(min-height:54rem)]:py-12" aria-labelledby="mezcal-showcase-title">
       <picture className="absolute inset-0 -z-20">
         <source media="(max-width: 640px)" srcSet={mediaObjectUrl(mediaBaseUrl, 'images/mezcal-showcase-background-mobile.png')} />
         <img src={mediaObjectUrl(mediaBaseUrl, 'images/mezcal-showcase-background.png')} alt="" width="1672" height="941" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
       </picture>
       <div className="absolute inset-0 -z-10 bg-black/80 max-sm:bg-black/55" aria-hidden="true" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-[5] h-32 bg-[linear-gradient(to_bottom,#0a0b0a,transparent)] sm:h-48 lg:h-56" aria-hidden="true" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-[5] h-36 bg-[linear-gradient(to_bottom,transparent,#0a0b0a)]" aria-hidden="true" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-[5] h-32 bg-[linear-gradient(to_bottom,var(--mictlan-night),transparent)] sm:h-48 lg:h-56" aria-hidden="true" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-[5] h-36 bg-[linear-gradient(to_bottom,transparent,var(--mictlan-night))]" aria-hidden="true" />
       <div className="mx-auto max-w-[1440px] lg:flex lg:flex-col [@media(min-width:80rem)_and_(min-height:54rem)]:h-full">
         <header className="text-center">
-          <h2 id="mezcal-showcase-title" className="font-display text-[clamp(2rem,5vw,2.3rem)] font-medium uppercase leading-[1.12] text-[#2dd4bf] lg:text-[clamp(2.3rem,2.8vw,2.75rem)]">Totonalhuan</h2>
+          <h2 id="mezcal-showcase-title" className="font-display text-[clamp(2rem,5vw,2.3rem)] font-medium uppercase leading-[1.12] text-mictlan-teal-bright lg:text-[clamp(2.3rem,2.8vw,2.75rem)]">Totonalhuan</h2>
           <p className="mx-auto mt-2 max-w-none font-serif text-base font-extralight uppercase leading-normal tracking-[0.1em] text-white sm:whitespace-nowrap">Destilados que cruzan el umbral del tiempo</p>
         </header>
 
         {products === null ? (
           <div className="mx-auto mt-16 max-w-lg text-center" role="status">
             <p className="font-display text-xl">No pudimos cargar la colección.</p>
-            <a href="/" className="mt-5 inline-flex min-h-11 items-center text-sm text-[#e9bd82] underline underline-offset-4">Reintentar</a>
+            <a href="/" className="mt-5 inline-flex min-h-11 items-center text-sm text-mictlan-gold underline underline-offset-4">Reintentar</a>
           </div>
         ) : products.length === 0 ? (
           <p className="mx-auto mt-16 max-w-lg text-center leading-7 text-white/80">La colección está tomando forma. Pronto podrás descubrir nuestros destilados.</p>

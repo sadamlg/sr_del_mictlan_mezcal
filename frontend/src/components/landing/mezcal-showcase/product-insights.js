@@ -97,7 +97,7 @@ export default function ProductInsights({ product }) {
               setActive((current) => nextInsight(current, `touch:${key}`));
             }
           }}
-          className={`inline-flex min-h-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 font-ui text-xs font-semibold uppercase tracking-[0.06em] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#e9bd82] sm:px-3 ${['profile', 'alcohol', 'volume'].includes(key) ? 'min-w-11' : ''} ${active === key ? 'border-[#e9bd82] bg-[#e9bd82] text-[#17120b] [text-shadow:none]' : 'border-white/55 bg-black/45 text-white hover:border-[#e9bd82] hover:text-[#e9bd82]'}`}
+          className={`inline-flex min-h-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 font-ui text-xs font-semibold uppercase tracking-[0.06em] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mictlan-gold sm:px-3 ${['profile', 'alcohol', 'volume'].includes(key) ? 'min-w-11' : ''} ${active === key ? 'border-mictlan-gold bg-mictlan-gold text-mictlan-brown-ink [text-shadow:none]' : 'border-white/55 bg-black/45 text-white hover:border-mictlan-gold hover:text-mictlan-gold'}`}
         >
           {display}
         </button>
@@ -108,18 +108,18 @@ export default function ProductInsights({ product }) {
             id={panelId}
             role="region"
             aria-label={panelLabel[active]}
-            className="rounded-md border border-[#cda575]/70 bg-[#14120f] px-5 py-4 text-center text-[#f4ede3] shadow-[0_12px_32px_rgba(0,0,0,0.55)] [text-shadow:none] motion-safe:animate-[age-gate-enter_220ms_cubic-bezier(0.16,1,0.3,1)_both]"
+            className="rounded-md border border-[#cda575]/70 bg-[#14120f] px-5 py-4 text-center text-mictlan-cream shadow-[0_12px_32px_rgba(0,0,0,0.55)] [text-shadow:none] motion-safe:animate-[age-gate-enter_220ms_cubic-bezier(0.16,1,0.3,1)_both]"
           >
             {active === 'profile' && (
               <>
-                <p className="font-ui text-xs font-semibold uppercase tracking-[0.1em] text-[#e9bd82]">Sobre este destilado</p>
+                <p className="font-ui text-xs font-semibold uppercase tracking-[0.1em] text-mictlan-gold">Sobre este destilado</p>
                 {product.labels?.[0] && <p className="mt-2 font-ui text-sm font-medium text-white">{product.labels[0]}</p>}
-                <p className="mt-2 font-serif text-base italic leading-6 text-[#f4ede3]">{product.sensoryProfile}</p>
+                <p className="mt-2 font-serif text-base italic leading-6 text-mictlan-cream">{product.sensoryProfile}</p>
               </>
             )}
             {active === 'alcohol' && (
               <>
-                <p className="font-ui text-xs font-semibold uppercase tracking-[0.1em] text-[#e9bd82]">Alc. Vol.</p>
+                <p className="font-ui text-xs font-semibold uppercase tracking-[0.1em] text-mictlan-gold">Alc. Vol.</p>
                 <p className="mt-1 font-ui text-2xl font-medium tabular-nums text-white">{formatAlcohol(product.alcohol)}</p>
                 {product.alcohol.minPercent !== product.alcohol.maxPercent && (
                   <p className="mt-1 font-ui text-xs uppercase tracking-[0.05em] text-white/80">Rango indicado en el catálogo</p>
@@ -128,7 +128,7 @@ export default function ProductInsights({ product }) {
             )}
             {active === 'volume' && (
               <>
-                <p className="font-ui text-xs font-semibold uppercase tracking-[0.1em] text-[#e9bd82]">Contenido neto</p>
+                <p className="font-ui text-xs font-semibold uppercase tracking-[0.1em] text-mictlan-gold">Contenido neto</p>
                 <p className="mt-1 font-ui text-2xl font-medium tabular-nums text-white">{product.volumeMl} ml</p>
               </>
             )}

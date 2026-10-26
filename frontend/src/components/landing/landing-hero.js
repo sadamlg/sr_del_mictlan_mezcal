@@ -47,13 +47,13 @@ export default function LandingHero({ mediaBaseUrl }) {
         aria-hidden="true"
       />
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-24 bg-[linear-gradient(to_bottom,transparent,#0a0b0a)] sm:h-32 lg:h-36"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-24 bg-[linear-gradient(to_bottom,transparent,var(--mictlan-night))] sm:h-32 lg:h-36"
         aria-hidden="true"
       />
 
       <div className={`relative z-10 mx-auto h-full w-full max-w-[1700px] px-[clamp(1.5rem,6vw,5rem)] max-lg:absolute max-lg:inset-[8rem_0_0] max-lg:h-auto max-lg:px-[4vw] ${heroImageReady && fontReady ? 'motion-safe:[animation:fade-in-up_1s_ease-in-out_both]' : 'motion-safe:opacity-0'}`}>
         <div className="ml-auto mr-[clamp(3rem,6vw,8rem)] flex h-full w-[min(46vw,38rem)] flex-col items-end justify-center text-right max-lg:mr-0 max-lg:w-[46%] min-[40.0625rem]:max-lg:w-[56%] min-[40.0625rem]:max-lg:-translate-x-[clamp(1rem,3.5vw,1.75rem)] max-[40rem]:m-0 max-[40rem]:w-full max-[40rem]:gap-[clamp(.5rem,1.8vw,.75rem)]">
-          <span className="mb-6 max-w-full rounded-full border border-[#0e7490] px-4 py-1 text-[clamp(.6rem,.8vw,.9rem)] leading-[1.5] font-semibold tracking-[.3em] text-white/80 uppercase max-lg:mb-[clamp(.375rem,1.5vw,.875rem)] max-lg:px-[.8em] max-lg:py-[.2em] max-lg:text-[clamp(.45rem,1.1vw,.65rem)] max-lg:tracking-[.2em] min-[40.0625rem]:max-lg:text-[clamp(.55rem,1.2vw,.75rem)] max-[40rem]:mb-0 max-[40rem]:text-[clamp(.55rem,1.5vw,.7rem)] max-[40rem]:tracking-[.15em]">
+          <span className="mb-6 max-w-full rounded-full border border-mictlan-petrol px-4 py-1 text-[clamp(.6rem,.8vw,.9rem)] leading-[1.5] font-semibold tracking-[.3em] text-white/80 uppercase max-lg:mb-[clamp(.375rem,1.5vw,.875rem)] max-lg:px-[.8em] max-lg:py-[.2em] max-lg:text-[clamp(.45rem,1.1vw,.65rem)] max-lg:tracking-[.2em] min-[40.0625rem]:max-lg:text-[clamp(.55rem,1.2vw,.75rem)] max-[40rem]:mb-0 max-[40rem]:text-[clamp(.55rem,1.5vw,.7rem)] max-[40rem]:tracking-[.15em]">
             Tradición Ancestral
           </span>
           <h1
@@ -66,7 +66,7 @@ export default function LandingHero({ mediaBaseUrl }) {
             100% agave cupreata · Etúcuaro, Michoacán
           </p>
           <a
-            className="group relative ml-2 border-0 bg-transparent px-[2.6rem] py-[.975rem] text-[clamp(.8rem,.9vw,1rem)] text-white no-underline outline-0 max-lg:whitespace-nowrap max-lg:px-[clamp(.975rem,3.25vw,2.6rem)] max-lg:py-[clamp(.65rem,1.56vw,.975rem)] max-lg:text-[clamp(.625rem,1.3vw,.8rem)] max-[40rem]:px-[1.3rem] max-[40rem]:py-[.8125rem] max-[40rem]:text-xs focus-visible:outline-2 focus-visible:outline-[#f2c98f] focus-visible:outline-offset-4"
+            className="group relative ml-2 border-0 bg-transparent px-[2.6rem] py-[.975rem] text-[clamp(.8rem,.9vw,1rem)] text-white no-underline outline-0 max-lg:whitespace-nowrap max-lg:px-[clamp(.975rem,3.25vw,2.6rem)] max-lg:py-[clamp(.65rem,1.56vw,.975rem)] max-lg:text-[clamp(.625rem,1.3vw,.8rem)] max-[40rem]:px-[1.3rem] max-[40rem]:py-[.8125rem] max-[40rem]:text-xs focus-visible:outline-2 focus-visible:outline-mictlan-gold-light focus-visible:outline-offset-4"
             href="#coleccion"
           >
             <span
