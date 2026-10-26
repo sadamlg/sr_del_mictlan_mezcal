@@ -101,11 +101,39 @@ body {
 @keyframes age-gate-enter {
   from {
     opacity: 0;
-    transform: translateY(0.6rem);
+    filter: blur(16px);
+    transform: scale(0.92);
   }
   to {
     opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
+  }
+}
+
+@keyframes age-gate-overlay-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes age-gate-content-enter {
+  from {
+    opacity: 0;
+    filter: blur(9px);
+    transform: translateY(0.45rem);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
     transform: translateY(0);
+  }
+}
+
+@keyframes age-gate-emblem-enter {
+  from {
+    opacity: 0;
+    filter: blur(14px) grayscale(1) contrast(1.25);
+    transform: translateY(1%) scale(1.02);
   }
 }
 
@@ -133,9 +161,29 @@ body {
   }
 }
 
-[role="dialog"] {
-  animation: age-gate-enter 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+.age-gate-overlay {
+  animation: age-gate-overlay-enter 480ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
+.age-gate-dialog {
+  animation: age-gate-enter 680ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.age-gate-emblem {
+  animation: age-gate-emblem-enter 820ms 80ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.age-gate-brand,
+.age-gate-divider,
+.age-gate-question,
+.age-gate-actions {
+  animation: age-gate-content-enter 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.age-gate-brand { animation-delay: 120ms; }
+.age-gate-divider { animation-delay: 190ms; }
+.age-gate-question { animation-delay: 250ms; }
+.age-gate-actions { animation-delay: 320ms; }
 
 @media (prefers-reduced-motion: reduce) {
   html {
