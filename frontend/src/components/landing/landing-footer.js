@@ -16,7 +16,7 @@ const footerLinks = [
 export default function LandingFooter({ mediaBaseUrl, year }) {
   return (
     <footer className="w-full bg-[linear-gradient(180deg,#0f0b0c_0%,rgba(15,11,12,0.88)_12%,transparent_42%),radial-gradient(circle_at_50%_100%,rgba(77,15,22,0.72)_0%,rgba(20,8,10,0.96)_50%,#060707_100%)] text-[#e2e3e0]">
-      <div className="mx-auto w-full max-w-[1440px] px-6 pt-8 pb-10 md:px-16 md:pt-10 md:pb-12">
+      <div className="mx-auto w-full max-w-[1440px] px-6 pt-8 pb-10 md:px-16 md:pt-10 md:pb-12 lg:pt-28 xl:pt-32">
         <div className="relative flex flex-col items-center gap-8 pb-4 md:pb-5">
           <a
             className="group relative z-10 inline-flex min-h-12 shrink-0 self-end items-center gap-3 rounded-full border border-[#0e7490] bg-transparent px-5 py-1 font-ui text-[11px] font-semibold uppercase tracking-[0.2em] text-white/85 no-underline transition-[background-color,border-color,color] duration-300 hover:border-[#97d2c6] hover:bg-[#97d2c6]/15 hover:text-[#97d2c6] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#97d2c6] [@media(min-width:80rem)_and_(min-height:54rem)_and_(orientation:landscape)]:absolute [@media(min-width:80rem)_and_(min-height:54rem)_and_(orientation:landscape)]:top-0 [@media(min-width:80rem)_and_(min-height:54rem)_and_(orientation:landscape)]:right-0"
