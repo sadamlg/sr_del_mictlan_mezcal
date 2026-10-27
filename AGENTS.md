@@ -21,6 +21,14 @@
 
 - Usa Tailwind CSS 4 como sistema predeterminado para los estilos del frontend. Recurre a CSS escrito a mano sólo para necesidades puntuales que no puedan resolverse razonablemente con sus utilidades; mantén esas reglas mínimas y acotadas.
 
+## Contrato de color del frontend
+
+- `design.md` en la raíz es el contrato visual maestro. Consúltalo antes de crear o cambiar una interfaz; sus colores y excepciones guían las decisiones nuevas.
+- `frontend/src/app/globals.css` implementa los tokens de color del contrato. Usa sus clases `mictlan-*`; no inventes colores para imitar un token ni uses colores cromáticos de Tailwind como `text-slate-300`, `bg-blue-*` o `text-green-*` para la interfaz.
+- Para un estado más tenue, reutiliza el mismo token con opacidad. Conserva las excepciones de composición documentadas en `design.md` y no las copies como paleta general.
+- Si hace falta un rol cromático que no existe, agrega un token semántico a `:root`, expónlo en `@theme inline` y actualiza `design.md` en el mismo cambio.
+- Antes de retirar un token, busca sus referencias en `frontend/src`. Verifica visualmente en navegador cualquier cambio de color o composición de capas.
+
 ## Migración de secciones de la landing
 
 - Antes de implementar una sección, inspecciona su implementación de referencia completa en `../sr_del_mictlan/frontend/src`: estructura, estilos, assets, breakpoints, interacciones y estados. Resume qué se conserva y detecta diferencias entre el original y el nuevo proyecto antes de editar.

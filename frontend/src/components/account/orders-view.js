@@ -42,7 +42,7 @@ export default function OrdersView() {
         <div className="py-8 text-center">
           <p className="font-display text-2xl text-mictlan-ivory">Todavía no tienes pedidos</p>
           <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-mictlan-sage-muted">Cuando hagas una compra, encontrarás aquí su información y seguimiento.</p>
-          <Link className="mt-7 inline-flex min-h-12 items-center justify-center border border-mictlan-gold/60 bg-mictlan-gold px-6 py-3 font-ui text-xs font-semibold uppercase tracking-[0.16em] text-mictlan-brown-ink transition-colors hover:bg-mictlan-gold-light" href="/#coleccion">Explorar la colección</Link>
+          <Link className="mt-7 inline-flex min-h-12 items-center justify-center border border-mictlan-teal/35 bg-mictlan-teal-deep px-6 py-3 font-ui text-xs font-semibold uppercase tracking-[0.16em] text-mictlan-bone transition-colors hover:bg-mictlan-teal-hover" href="/#coleccion">Explorar la colección</Link>
         </div>
       )}
       {orders?.length > 0 && (

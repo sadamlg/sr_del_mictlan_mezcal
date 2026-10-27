@@ -20,6 +20,23 @@ test('visitor counter shows the API total and reuses its session after reload', 
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
+test('landing hero CTA uses the green palette tokens', async ({ page }) => {
+  await page.addInitScript(() => window.sessionStorage.setItem('mictlan-age-confirmed-v1', 'yes'));
+  await page.goto('/');
+
+  const cta = page.getByRole('link', { name: 'Conocer la colección' });
+  const ctaSurface = cta.locator('span[aria-hidden="true"]');
+
+  await expect(cta).toBeVisible();
+  await expect(cta).toHaveCSS('color', 'rgb(226, 227, 224)');
+  await expect(ctaSurface).toHaveCSS('background-color', 'rgb(4, 120, 87)');
+  await cta.hover();
+  await expect.poll(() => ctaSurface.evaluate((element) => {
+    const match = getComputedStyle(element).backgroundColor.match(/\/\s*([\d.]+)\)$/);
+    return match ? Number(match[1]) : null;
+  })).toBe(0.9);
+});
+
 test('age confirmation unlocks the landing and is remembered for the session', async ({ page }) => {
   await page.goto('/');
   await page.locator('#coleccion').scrollIntoViewIfNeeded();
@@ -29,6 +46,10 @@ test('age confirmation unlocks the landing and is remembered for the session', a
 
   await expect(dialog).toBeVisible();
   await expect(confirmButton).toBeFocused();
+  await expect(confirmButton).toHaveCSS('background-color', 'rgb(15, 80, 71)');
+  await confirmButton.hover();
+  await expect(confirmButton).toHaveCSS('background-color', 'rgb(21, 105, 93)');
+  await page.mouse.move(0, 0);
   await confirmButton.click();
 
   await expect(dialog).toHaveCount(0);

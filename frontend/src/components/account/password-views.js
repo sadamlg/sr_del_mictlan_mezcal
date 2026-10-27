@@ -107,7 +107,7 @@ export function EmailConfirmationView({ token }) {
         {!token && <AccountNotice kind="error">El enlace no es válido. Revisa el correo o solicita un cambio desde tu perfil.</AccountNotice>}
         {token && !message && <>
           <p className="text-sm leading-6 text-mictlan-sage-muted">La confirmación se realizará cuando elijas este botón.</p>
-          <button className="flex min-h-12 w-full items-center justify-center border border-mictlan-gold/60 bg-mictlan-gold px-5 py-3 font-ui text-xs font-semibold uppercase tracking-[0.16em] text-mictlan-brown-ink transition-colors hover:bg-mictlan-gold-light disabled:opacity-60" type="button" disabled={busy} onClick={confirm}>{busy ? 'Confirmando…' : 'Confirmar mi correo'}</button>
+          <button className="flex min-h-12 w-full items-center justify-center border border-mictlan-teal/35 bg-mictlan-teal-deep px-5 py-3 font-ui text-xs font-semibold uppercase tracking-[0.16em] text-mictlan-bone transition-colors hover:bg-mictlan-teal-hover disabled:opacity-60" type="button" disabled={busy} onClick={confirm}>{busy ? 'Confirmando…' : 'Confirmar mi correo'}</button>
         </>}
         <AccountTextLink href="/cuenta">Ir a mi cuenta</AccountTextLink>
       </div>

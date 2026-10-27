@@ -86,6 +86,7 @@ test('registration separates first names and surnames', async ({ page }) => {
   await expect(page.getByLabel('Apellidos')).toBeVisible();
   await expect(page.getByLabel('Nombre(s)')).toHaveAttribute('required', '');
   await expect(page.getByLabel('Apellidos')).toHaveAttribute('required', '');
+  await expect(page.getByRole('button', { name: 'Crear mi cuenta' })).toHaveCSS('background-color', 'rgb(15, 80, 71)');
 });
 
 test('mobile account menu shows orders, account, and sign out', async ({ page }) => {
@@ -157,6 +158,9 @@ test('sign-in view fits tall screens and includes accessible credential controls
   await expect(page.getByRole('button', { name: 'Mostrar contraseña' })).toBeVisible();
   await expect(loginButton).toHaveCSS('background-color', 'rgb(15, 80, 71)');
   await expect(loginButton).toHaveCSS('color', 'rgb(226, 227, 224)');
+  await loginButton.hover();
+  await expect(loginButton).toHaveCSS('background-color', 'rgb(21, 105, 93)');
+  await page.mouse.move(0, 0);
   await expect.poll(async () => {
     const labelBox = await passwordLabel.boundingBox();
     const linkBox = await forgotLink.boundingBox();

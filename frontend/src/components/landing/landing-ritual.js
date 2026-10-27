@@ -25,7 +25,7 @@ export default function LandingRitual() {
     >
       <div className="mx-auto max-w-[1400px]">
         <header className="mx-auto mb-16 max-w-3xl text-center sm:mb-20">
-          <p className="mb-5 inline-flex rounded-full border border-mictlan-petrol px-4 py-1 font-ui text-[10px] font-semibold uppercase tracking-[0.25em] text-white/80">
+          <p className="mb-5 inline-flex rounded-full border border-mictlan-petrol px-4 py-1 font-ui text-[10px] font-semibold uppercase tracking-[0.25em] text-mictlan-bone/80">
             Tradición Ancestral
           </p>
           <h2 id="ritual-title" className="font-display text-[clamp(2rem,4.5vw,3rem)] font-normal uppercase leading-[1.2] tracking-[0.04em]">
@@ -51,8 +51,8 @@ export default function LandingRitual() {
 
           <ol className="m-0 grid list-none gap-5 p-0 sm:gap-6">
             {steps.map(({ title, label, description }) => (
-              <li key={title} className="group flex items-start gap-5 border border-[#e8e3d7]/15 border-l-2 border-l-mictlan-teal-deep bg-mictlan-dark-forest/50 p-6 transition-colors duration-300 hover:border-l-mictlan-teal hover:bg-[#1a1c1b]/50 sm:gap-6 sm:p-8">
-                <span className="mt-2 h-3.5 w-3.5 shrink-0 rounded-full bg-mictlan-teal shadow-[0_0_12px_rgba(151,210,198,0.55)] transition-transform duration-300 group-hover:scale-125" aria-hidden="true" />
+              <li key={title} className="group flex items-start gap-5 border border-mictlan-bone/15 border-l-2 border-l-mictlan-teal-deep bg-mictlan-dark-forest/50 p-6 transition-colors duration-300 hover:border-l-mictlan-teal hover:bg-[#1a1c1b]/50 sm:gap-6 sm:p-8">
+                <span className="mt-2 h-3.5 w-3.5 shrink-0 rounded-full bg-mictlan-teal shadow-[0_0_12px_color-mix(in_srgb,var(--mictlan-teal)_55%,transparent)] transition-transform duration-300 group-hover:scale-125" aria-hidden="true" />
                 <div>
                   <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
                     <h4 className="font-display text-xl font-normal leading-7 tracking-[0.05em]">{title}</h4>

@@ -1,0 +1,596 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-27T05:33:59Z",
+  "title": "Design System: Señor del Mictlán",
+  "extensions": {
+    "colorMeta": {
+      "mictlan-background": {
+        "role": "neutral",
+        "displayName": "Mictlan Background",
+        "tonalRamp": [
+          "oklch(15% 0.0070 78.1)",
+          "oklch(25% 0.0070 78.1)",
+          "oklch(35% 0.0070 78.1)",
+          "oklch(45% 0.0070 78.1)",
+          "oklch(55% 0.0070 78.1)",
+          "oklch(65% 0.0070 78.1)",
+          "oklch(75% 0.0070 78.1)",
+          "oklch(95% 0.0070 78.1)"
+        ]
+      },
+      "mictlan-night": {
+        "role": "neutral",
+        "displayName": "Mictlan Night",
+        "tonalRamp": [
+          "oklch(15% 0.0027 145.4)",
+          "oklch(25% 0.0027 145.4)",
+          "oklch(35% 0.0027 145.4)",
+          "oklch(45% 0.0027 145.4)",
+          "oklch(55% 0.0027 145.4)",
+          "oklch(65% 0.0027 145.4)",
+          "oklch(75% 0.0027 145.4)",
+          "oklch(95% 0.0027 145.4)"
+        ]
+      },
+      "mictlan-night-green": {
+        "role": "neutral",
+        "displayName": "Mictlan Night Green",
+        "tonalRamp": [
+          "oklch(15% 0.0039 164.4)",
+          "oklch(25% 0.0039 164.4)",
+          "oklch(35% 0.0039 164.4)",
+          "oklch(45% 0.0039 164.4)",
+          "oklch(55% 0.0039 164.4)",
+          "oklch(65% 0.0039 164.4)",
+          "oklch(75% 0.0039 164.4)",
+          "oklch(95% 0.0039 164.4)"
+        ]
+      },
+      "mictlan-dark-forest": {
+        "role": "neutral",
+        "displayName": "Mictlan Dark Forest",
+        "tonalRamp": [
+          "oklch(15% 0.0039 164.5)",
+          "oklch(25% 0.0039 164.5)",
+          "oklch(35% 0.0039 164.5)",
+          "oklch(45% 0.0039 164.5)",
+          "oklch(55% 0.0039 164.5)",
+          "oklch(65% 0.0039 164.5)",
+          "oklch(75% 0.0039 164.5)",
+          "oklch(95% 0.0039 164.5)"
+        ]
+      },
+      "mictlan-red-black": {
+        "role": "neutral",
+        "displayName": "Mictlan Red Black",
+        "tonalRamp": [
+          "oklch(15% 0.0072 1.1)",
+          "oklch(25% 0.0072 1.1)",
+          "oklch(35% 0.0072 1.1)",
+          "oklch(45% 0.0072 1.1)",
+          "oklch(55% 0.0072 1.1)",
+          "oklch(65% 0.0072 1.1)",
+          "oklch(75% 0.0072 1.1)",
+          "oklch(95% 0.0072 1.1)"
+        ]
+      },
+      "mictlan-blood-shadow": {
+        "role": "neutral",
+        "displayName": "Mictlan Blood Shadow",
+        "tonalRamp": [
+          "oklch(15% 0.0916 19.3)",
+          "oklch(25% 0.0916 19.3)",
+          "oklch(35% 0.0916 19.3)",
+          "oklch(45% 0.0916 19.3)",
+          "oklch(55% 0.0916 19.3)",
+          "oklch(65% 0.0916 19.3)",
+          "oklch(75% 0.0916 19.3)",
+          "oklch(95% 0.0916 19.3)"
+        ]
+      },
+      "mictlan-carbon": {
+        "role": "neutral",
+        "displayName": "Mictlan Carbon",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.9)",
+          "oklch(25% 0.0000 89.9)",
+          "oklch(35% 0.0000 89.9)",
+          "oklch(45% 0.0000 89.9)",
+          "oklch(55% 0.0000 89.9)",
+          "oklch(65% 0.0000 89.9)",
+          "oklch(75% 0.0000 89.9)",
+          "oklch(95% 0.0000 89.9)"
+        ]
+      },
+      "mictlan-ink": {
+        "role": "neutral",
+        "displayName": "Mictlan Ink",
+        "tonalRamp": [
+          "oklch(15% 0.0023 196.9)",
+          "oklch(25% 0.0023 196.9)",
+          "oklch(35% 0.0023 196.9)",
+          "oklch(45% 0.0023 196.9)",
+          "oklch(55% 0.0023 196.9)",
+          "oklch(65% 0.0023 196.9)",
+          "oklch(75% 0.0023 196.9)",
+          "oklch(95% 0.0023 196.9)"
+        ]
+      },
+      "mictlan-brown-ink": {
+        "role": "neutral",
+        "displayName": "Mictlan Brown Ink",
+        "tonalRamp": [
+          "oklch(15% 0.0157 75.8)",
+          "oklch(25% 0.0157 75.8)",
+          "oklch(35% 0.0157 75.8)",
+          "oklch(45% 0.0157 75.8)",
+          "oklch(55% 0.0157 75.8)",
+          "oklch(65% 0.0157 75.8)",
+          "oklch(75% 0.0157 75.8)",
+          "oklch(95% 0.0157 75.8)"
+        ]
+      },
+      "mictlan-ivory": {
+        "role": "neutral",
+        "displayName": "Mictlan Ivory",
+        "tonalRamp": [
+          "oklch(15% 0.0251 81.1)",
+          "oklch(25% 0.0251 81.1)",
+          "oklch(35% 0.0251 81.1)",
+          "oklch(45% 0.0251 81.1)",
+          "oklch(55% 0.0251 81.1)",
+          "oklch(65% 0.0251 81.1)",
+          "oklch(75% 0.0251 81.1)",
+          "oklch(95% 0.0251 81.1)"
+        ]
+      },
+      "mictlan-cream": {
+        "role": "neutral",
+        "displayName": "Mictlan Cream",
+        "tonalRamp": [
+          "oklch(15% 0.0153 77.1)",
+          "oklch(25% 0.0153 77.1)",
+          "oklch(35% 0.0153 77.1)",
+          "oklch(45% 0.0153 77.1)",
+          "oklch(55% 0.0153 77.1)",
+          "oklch(65% 0.0153 77.1)",
+          "oklch(75% 0.0153 77.1)",
+          "oklch(95% 0.0153 77.1)"
+        ]
+      },
+      "mictlan-bone": {
+        "role": "neutral",
+        "displayName": "Mictlan Bone",
+        "tonalRamp": [
+          "oklch(15% 0.0042 121.6)",
+          "oklch(25% 0.0042 121.6)",
+          "oklch(35% 0.0042 121.6)",
+          "oklch(45% 0.0042 121.6)",
+          "oklch(55% 0.0042 121.6)",
+          "oklch(65% 0.0042 121.6)",
+          "oklch(75% 0.0042 121.6)",
+          "oklch(95% 0.0042 121.6)"
+        ]
+      },
+      "mictlan-sage": {
+        "role": "neutral",
+        "displayName": "Mictlan Sage",
+        "tonalRamp": [
+          "oklch(15% 0.0153 158.2)",
+          "oklch(25% 0.0153 158.2)",
+          "oklch(35% 0.0153 158.2)",
+          "oklch(45% 0.0153 158.2)",
+          "oklch(55% 0.0153 158.2)",
+          "oklch(65% 0.0153 158.2)",
+          "oklch(75% 0.0153 158.2)",
+          "oklch(95% 0.0153 158.2)"
+        ]
+      },
+      "mictlan-sage-muted": {
+        "role": "neutral",
+        "displayName": "Mictlan Sage Muted",
+        "tonalRamp": [
+          "oklch(15% 0.0137 159.8)",
+          "oklch(25% 0.0137 159.8)",
+          "oklch(35% 0.0137 159.8)",
+          "oklch(45% 0.0137 159.8)",
+          "oklch(55% 0.0137 159.8)",
+          "oklch(65% 0.0137 159.8)",
+          "oklch(75% 0.0137 159.8)",
+          "oklch(95% 0.0137 159.8)"
+        ]
+      },
+      "mictlan-muted": {
+        "role": "neutral",
+        "displayName": "Mictlan Muted",
+        "tonalRamp": [
+          "oklch(15% 0.0324 84.6)",
+          "oklch(25% 0.0324 84.6)",
+          "oklch(35% 0.0324 84.6)",
+          "oklch(45% 0.0324 84.6)",
+          "oklch(55% 0.0324 84.6)",
+          "oklch(65% 0.0324 84.6)",
+          "oklch(75% 0.0324 84.6)",
+          "oklch(95% 0.0324 84.6)"
+        ]
+      },
+      "mictlan-sand": {
+        "role": "neutral",
+        "displayName": "Mictlan Sand",
+        "tonalRamp": [
+          "oklch(15% 0.0355 70.1)",
+          "oklch(25% 0.0355 70.1)",
+          "oklch(35% 0.0355 70.1)",
+          "oklch(45% 0.0355 70.1)",
+          "oklch(55% 0.0355 70.1)",
+          "oklch(65% 0.0355 70.1)",
+          "oklch(75% 0.0355 70.1)",
+          "oklch(95% 0.0355 70.1)"
+        ]
+      },
+      "mictlan-earth": {
+        "role": "neutral",
+        "displayName": "Mictlan Earth",
+        "tonalRamp": [
+          "oklch(15% 0.0287 88.3)",
+          "oklch(25% 0.0287 88.3)",
+          "oklch(35% 0.0287 88.3)",
+          "oklch(45% 0.0287 88.3)",
+          "oklch(55% 0.0287 88.3)",
+          "oklch(65% 0.0287 88.3)",
+          "oklch(75% 0.0287 88.3)",
+          "oklch(95% 0.0287 88.3)"
+        ]
+      },
+      "mictlan-earth-muted": {
+        "role": "neutral",
+        "displayName": "Mictlan Earth Muted",
+        "tonalRamp": [
+          "oklch(15% 0.0306 86.7)",
+          "oklch(25% 0.0306 86.7)",
+          "oklch(35% 0.0306 86.7)",
+          "oklch(45% 0.0306 86.7)",
+          "oklch(55% 0.0306 86.7)",
+          "oklch(65% 0.0306 86.7)",
+          "oklch(75% 0.0306 86.7)",
+          "oklch(95% 0.0306 86.7)"
+        ]
+      },
+      "mictlan-gold": {
+        "role": "secondary",
+        "displayName": "Mictlan Gold",
+        "tonalRamp": [
+          "oklch(15% 0.0911 74.1)",
+          "oklch(25% 0.0911 74.1)",
+          "oklch(35% 0.0911 74.1)",
+          "oklch(45% 0.0911 74.1)",
+          "oklch(55% 0.0911 74.1)",
+          "oklch(65% 0.0911 74.1)",
+          "oklch(75% 0.0911 74.1)",
+          "oklch(95% 0.0911 74.1)"
+        ]
+      },
+      "mictlan-red": {
+        "role": "tertiary",
+        "displayName": "Mictlan Red",
+        "tonalRamp": [
+          "oklch(15% 0.1292 15.2)",
+          "oklch(25% 0.1292 15.2)",
+          "oklch(35% 0.1292 15.2)",
+          "oklch(45% 0.1292 15.2)",
+          "oklch(55% 0.1292 15.2)",
+          "oklch(65% 0.1292 15.2)",
+          "oklch(75% 0.1292 15.2)",
+          "oklch(95% 0.1292 15.2)"
+        ]
+      },
+      "mictlan-burgundy": {
+        "role": "tertiary",
+        "displayName": "Mictlan Burgundy",
+        "tonalRamp": [
+          "oklch(15% 0.1168 17.7)",
+          "oklch(25% 0.1168 17.7)",
+          "oklch(35% 0.1168 17.7)",
+          "oklch(45% 0.1168 17.7)",
+          "oklch(55% 0.1168 17.7)",
+          "oklch(65% 0.1168 17.7)",
+          "oklch(75% 0.1168 17.7)",
+          "oklch(95% 0.1168 17.7)"
+        ]
+      },
+      "mictlan-red-hover": {
+        "role": "tertiary",
+        "displayName": "Mictlan Red Hover",
+        "tonalRamp": [
+          "oklch(15% 0.1290 14.4)",
+          "oklch(25% 0.1290 14.4)",
+          "oklch(35% 0.1290 14.4)",
+          "oklch(45% 0.1290 14.4)",
+          "oklch(55% 0.1290 14.4)",
+          "oklch(65% 0.1290 14.4)",
+          "oklch(75% 0.1290 14.4)",
+          "oklch(95% 0.1290 14.4)"
+        ]
+      },
+      "mictlan-burgundy-deep": {
+        "role": "tertiary",
+        "displayName": "Mictlan Burgundy Deep",
+        "tonalRamp": [
+          "oklch(15% 0.1278 19.0)",
+          "oklch(25% 0.1278 19.0)",
+          "oklch(35% 0.1278 19.0)",
+          "oklch(45% 0.1278 19.0)",
+          "oklch(55% 0.1278 19.0)",
+          "oklch(65% 0.1278 19.0)",
+          "oklch(75% 0.1278 19.0)",
+          "oklch(95% 0.1278 19.0)"
+        ]
+      },
+      "mictlan-error-text": {
+        "role": "tertiary",
+        "displayName": "Mictlan Error Text",
+        "tonalRamp": [
+          "oklch(15% 0.0956 17.8)",
+          "oklch(25% 0.0956 17.8)",
+          "oklch(35% 0.0956 17.8)",
+          "oklch(45% 0.0956 17.8)",
+          "oklch(55% 0.0956 17.8)",
+          "oklch(65% 0.0956 17.8)",
+          "oklch(75% 0.0956 17.8)",
+          "oklch(95% 0.0956 17.8)"
+        ]
+      },
+      "mictlan-error-text-muted": {
+        "role": "tertiary",
+        "displayName": "Mictlan Error Text Muted",
+        "tonalRamp": [
+          "oklch(15% 0.0663 16.2)",
+          "oklch(25% 0.0663 16.2)",
+          "oklch(35% 0.0663 16.2)",
+          "oklch(45% 0.0663 16.2)",
+          "oklch(55% 0.0663 16.2)",
+          "oklch(65% 0.0663 16.2)",
+          "oklch(75% 0.0663 16.2)",
+          "oklch(95% 0.0663 16.2)"
+        ]
+      },
+      "mictlan-teal": {
+        "role": "primary",
+        "displayName": "Mictlan Teal",
+        "tonalRamp": [
+          "oklch(15% 0.0629 180.6)",
+          "oklch(25% 0.0629 180.6)",
+          "oklch(35% 0.0629 180.6)",
+          "oklch(45% 0.0629 180.6)",
+          "oklch(55% 0.0629 180.6)",
+          "oklch(65% 0.0629 180.6)",
+          "oklch(75% 0.0629 180.6)",
+          "oklch(95% 0.0629 180.6)"
+        ]
+      },
+      "mictlan-teal-bright": {
+        "role": "primary",
+        "displayName": "Mictlan Teal Bright",
+        "tonalRamp": [
+          "oklch(15% 0.1325 181.9)",
+          "oklch(25% 0.1325 181.9)",
+          "oklch(35% 0.1325 181.9)",
+          "oklch(45% 0.1325 181.9)",
+          "oklch(55% 0.1325 181.9)",
+          "oklch(65% 0.1325 181.9)",
+          "oklch(75% 0.1325 181.9)",
+          "oklch(95% 0.1325 181.9)"
+        ]
+      },
+      "mictlan-teal-deep": {
+        "role": "primary",
+        "displayName": "Mictlan Teal Deep",
+        "tonalRamp": [
+          "oklch(15% 0.0642 181.3)",
+          "oklch(25% 0.0642 181.3)",
+          "oklch(35% 0.0642 181.3)",
+          "oklch(45% 0.0642 181.3)",
+          "oklch(55% 0.0642 181.3)",
+          "oklch(65% 0.0642 181.3)",
+          "oklch(75% 0.0642 181.3)",
+          "oklch(95% 0.0642 181.3)"
+        ]
+      },
+      "mictlan-teal-hover": {
+        "role": "primary",
+        "displayName": "Mictlan Teal Hover",
+        "tonalRamp": [
+          "oklch(15% 0.0784 180.7)",
+          "oklch(25% 0.0784 180.7)",
+          "oklch(35% 0.0784 180.7)",
+          "oklch(45% 0.0784 180.7)",
+          "oklch(55% 0.0784 180.7)",
+          "oklch(65% 0.0784 180.7)",
+          "oklch(75% 0.0784 180.7)",
+          "oklch(95% 0.0784 180.7)"
+        ]
+      },
+      "mictlan-green": {
+        "role": "primary",
+        "displayName": "Mictlan Green",
+        "tonalRamp": [
+          "oklch(15% 0.1049 165.6)",
+          "oklch(25% 0.1049 165.6)",
+          "oklch(35% 0.1049 165.6)",
+          "oklch(45% 0.1049 165.6)",
+          "oklch(55% 0.1049 165.6)",
+          "oklch(65% 0.1049 165.6)",
+          "oklch(75% 0.1049 165.6)",
+          "oklch(95% 0.1049 165.6)"
+        ]
+      },
+      "mictlan-mint": {
+        "role": "primary",
+        "displayName": "Mictlan Mint",
+        "tonalRamp": [
+          "oklch(15% 0.0507 163.1)",
+          "oklch(25% 0.0507 163.1)",
+          "oklch(35% 0.0507 163.1)",
+          "oklch(45% 0.0507 163.1)",
+          "oklch(55% 0.0507 163.1)",
+          "oklch(65% 0.0507 163.1)",
+          "oklch(75% 0.0507 163.1)",
+          "oklch(95% 0.0507 163.1)"
+        ]
+      },
+      "mictlan-petrol": {
+        "role": "secondary",
+        "displayName": "Mictlan Petrol",
+        "tonalRamp": [
+          "oklch(15% 0.0936 223.1)",
+          "oklch(25% 0.0936 223.1)",
+          "oklch(35% 0.0936 223.1)",
+          "oklch(45% 0.0936 223.1)",
+          "oklch(55% 0.0936 223.1)",
+          "oklch(65% 0.0936 223.1)",
+          "oklch(75% 0.0936 223.1)",
+          "oklch(95% 0.0936 223.1)"
+        ]
+      }
+    },
+    "shadows": [
+      {
+        "name": "account-card",
+        "value": "0 24px 70px rgba(0,0,0,0.32)",
+        "purpose": "Separar la tarjeta de cuenta del fondo sin competir con el contenido."
+      },
+      {
+        "name": "primary-action",
+        "value": "0 8px 24px color-mix(in srgb, var(--mictlan-teal-deep) 30%, transparent)",
+        "purpose": "Dar profundidad tenue al botón principal del age-gate y de cuenta."
+      },
+      {
+        "name": "age-gate-dialog",
+        "value": "0 28px 90px rgba(0,0,0,0.78)",
+        "purpose": "Elevar el diálogo circular sobre el velo de fondo."
+      },
+      {
+        "name": "product-detail",
+        "value": "0 12px 32px rgba(0,0,0,0.55)",
+        "purpose": "Separar el detalle superpuesto del producto y su fotografía."
+      }
+    ],
+    "motion": [
+      {
+        "name": "color-state",
+        "value": "200ms ease-out",
+        "purpose": "Cambios discretos de color para controles y enlaces."
+      },
+      {
+        "name": "surface-transition",
+        "value": "300ms ease-out",
+        "purpose": "Transición de superficies interactivas del hero y tarjetas."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "account-menu",
+        "value": "560px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Account Primary Action",
+      "kind": "button",
+      "refersTo": "account-primary",
+      "description": "Acción principal en inicio de sesión, perfil y age-gate.",
+      "html": "<button class=\"ds-btn-primary\">Entrar a mi cuenta</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 20px;border:1px solid color-mix(in srgb,var(--mictlan-teal) 35%,transparent);background:var(--mictlan-teal-deep);color:var(--mictlan-bone);font:600 12px Montserrat,sans-serif;letter-spacing:.16em;text-transform:uppercase;transition:background-color 200ms ease-out}.ds-btn-primary:hover{background:var(--mictlan-teal-hover)}.ds-btn-primary:focus-visible{outline:2px solid var(--mictlan-teal);outline-offset:4px}.ds-btn-primary:disabled{opacity:.6}"
+    },
+    {
+      "name": "Hero Collection Action",
+      "kind": "button",
+      "refersTo": "hero-action",
+      "description": "Enlace de alto contraste superpuesto a la fotografía principal.",
+      "html": "<a class=\"ds-btn-hero\" href=\"#coleccion\">Conocer la colección</a>",
+      "css": ".ds-btn-hero{position:relative;display:inline-flex;align-items:center;justify-content:center;padding:15.6px 41.6px;color:var(--mictlan-bone);font:600 13px \"Open Sans\",sans-serif;letter-spacing:.1em;text-transform:uppercase;text-decoration:none}.ds-btn-hero:before{position:absolute;inset:0;z-index:-1;content:\"\";background:var(--mictlan-green);clip-path:polygon(0 0,100% 0,100% 100%,10% 100%,0 75%);transition:background-color 300ms ease-out,transform 300ms ease-out}.ds-btn-hero:hover:before{background:color-mix(in srgb,var(--mictlan-green) 90%,transparent);transform:scale(1.1)}.ds-btn-hero:focus-visible{outline:2px solid var(--mictlan-teal);outline-offset:4px}"
+    },
+    {
+      "name": "Account Field",
+      "kind": "input",
+      "refersTo": "account-field",
+      "description": "Campo de formulario oscuro con foco teal y etiqueta arena.",
+      "html": "<label class=\"ds-field-label\" for=\"email\">Correo electrónico</label><input class=\"ds-field\" id=\"email\" type=\"email\" placeholder=\"nombre@ejemplo.com\">",
+      "css": ".ds-field-label{display:block;color:var(--mictlan-sand);font:500 12px Montserrat,sans-serif;letter-spacing:.03em}.ds-field{display:block;width:100%;margin-top:8px;padding:12px 14px;border:1px solid color-mix(in srgb,var(--mictlan-sand) 20%,transparent);border-radius:2px;background:color-mix(in srgb,var(--mictlan-carbon) 30%,transparent);color:var(--mictlan-ivory);font:400 14px \"Open Sans\",sans-serif}.ds-field::placeholder{color:var(--mictlan-earth-muted)}.ds-field:focus{border-color:var(--mictlan-teal);outline:2px solid var(--mictlan-teal);outline-offset:3px}"
+    },
+    {
+      "name": "Account Card",
+      "kind": "card",
+      "refersTo": "account-card",
+      "description": "Contenedor sobrio para formularios y datos personales.",
+      "html": "<section class=\"ds-account-card\"><h2>Mi información</h2><p>Mantén tus datos al día.</p></section>",
+      "css": ".ds-account-card{padding:24px;border:1px solid color-mix(in srgb,var(--mictlan-teal) 25%,transparent);background:color-mix(in srgb,var(--mictlan-background) 90%,transparent);color:var(--mictlan-ivory);box-shadow:0 24px 70px rgba(0,0,0,.32)}.ds-account-card h2{margin:0;font:400 28px \"Cinzel Decorative\",Georgia,serif}.ds-account-card p{color:var(--mictlan-sage-muted);font:400 14px/1.6 \"Open Sans\",sans-serif}"
+    },
+    {
+      "name": "Navbar Link",
+      "kind": "nav",
+      "refersTo": "navbar-link",
+      "description": "Enlace de navegación con texto menta y subrayado verde al pasar el cursor.",
+      "html": "<a class=\"ds-nav-link\" href=\"#coleccion\">Mezcales</a>",
+      "css": ".ds-nav-link{padding:8px 0;border-bottom:1px solid transparent;color:var(--mictlan-bone);font:500 14px Montserrat,sans-serif;text-decoration:none;transition:color 200ms ease-out,border-color 200ms ease-out}.ds-nav-link:hover,.ds-nav-link:focus-visible{border-color:var(--mictlan-green);color:var(--mictlan-mint)}.ds-nav-link:focus-visible{outline:2px solid var(--mictlan-teal);outline-offset:4px}"
+    },
+    {
+      "name": "Product Insight Chip",
+      "kind": "chip",
+      "refersTo": "product-insight-active",
+      "description": "Selector redondo dorado para revelar datos del destilado.",
+      "html": "<button class=\"ds-chip\" aria-pressed=\"true\">Perfil</button>",
+      "css": ".ds-chip{min-height:44px;padding:0 12px;border:1px solid color-mix(in srgb,var(--mictlan-gold) 55%,transparent);border-radius:999px;background:color-mix(in srgb,var(--mictlan-ink) 45%,transparent);color:var(--mictlan-bone);font:600 12px Montserrat,sans-serif;letter-spacing:.06em;text-transform:uppercase}.ds-chip[aria-pressed=\"true\"]{border-color:var(--mictlan-gold);background:var(--mictlan-gold);color:var(--mictlan-brown-ink)}.ds-chip:focus-visible{outline:2px solid var(--mictlan-gold);outline-offset:2px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Ritual artesanal en penumbra",
+    "overview": "La tienda presenta destilados de agave con un lenguaje editorial, oscuro y sobrio. La fotografía del producto y los titulares de alto contraste llevan el peso visual; los acentos de color orientan la navegación y comunican estados sin competir con las imágenes. La tipografía display aporta carácter ceremonial, mientras la sans serif mantiene legibles la información y las acciones.",
+    "keyCharacteristics": [
+      "Fondos oscuros en capas y fotografía de producto como protagonista.",
+      "Verde agua y teal para acciones, enlaces, foco y énfasis interactivo.",
+      "Dorado únicamente como acento cálido de producto.",
+      "Formas sobrias, con geometría distintiva sólo en el age-gate y el CTA del hero."
+    ],
+    "rules": [
+      {
+        "name": "The One Palette Rule",
+        "body": "Usa primero un token existente y ajusta su opacidad según el contexto; añade un color nuevo sólo cuando cumpla un rol visual distinto que la paleta no cubra.",
+        "section": "colors"
+      },
+      {
+        "name": "The Role Separation Rule",
+        "body": "Reserva la serif decorativa para títulos; no la uses para párrafos, mensajes de estado ni instrucciones largas.",
+        "section": "typography"
+      },
+      {
+        "name": "The Scene-Specific Layer Rule",
+        "body": "Conserva la posición y el carácter de los velos y gradientes existentes: son parte de la iluminación de cada escena, no un efecto genérico para tarjetas.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** consultar este contrato antes de cambiar color, contraste o estado visual.",
+      "**Do** implementar los tokens de color aquí definidos en `frontend/src/app/globals.css` y exponerlos en `@theme inline` para Tailwind.",
+      "**Do** reutilizar un token con opacidad cuando sólo se necesita una variante más tenue.",
+      "**Do** actualizar este documento y `globals.css` en el mismo cambio cuando se incorpore un nuevo color semántico.",
+      "**Do** revisar el resultado en navegador cuando cambie un color o una composición de capas."
+    ],
+    "donts": [
+      "**Don't** usar colores de Tailwind como `text-slate-300`, `bg-blue-*` o `text-green-*` para elementos de marca o texto de interfaz.",
+      "**Don't** usar dorado como color predeterminado de botones, enlaces o navegación de cuenta.",
+      "**Don't** inventar un tono para imitar teal o verde; busca primero el token visualmente más cercano.",
+      "**Don't** reutilizar en pantallas nuevas los tonos locales listados como excepciones de landing o producto.",
+      "**Don't** homogeneizar los gradientes y velos de la landing si su color depende de la fotografía y la escena."
+    ]
+  }
+}

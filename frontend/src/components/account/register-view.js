@@ -39,7 +39,7 @@ export default function RegisterView() {
       <AccountCard eyebrow="Cuenta creada" title="Bienvenido al Mictlán" description="Guardamos tus datos y abrimos tu sesión.">
         <div className="space-y-5">
           <AccountNotice kind="success">{message}</AccountNotice>
-          <Link className="flex min-h-12 items-center justify-center border border-mictlan-gold/60 bg-mictlan-gold px-5 py-3 text-center font-ui text-xs font-semibold uppercase tracking-[0.16em] text-mictlan-brown-ink transition-colors hover:bg-mictlan-gold-light" href="/cuenta">Ver mi información personal</Link>
+          <Link className="flex min-h-12 items-center justify-center border border-mictlan-teal/35 bg-mictlan-teal-deep px-5 py-3 text-center font-ui text-xs font-semibold uppercase tracking-[0.16em] text-mictlan-bone transition-colors hover:bg-mictlan-teal-hover" href="/cuenta">Ver mi información personal</Link>
         </div>
       </AccountCard>
     );

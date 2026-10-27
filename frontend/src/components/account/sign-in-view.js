@@ -33,7 +33,6 @@ export default function SignInView() {
     <AccountCard
       title="Inicia sesión"
       description="Vuelve a tu espacio personal y consulta tus datos y pedidos."
-      accent="teal"
       emblem={<Image src="/images/age-gate/skull.png" alt="" width={56} height={56} sizes="56px" loading="eager" className="size-12 object-contain opacity-80" />}
     >
       <form className="space-y-5" onSubmit={submit}>
@@ -48,7 +47,6 @@ export default function SignInView() {
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           inputIcon={<Mail className="size-4 text-mictlan-teal" />}
-          accent="teal"
         />
         <AccountField
           id="password"
@@ -59,7 +57,7 @@ export default function SignInView() {
           maxLength={128}
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          labelAction={<AccountTextLink href="/cuenta/recuperar-contrasena" accent="teal">¿Olvidaste tu contraseña?</AccountTextLink>}
+          labelAction={<AccountTextLink href="/cuenta/recuperar-contrasena">¿Olvidaste tu contraseña?</AccountTextLink>}
           inputAction={(
             <button
               className="flex size-10 items-center justify-center rounded-sm text-mictlan-teal transition-colors hover:text-mictlan-teal-bright"
@@ -72,12 +70,11 @@ export default function SignInView() {
               {passwordVisible ? <EyeOff className="size-4" aria-hidden="true" /> : <Eye className="size-4" aria-hidden="true" />}
             </button>
           )}
-          accent="teal"
         />
-        <AccountSubmit busy={busy} accent="teal">Entrar a mi cuenta</AccountSubmit>
+        <AccountSubmit busy={busy}>Entrar a mi cuenta</AccountSubmit>
       </form>
       <div className="mt-7 border-t border-mictlan-sand/10 pt-5 text-center text-sm text-mictlan-sage-muted">
-        ¿Aún no tienes cuenta? <AccountTextLink href="/cuenta/registro" accent="teal">Crear una cuenta</AccountTextLink>
+        ¿Aún no tienes cuenta? <AccountTextLink href="/cuenta/registro">Crear una cuenta</AccountTextLink>
       </div>
     </AccountCard>
   );

@@ -107,7 +107,7 @@ export default function SiteHeader({ mediaBaseUrl }) {
         signOutError={signOutError}
       />
       <header
-        className={`fixed inset-x-0 top-0 z-50 w-full bg-mictlan-carbon py-6 font-display text-white transition-[translate] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] lg:pt-4 lg:pb-2${headerShouldDisplay ? ' translate-y-0 delay-0' : ' -translate-y-full delay-100'}`}
+        className={`fixed inset-x-0 top-0 z-50 w-full bg-mictlan-carbon py-6 font-display text-mictlan-bone transition-[translate] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] lg:pt-4 lg:pb-2${headerShouldDisplay ? ' translate-y-0 delay-0' : ' -translate-y-full delay-100'}`}
       >
         <div className="mx-auto flex w-full max-w-[1280px] items-center justify-between px-4 min-[768px]:px-10 min-[768px]:max-[1023px]:px-[30px]">
           <div className="flex-1 lg:hidden">
@@ -135,7 +135,7 @@ export default function SiteHeader({ mediaBaseUrl }) {
               onError={() => setBrandImageReady(true)}
             />
           </Link>
-          <nav className="hidden text-lg leading-7 lg:order-2 lg:flex" aria-label="Navegación principal">
+          <nav className="hidden text-lg leading-7 text-mictlan-sand lg:order-2 lg:flex" aria-label="Navegación principal">
             <ul className="m-0 flex list-none items-center gap-[80px] p-0 uppercase tracking-[0.025em] min-[1280px]:gap-[96px]">
               <li className="border-b border-b-transparent transition-[color,border-color] duration-300 ease-in-out hover:border-b-mictlan-green hover:text-mictlan-mint">
                 <Link className="text-inherit no-underline" href="/#coleccion">Mezcales</Link>
