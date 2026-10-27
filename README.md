@@ -6,6 +6,8 @@ Señor del Mictlán reúne mezcales de agave Cupreata silvestre y destilados pro
 
 La arquitectura combina Next.js, React y Tailwind CSS para la experiencia web; una API REST construida con Express; y PostgreSQL con Prisma ORM para los datos de usuarios, productos, carritos, pedidos y trabajos de correo. Stripe Checkout gestiona el pago alojado y el backend valida los webhooks firmados de Stripe. Un worker de Node.js procesa los trabajos de correo guardados en PostgreSQL y solicita su envío mediante Resend.
 
+Si quieres saber qué direcciones puede visitar una persona y cuáles requieren sesión o un enlace de correo, consulta la guía sencilla de [rutas y acceso al sistema](docs/rutas-y-acceso.md).
+
 La arquitectura de producción prevista utiliza Railway para alojar el frontend, la API, el worker y PostgreSQL. Cloudflare proporciona DNS, proxy, CDN y TLS para los hostnames públicos; Cloudflare R2 almacena y sirve las imágenes de productos y los medios de la landing. Durante el renderizado del servidor, Next.js consulta la API por la red privada. Las interacciones del navegador llegan a la API mediante su hostname público.
 
 El entorno local de desarrollo se construye con Docker Compose e incluye frontend, backend, PostgreSQL, worker y Mailpit para probar correo. Las guías del repositorio documentan el stack, la infraestructura, el despliegue y las decisiones de servicios y costos.
