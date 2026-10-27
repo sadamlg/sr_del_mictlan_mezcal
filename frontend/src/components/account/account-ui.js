@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { accountRequest } from '../../lib/account-api';
 
-const INPUT_CLASS = 'w-full rounded-sm border border-mictlan-sand/20 bg-mictlan-carbon/30 px-3.5 py-3 font-sans text-sm text-mictlan-ivory placeholder:text-mictlan-earth-muted';
+export const ACCOUNT_INPUT_CLASS = 'w-full rounded-sm border border-mictlan-sand/20 bg-mictlan-carbon/30 px-3.5 py-3 font-sans text-sm text-mictlan-ivory placeholder:text-mictlan-earth-muted';
 
 export function AccountCard({ eyebrow = 'Tu cuenta', title, description, children, wide = false, emblem }) {
   return (
@@ -35,7 +35,7 @@ export function AccountField({
   ...inputProps
 }) {
   const errorId = error ? `${id}-error` : undefined;
-  const inputClassName = `${INPUT_CLASS} focus:border-mictlan-teal ${inputIcon ? 'pl-10' : ''} ${inputAction ? 'pr-12' : ''}`;
+  const inputClassName = `${ACCOUNT_INPUT_CLASS} focus:border-mictlan-teal ${inputIcon ? 'pl-10' : ''} ${inputAction ? 'pr-12' : ''}`;
   return (
     <div className={`block font-ui text-xs font-medium tracking-[0.03em] text-mictlan-sand ${className}`}>
       <div className="flex items-center justify-between gap-3">

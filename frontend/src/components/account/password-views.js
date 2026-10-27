@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { accountRequest } from '../../lib/account-api';
 import { AccountCard, AccountField, AccountNotice, AccountSubmit, AccountTextLink } from './account-ui';
 
@@ -82,34 +83,44 @@ export function PasswordResetView({ token }) {
 }
 
 export function EmailConfirmationView({ token }) {
-  const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [busy, setBusy] = useState(false);
+  const router = useRouter();
+  const confirmationRequest = useRef({ token: null, promise: null });
 
-  async function confirm() {
-    setBusy(true);
-    setError('');
-    try {
-      const result = await accountRequest('auth/email-confirmations', { method: 'POST', body: { token } });
-      setMessage(result.message);
-    } catch (requestError) {
-      setError(requestError.message);
-    } finally {
-      setBusy(false);
+  useEffect(() => {
+    if (!token) return undefined;
+
+    let active = true;
+    if (confirmationRequest.current.token !== token) {
+      confirmationRequest.current = {
+        token,
+        promise: accountRequest('auth/email-confirmations', { method: 'POST', body: { token } })
+          .then((result) => ({ result }))
+          .catch((requestError) => ({ requestError })),
+      };
     }
-  }
+
+    confirmationRequest.current.promise.then(({ result, requestError }) => {
+      if (!active) return;
+      if (requestError) {
+        setError(requestError.message);
+        return;
+      }
+      router.replace(result.accountActivated ? '/' : '/cuenta');
+    });
+
+    return () => { active = false; };
+  }, [token, router]);
 
   return (
-    <AccountCard title="Confirmar correo" description="Al confirmar, podremos verificar que tienes acceso a esta dirección.">
+    <AccountCard title={error ? 'No se pudo confirmar el correo' : token ? 'Confirmando tu correo' : 'Enlace no válido'} description="Estamos verificando el enlace de tu correo.">
       <div className="space-y-5 text-center">
-        {error && <AccountNotice kind="error">{error}</AccountNotice>}
-        {message && <AccountNotice kind="success">{message}</AccountNotice>}
-        {!token && <AccountNotice kind="error">El enlace no es válido. Revisa el correo o solicita un cambio desde tu perfil.</AccountNotice>}
-        {token && !message && <>
-          <p className="text-sm leading-6 text-mictlan-sage-muted">La confirmación se realizará cuando elijas este botón.</p>
-          <button className="flex min-h-12 w-full items-center justify-center border border-mictlan-teal/35 bg-mictlan-teal-deep px-5 py-3 font-ui text-xs font-semibold uppercase tracking-[0.16em] text-mictlan-bone transition-colors hover:bg-mictlan-teal-hover disabled:opacity-60" type="button" disabled={busy} onClick={confirm}>{busy ? 'Confirmando…' : 'Confirmar mi correo'}</button>
-        </>}
-        <AccountTextLink href="/cuenta">Ir a mi cuenta</AccountTextLink>
+        {error
+          ? <AccountNotice kind="error">{error}</AccountNotice>
+          : token
+            ? <AccountNotice>Al terminar, volverás a la tienda. Si es una cuenta nueva, tu sesión quedará iniciada.</AccountNotice>
+            : <AccountNotice kind="error">El enlace no es válido o está incompleto.</AccountNotice>}
+        {(error || !token) && <AccountTextLink href="/">Volver al inicio</AccountTextLink>}
       </div>
     </AccountCard>
   );

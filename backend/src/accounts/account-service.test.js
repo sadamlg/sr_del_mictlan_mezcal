@@ -17,7 +17,7 @@ function account(overrides = {}) {
     locality: 'Morelia',
     state: 'Michoacán',
     postalCode: '58000',
-    emailVerifiedAt: null,
+    emailVerifiedAt: new Date('2026-09-01T00:00:00.000Z'),
     ...overrides,
   };
 }
@@ -25,8 +25,8 @@ function account(overrides = {}) {
 function createHarness(overrides = {}) {
   const calls = { registration: null, session: null, profileUpdate: null, reset: null, passwordVerifications: [] };
   const repository = {
-    async createAccount({ account: record, passwordHash, sessionTokenHash, sessionExpiresAt, emailJobType }) {
-      calls.registration = { account: record, passwordHash, sessionTokenHash, sessionExpiresAt, emailJobType };
+    async createAccount({ account: record, passwordHash, emailJobType }) {
+      calls.registration = { account: record, passwordHash, emailJobType };
       return account({ ...record, passwordHash });
     },
     async findAccountByEmail() { return account(); },
@@ -77,7 +77,7 @@ function validRegistration(overrides = {}) {
   };
 }
 
-test('register normalizes input, stores only a password hash, creates a session, and queues confirmation', async () => {
+test('register normalizes input, stores only a password hash, leaves activation pending, and queues confirmation', async () => {
   const { calls, service } = createHarness();
 
   const result = await service.register(validRegistration());
@@ -87,12 +87,10 @@ test('register normalizes input, stores only a password hash, creates a session,
   assert.equal(calls.registration.account.lastName, 'Martínez');
   assert.equal(calls.registration.passwordHash, 'hashed:mezcalSeguro2026');
   assert.equal(calls.registration.emailJobType, 'ACCOUNT_CONFIRMATION');
-  assert.notEqual(calls.registration.sessionTokenHash, result.sessionToken);
-  assert.equal(result.sessionToken, 'opaque-session-token-12345678901234567890');
-  assert.equal(result.account.email, 'ana@example.com');
-  assert.equal(result.account.firstName, 'Ana');
-  assert.equal(result.account.lastName, 'Martínez');
-  assert.equal('passwordHash' in result.account, false);
+  assert.equal(calls.session, null);
+  assert.equal(result.email, 'ana@example.com');
+  assert.match(result.message, /antes de iniciar sesión/);
+  assert.equal('sessionToken' in result, false);
 });
 
 test('registration rejects underage data before writing an account', async () => {

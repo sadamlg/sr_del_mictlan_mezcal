@@ -4,11 +4,10 @@ import { createAccountRepository } from './account-repository.js';
 
 const accountId = '4aa4f6d0-c64f-4c25-b3e0-f426775cf859';
 
-test('registration creates account, session, and confirmation job in one transaction', async () => {
+test('registration creates a pending account and confirmation job in one transaction without a session', async () => {
   const calls = [];
   const tx = {
     account: { async create(input) { calls.push(['account', input]); return { id: accountId, ...input.data }; } },
-    accountSession: { async create(input) { calls.push(['session', input]); } },
     emailJob: { async create(input) { calls.push(['email', input]); } },
   };
   const repository = createAccountRepository({ $transaction: async (operation) => operation(tx) });
@@ -16,14 +15,11 @@ test('registration creates account, session, and confirmation job in one transac
   await repository.createAccount({
     account: { email: 'ana@example.com', firstName: 'Ana', lastName: 'Martínez' },
     passwordHash: 'scrypt-hash',
-    sessionTokenHash: 'a'.repeat(64),
-    sessionExpiresAt: new Date('2026-11-02T12:00:00Z'),
     emailJobType: 'ACCOUNT_CONFIRMATION',
   });
 
-  assert.deepEqual(calls.map(([kind]) => kind), ['account', 'session', 'email']);
-  assert.equal(calls[1][1].data.tokenHash, 'a'.repeat(64));
-  assert.equal(calls[2][1].data.type, 'ACCOUNT_CONFIRMATION');
+  assert.deepEqual(calls.map(([kind]) => kind), ['account', 'email']);
+  assert.equal(calls[1][1].data.type, 'ACCOUNT_CONFIRMATION');
 });
 
 test('session lookup rejects revoked and expired sessions in the database query', async () => {

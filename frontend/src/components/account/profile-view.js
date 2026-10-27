@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { accountRequest } from '../../lib/account-api';
+import AccountDatePicker from './account-date-picker';
 import { AccountCard, AccountField, AccountNavigation, AccountNotice, AccountSubmit, AccountTextLink, AddressFields, FormGrid, SignOutButton } from './account-ui';
 
 function profileForm(account) {
@@ -119,7 +120,7 @@ export default function ProfileView() {
             <AccountField id="firstName" label="Nombre(s)" type="text" autoComplete="given-name" required maxLength={120} value={form.firstName} onChange={(event) => update('firstName', event.target.value)} error={errors.firstName} />
             <AccountField id="lastName" label="Apellidos" type="text" autoComplete="family-name" required maxLength={120} value={form.lastName} onChange={(event) => update('lastName', event.target.value)} error={errors.lastName} />
             <AccountField id="email" label="Correo electrónico" type="email" autoComplete="email" required maxLength={254} value={form.email} onChange={(event) => update('email', event.target.value)} error={errors.email} />
-            <AccountField id="dateOfBirth" label="Fecha de nacimiento" type="date" autoComplete="bday" required value={form.dateOfBirth} onChange={(event) => update('dateOfBirth', event.target.value)} error={errors.dateOfBirth} />
+            <AccountDatePicker id="dateOfBirth" label="Fecha de nacimiento" value={form.dateOfBirth} onChange={(value) => update('dateOfBirth', value)} error={errors.dateOfBirth} />
             {form.email.trim().toLowerCase() !== account.email && (
               <AccountField id="currentPassword" label="Contraseña actual · para confirmar el correo" type="password" autoComplete="current-password" required maxLength={128} value={form.currentPassword} onChange={(event) => update('currentPassword', event.target.value)} error={errors.currentPassword} />
             )}

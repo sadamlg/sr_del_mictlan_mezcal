@@ -41,11 +41,11 @@ flowchart TB
 
 ### 04. Cuentas y perfil
 
-**Estado: concluida.** Registro con nombre(s) y apellidos separados, sesiones, saludo y menú de cuenta, perfil editable, confirmación y cambio de correo, recuperación de contraseña y vista vacía de pedidos están conectados en Compose. Mailpit recibió y permitió confirmar los mensajes de registro y cambio de correo. Las suites del backend, frontend y navegador, ESLint y el build de producción del frontend terminaron correctamente.
+**Estado: concluida.** Registro con nombre(s) y apellidos separados, sesiones, saludo y menú de cuenta, perfil editable, confirmación y cambio de correo, recuperación de contraseña y vista vacía de pedidos están conectados en Compose. El registro permanece pendiente, sin sesión ni acceso a datos privados, hasta confirmar el correo; la confirmación inicia la sesión y redirige a la landing. Mailpit recibió y permitió confirmar los mensajes de registro y cambio de correo. Las suites del backend, frontend y navegador, ESLint y el build de producción del frontend terminaron correctamente.
 
 - **Dependencias:** fases 01 y 02; las pantallas se integran con las superficies definidas en fase 03.
 - **Resultado esperado:** registro con validación de mayoría de edad y dirección, inicio/cierre y restauración de sesión, recuperación de contraseña, edición de nombre(s), apellidos, correo, fecha de nacimiento y dirección, y las vistas de perfil y “Mis pedidos”.
-- **Correo:** se envía confirmación tras el registro. Un cambio de correo sólo se aplica después de confirmar el nuevo destino. Esta fase incorpora el trabajo persistido en PostgreSQL y activa el worker existente con Mailpit para probar los mensajes de cuenta; Resend de producción se integra en la fase 07.
+- **Correo:** se envía confirmación tras el registro; el login y las vistas privadas se habilitan después de consumir el enlace. Un cambio de correo sólo se aplica después de confirmar el nuevo destino. Esta fase incorpora el trabajo persistido en PostgreSQL y activa el worker existente con Mailpit para probar los mensajes de cuenta; Resend de producción se integra en la fase 07.
 - **Pedidos:** la vista protegida muestra un estado vacío hasta que la fase 06 cree y conecte las órdenes reales; no presenta pedidos de ejemplo.
 - **Criterio de cierre:** los recorridos incluidos funcionan de extremo a extremo en Docker Compose, con validaciones del backend, pruebas automatizadas y estados de interfaz completos. Las contraseñas y tokens no se exponen en respuestas ni logs.
 

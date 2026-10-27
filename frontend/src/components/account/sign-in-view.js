@@ -14,16 +14,19 @@ export default function SignInView() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [errorKind, setErrorKind] = useState('error');
 
   async function submit(event) {
     event.preventDefault();
     setBusy(true);
     setError('');
+    setErrorKind('error');
     try {
       await accountRequest('auth/login', { method: 'POST', body: { email, password } });
       router.replace('/cuenta');
     } catch (requestError) {
       setError(requestError.message);
+      if (requestError.code === 'EMAIL_NOT_VERIFIED') setErrorKind('info');
     } finally {
       setBusy(false);
     }
@@ -36,7 +39,7 @@ export default function SignInView() {
       emblem={<Image src="/images/age-gate/skull.png" alt="" width={56} height={56} sizes="56px" loading="eager" className="size-12 object-contain opacity-80" />}
     >
       <form className="space-y-5" onSubmit={submit}>
-        {error && <AccountNotice kind="error">{error}</AccountNotice>}
+        {error && <AccountNotice kind={errorKind}>{error}</AccountNotice>}
         <AccountField
           id="email"
           label="Correo electrónico"
@@ -51,6 +54,7 @@ export default function SignInView() {
         <AccountField
           id="password"
           label="Contraseña"
+          className="account-sign-in-password"
           type={passwordVisible ? 'text' : 'password'}
           autoComplete="current-password"
           required

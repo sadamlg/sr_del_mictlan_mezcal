@@ -53,8 +53,9 @@ export function createAccountHandlers(service, { secureCookies = false, logger =
       setCommonHeaders(response);
       try {
         const result = await action(request);
-        if (cookie || clearCookie) {
-          response.set('Set-Cookie', sessionCookie(cookie ? result.sessionToken : '', secureCookies));
+        const shouldSetCookie = typeof cookie === 'function' ? cookie(result) : cookie;
+        if (shouldSetCookie || clearCookie) {
+          response.set('Set-Cookie', sessionCookie(shouldSetCookie ? result.sessionToken : '', secureCookies));
         }
         if (empty) return response.status(status).end();
         const body = { ...(result ?? {}) };
@@ -70,7 +71,7 @@ export function createAccountHandlers(service, { secureCookies = false, logger =
   const currentAccount = (request) => service.getSession(readSessionCookie(request));
 
   return {
-    register: wrap((request) => service.register(request.body), { status: 201, cookie: true }),
+    register: wrap((request) => service.register(request.body), { status: 201 }),
     login: wrap((request) => service.login(request.body), { cookie: true }),
     logout: wrap(async (request) => {
       await service.logout(readSessionCookie(request));
@@ -79,7 +80,9 @@ export function createAccountHandlers(service, { secureCookies = false, logger =
     session: wrap(async (request) => ({ account: await currentAccount(request) })),
     requestPasswordReset: wrap((request) => service.requestPasswordReset(request.body), { status: 202 }),
     resetPassword: wrap((request) => service.resetPassword(request.body)),
-    confirmEmail: wrap((request) => service.confirmEmail(request.body)),
+    confirmEmail: wrap((request) => service.confirmEmail(request.body), {
+      cookie: (result) => Boolean(result?.sessionToken),
+    }),
     getProfile: wrap(async (request) => ({ account: await service.getProfile((await currentAccount(request)).id) })),
     updateProfile: wrap(async (request) => ({
       account: await service.updateProfile((await currentAccount(request)).id, request.body),

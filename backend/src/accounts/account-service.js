@@ -76,8 +76,6 @@ export function createAccountService({
       const validated = validateRegistrationInput(input, now());
       ensureInput(validated.success, validated.errors);
       const { password, dateOfBirth, address, ...accountData } = validated.data;
-      const sessionToken = tokenFactory();
-      const expiresAt = new Date(now().getTime() + sessionDurationMs);
       let created;
 
       try {
@@ -88,8 +86,6 @@ export function createAccountService({
             dateOfBirth: new Date(`${dateOfBirth}T00:00:00.000Z`),
           },
           passwordHash: await hashPasswordValue(password),
-          sessionTokenHash: hashTokenValue(sessionToken),
-          sessionExpiresAt: expiresAt,
           emailJobType: 'ACCOUNT_CONFIRMATION',
         });
       } catch (error) {
@@ -99,7 +95,10 @@ export function createAccountService({
         throw error;
       }
 
-      return { account: toPublicAccount(created), sessionToken, expiresAt };
+      return {
+        message: 'Revisa tu correo para activar la cuenta. Confirma la dirección antes de iniciar sesión.',
+        email: created.email,
+      };
     },
 
     async login(input) {
@@ -117,6 +116,9 @@ export function createAccountService({
       if (!found || !validPassword) {
         throw new AccountError(401, 'INVALID_CREDENTIALS', 'El correo o la contraseña no son correctos.');
       }
+      if (!found.emailVerifiedAt) {
+        throw new AccountError(403, 'EMAIL_NOT_VERIFIED', 'Confirma tu correo antes de iniciar sesión. Usa el enlace que te enviamos al registrarte.');
+      }
 
       const session = await createSession(found.id);
       return { account: toPublicAccount(found), ...session };
@@ -130,8 +132,14 @@ export function createAccountService({
 
     async getSession(sessionToken) {
       ensureSessionToken(sessionToken);
-      const session = await repository.findSessionByTokenHash(hashTokenValue(sessionToken), now());
+      const tokenHash = hashTokenValue(sessionToken);
+      const timestamp = now();
+      const session = await repository.findSessionByTokenHash(tokenHash, timestamp);
       if (!session) throw new AccountError(401, 'AUTHENTICATION_REQUIRED', 'Inicia sesión para continuar.');
+      if (!session.account?.emailVerifiedAt) {
+        await repository.revokeSession(tokenHash, timestamp);
+        throw new AccountError(401, 'AUTHENTICATION_REQUIRED', 'Confirma tu correo para activar la cuenta; después inicia sesión.');
+      }
       return toPublicAccount(session.account);
     },
 
@@ -172,16 +180,23 @@ export function createAccountService({
       if (typeof token !== 'string' || !/^[A-Za-z0-9_-]{40,}$/.test(token)) {
         throw new AccountError(400, 'EMAIL_CONFIRMATION_INVALID', 'El enlace de confirmación no es válido.');
       }
+      let confirmation;
       try {
-        const confirmed = await repository.confirmEmail(hashTokenValue(token), now());
-        if (!confirmed) throw new AccountError(400, 'EMAIL_CONFIRMATION_INVALID', 'El enlace venció o ya se utilizó.');
-        return { message: 'Tu correo quedó confirmado.' };
+        confirmation = await repository.confirmEmail(hashTokenValue(token), now());
       } catch (error) {
         if (error?.code === 'P2002') {
           throw new AccountError(409, 'EMAIL_IN_USE', 'Ese correo ya pertenece a otra cuenta.');
         }
         throw error;
       }
+      if (!confirmation) throw new AccountError(400, 'EMAIL_CONFIRMATION_INVALID', 'El enlace venció o ya se utilizó.');
+      const accountActivated = confirmation.purpose === 'ACCOUNT_CONFIRMATION';
+      const session = accountActivated ? await createSession(confirmation.accountId) : {};
+      return {
+        message: accountActivated ? 'Tu cuenta está activa.' : 'Tu correo quedó actualizado.',
+        accountActivated,
+        ...session,
+      };
     },
 
     async updateProfile(accountId, input) {

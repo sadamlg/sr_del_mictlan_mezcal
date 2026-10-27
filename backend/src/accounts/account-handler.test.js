@@ -21,7 +21,7 @@ function publicAccount() {
     lastName: 'Martínez',
     email: 'ana@example.com',
     pendingEmail: null,
-    emailVerified: false,
+    emailVerified: true,
     dateOfBirth: '2000-04-12',
     address: {
       street: 'Calle del Mezcal',
@@ -34,20 +34,19 @@ function publicAccount() {
   };
 }
 
-test('registration sets an HttpOnly session cookie and returns no token in JSON', async () => {
+test('registration creates a pending account without issuing a session cookie', async () => {
   const handlers = createAccountHandlers({
-    register: async () => ({ account: publicAccount(), sessionToken: 'session-token-123456789012345678901234567890123', expiresAt: new Date('2026-11-02T12:00:00Z') }),
+    register: async () => ({ message: 'Confirma tu correo antes de iniciar sesión.', email: 'ana@example.com' }),
   }, { secureCookies: false });
   const result = response();
 
   await handlers.register({ body: { email: 'ana@example.com' } }, result);
 
   assert.equal(result.statusCode, 201);
-  assert.equal(result.body.account.email, 'ana@example.com');
+  assert.equal(result.body.email, 'ana@example.com');
+  assert.match(result.body.message, /Confirma tu correo/);
   assert.equal('sessionToken' in result.body, false);
-  assert.match(result.headers['Set-Cookie'], /HttpOnly/);
-  assert.match(result.headers['Set-Cookie'], /SameSite=Lax/);
-  assert.doesNotMatch(result.headers['Set-Cookie'], /Secure/);
+  assert.equal(result.headers['Set-Cookie'], undefined);
 });
 
 test('production session cookies are Secure and logout expires the cookie', async () => {

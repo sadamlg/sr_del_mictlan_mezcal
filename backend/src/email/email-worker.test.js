@@ -47,7 +47,7 @@ test('account confirmation worker sends an escaped email with one-time link and 
 
   assert.equal(await worker.processNext(), true);
   assert.equal(message.to, 'ana@example.com');
-  assert.match(message.subject, /Confirma tu cuenta/);
+  assert.match(message.subject, /Activa tu cuenta/);
   assert.match(message.text, /https:\/\/mictlan\.example\/cuenta\/confirmar-correo\?token=one-time-token/);
   assert.match(message.html, /Ana &lt;Martínez&gt;/);
   assert.deepEqual(calls.issued[0], {

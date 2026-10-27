@@ -3,9 +3,9 @@ export const ACCOUNT_SESSION_CHANGED_EVENT = 'mictlan:account-session-changed';
 
 function notifyAccountSessionChanged(path, method) {
   const sessionChangingRequest = method === 'POST' && [
-    'auth/register',
     'auth/login',
     'auth/logout',
+    'auth/email-confirmations',
     'auth/password-resets',
   ].includes(path);
   const profileChanged = method === 'PATCH' && path === 'profile';

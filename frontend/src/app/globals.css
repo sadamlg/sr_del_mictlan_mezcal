@@ -280,3 +280,7 @@ body {
     block-size: auto;
   }
 }
+
+.account-sign-in-password input[type="password"]::-ms-reveal {
+  display: none;
+}

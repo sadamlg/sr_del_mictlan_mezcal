@@ -12,16 +12,9 @@ function isUsableToken(token, purpose, now) {
 
 export function createAccountRepository(database) {
   return {
-    async createAccount({ account, passwordHash, sessionTokenHash, sessionExpiresAt, emailJobType }) {
+    async createAccount({ account, passwordHash, emailJobType }) {
       return database.$transaction(async (transaction) => {
         const created = await transaction.account.create({ data: { ...account, passwordHash } });
-        await transaction.accountSession.create({
-          data: {
-            accountId: created.id,
-            tokenHash: sessionTokenHash,
-            expiresAt: sessionExpiresAt,
-          },
-        });
         await transaction.emailJob.create({ data: { accountId: created.id, type: emailJobType } });
         return created;
       });
@@ -125,8 +118,12 @@ export function createAccountRepository(database) {
             where: { id: token.accountId },
             data: { emailVerifiedAt: now },
           });
+          await transaction.accountSession.updateMany({
+            where: { accountId: token.accountId, revokedAt: null },
+            data: { revokedAt: now },
+          });
         }
-        return true;
+        return { purpose: token.purpose, accountId: token.accountId };
       });
     },
 
