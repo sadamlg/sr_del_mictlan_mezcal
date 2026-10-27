@@ -137,13 +137,13 @@ export default function SiteHeader({ mediaBaseUrl }) {
           </Link>
           <nav className="hidden text-lg leading-7 text-mictlan-sand lg:order-2 lg:flex" aria-label="Navegación principal">
             <ul className="m-0 flex list-none items-center gap-[80px] p-0 uppercase tracking-[0.025em] min-[1280px]:gap-[96px]">
-              <li className="border-b border-b-transparent transition-[color,border-color] duration-300 ease-in-out hover:border-b-mictlan-green hover:text-mictlan-mint">
+              <li className="border-b-2 border-b-transparent transition-[color,border-color] duration-150 ease-out hover:border-b-mictlan-teal hover:text-mictlan-mint focus-within:border-b-mictlan-teal focus-within:text-mictlan-mint">
                 <Link className="text-inherit no-underline" href="/#coleccion">Mezcales</Link>
               </li>
-              <li className="border-b border-b-transparent transition-[color,border-color] duration-300 ease-in-out hover:border-b-mictlan-green hover:text-mictlan-mint">
+              <li className="border-b-2 border-b-transparent transition-[color,border-color] duration-150 ease-out hover:border-b-mictlan-teal hover:text-mictlan-mint focus-within:border-b-mictlan-teal focus-within:text-mictlan-mint">
                 <Link className="text-inherit no-underline" href="/#origen">Nosotros</Link>
               </li>
-              <li className="border-b border-b-transparent transition-[color,border-color] duration-300 ease-in-out hover:border-b-mictlan-green hover:text-mictlan-mint">
+              <li className="border-b-2 border-b-transparent transition-[color,border-color] duration-150 ease-out hover:border-b-mictlan-teal hover:text-mictlan-mint focus-within:border-b-mictlan-teal focus-within:text-mictlan-mint">
                 <Link className="text-inherit no-underline" href="/#coleccion">Promociones</Link>
               </li>
             </ul>

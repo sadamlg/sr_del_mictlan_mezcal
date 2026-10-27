@@ -31,7 +31,6 @@ colors:
   mictlan-teal-bright: "#2dd4bf"
   mictlan-teal-deep: "#0f5047"
   mictlan-teal-hover: "#15695d"
-  mictlan-green: "#047857"
   mictlan-mint: "#d1fae5"
   mictlan-petrol: "#0e7490"
 typography:
@@ -49,9 +48,11 @@ components:
   account-primary-hover:
     backgroundColor: "{colors.mictlan-teal-hover}"
   hero-action:
-    backgroundColor: "{colors.mictlan-green}"
+    backgroundColor: "{colors.mictlan-teal-deep}"
     textColor: "{colors.mictlan-bone}"
     padding: "15.6px 41.6px"
+  hero-action-hover:
+    backgroundColor: "{colors.mictlan-teal-hover}"
   account-card:
     backgroundColor: "{colors.mictlan-background}"
     padding: "24px"
@@ -88,10 +89,9 @@ La paleta se organiza por función: teal para interacción, neutrales cálidos p
 
 ### Primary
 
-- **Verde agua (`mictlan-teal`):** acento de iconos, enlaces, foco visible y bordes activos.
-- **Teal profundo (`mictlan-teal-deep`):** fondo de las acciones principales del age-gate y de cuenta.
+- **Verde agua (`mictlan-teal`):** acento de iconos, enlaces, foco visible, bordes activos y subrayado hover de 2 px del navbar.
+- **Teal profundo (`mictlan-teal-deep`):** fondo de las acciones principales del age-gate, cuenta y hero.
 - **Teal de interacción (`mictlan-teal-hover`):** hover de las acciones principales. `mictlan-teal-bright` destaca títulos y estados activos de FAQ y escaparate.
-- **Verde de escena (`mictlan-green`):** fondo del CTA del hero y subrayado hover del navbar. El CTA del hero mantiene ese mismo verde al 90% de opacidad en hover.
 - **Menta (`mictlan-mint`):** texto de navegación en hover.
 
 ### Secondary
@@ -185,8 +185,8 @@ Los campos y controles de cuenta tienen esquinas discretas y bordes finos; las t
 
 ### Buttons
 
-- **Acciones principales de cuenta y age-gate:** teal profundo con texto hueso, borde teal sutil y hover teal. El foco visible conserva un contorno teal.
-- **CTA del hero:** verde de escena con texto hueso y corte diagonal; en hover mantiene el verde al 90% de opacidad.
+- **Acciones principales de cuenta, age-gate y hero:** teal profundo con texto hueso y hover teal. El foco visible conserva un contorno teal.
+- **CTA del hero:** conserva su corte diagonal y se amplía al 110% en hover; comparte con las acciones principales los colores teal y la transición de color.
 - **Acciones destructivas o de rechazo:** borde y hover en rojo/burdeos; conserva texto que nombre la acción.
 - **Acciones de producto:** el dorado puede aparecer en selectores y datos del destilado; el foco visible usa teal. El dorado no es el estilo predeterminado de CTA de cuenta.
 
@@ -202,7 +202,7 @@ Los campos usan una superficie carbón translúcida, texto marfil y una etiqueta
 
 ### Navigation
 
-El navbar usa texto arena y subrayado verde en hover, con texto menta. El menú móvil conserva fondo carbón y texto sage; los controles de cuenta usan teal para hover y bordes activos.
+El navbar usa texto arena y un subrayado verde agua de 2 px en hover, con texto menta. El cambio dura 150 ms y también se muestra al enfocar un enlace con teclado. En el menú móvil, las opciones de navegación y cuenta mantienen el texto sage por defecto; al pasar el cursor o recibir foco cambian el texto a verde agua (`mictlan-teal`), sin añadir subrayado. El menú conserva su fondo carbón.
 
 ### Signature Component: Age Gate
 

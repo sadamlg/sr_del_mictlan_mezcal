@@ -30,9 +30,9 @@ export default function MobileMenu({ isOpen, account, onClose, onSignOut, signOu
         <div className="flex h-auto flex-col gap-0 text-xl font-medium">
           <nav className="pl-0 pt-4 font-display uppercase tracking-[0.025em] text-mictlan-sage" aria-label="Navegación móvil">
             <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
-              <li className="h-[47.5px]"><Link className="flex h-full w-full items-center px-[30px] text-inherit no-underline" href="/#coleccion" onClick={onClose}>Mezcales</Link></li>
-              <li className="h-[47.5px]"><Link className="flex h-full w-full items-center px-[30px] text-inherit no-underline" href="/#origen" onClick={onClose}>Nosotros</Link></li>
-              <li className="h-[47.5px]"><Link className="flex h-full w-full items-center px-[30px] text-inherit no-underline" href="/#coleccion" onClick={onClose}>Promociones</Link></li>
+              <li className="h-[47.5px]"><Link className="flex h-full w-full items-center px-[30px] text-inherit no-underline transition-colors duration-150 ease-out hover:text-mictlan-teal focus-visible:text-mictlan-teal" href="/#coleccion" onClick={onClose}>Mezcales</Link></li>
+              <li className="h-[47.5px]"><Link className="flex h-full w-full items-center px-[30px] text-inherit no-underline transition-colors duration-150 ease-out hover:text-mictlan-teal focus-visible:text-mictlan-teal" href="/#origen" onClick={onClose}>Nosotros</Link></li>
+              <li className="h-[47.5px]"><Link className="flex h-full w-full items-center px-[30px] text-inherit no-underline transition-colors duration-150 ease-out hover:text-mictlan-teal focus-visible:text-mictlan-teal" href="/#coleccion" onClick={onClose}>Promociones</Link></li>
             </ul>
           </nav>
           <div className="mt-[75px]">
@@ -42,9 +42,9 @@ export default function MobileMenu({ isOpen, account, onClose, onSignOut, signOu
                   <UserRound className="h-6 w-6 text-mictlan-teal" aria-hidden="true" /> Hola, {account.firstName}
                 </p>
                 <nav className="flex flex-col pl-[30px] font-ui text-sm" aria-label="Opciones de cuenta">
-                  <Link className="py-3 text-mictlan-sage no-underline hover:text-mictlan-teal" href="/cuenta/pedidos" onClick={onClose}>Mis pedidos</Link>
-                  <Link className="py-3 text-mictlan-sage no-underline hover:text-mictlan-teal" href="/cuenta" onClick={onClose}>Cuenta</Link>
-                  <button className="py-3 text-left text-mictlan-sage hover:text-mictlan-teal disabled:opacity-60" type="button" disabled={signOutPending} onClick={onSignOut}>
+                  <Link className="py-3 text-mictlan-sage no-underline transition-colors duration-150 ease-out hover:text-mictlan-teal focus-visible:text-mictlan-teal" href="/cuenta/pedidos" onClick={onClose}>Mis pedidos</Link>
+                  <Link className="py-3 text-mictlan-sage no-underline transition-colors duration-150 ease-out hover:text-mictlan-teal focus-visible:text-mictlan-teal" href="/cuenta" onClick={onClose}>Cuenta</Link>
+                  <button className="py-3 text-left text-mictlan-sage transition-colors duration-150 ease-out hover:text-mictlan-teal focus-visible:text-mictlan-teal disabled:opacity-60" type="button" disabled={signOutPending} onClick={onSignOut}>
                     {signOutPending ? 'Cerrando sesión…' : 'Cerrar sesión'}
                   </button>
                   {signOutError && <p className="pr-6 text-xs text-mictlan-error-text" role="alert">{signOutError}</p>}
@@ -52,8 +52,8 @@ export default function MobileMenu({ isOpen, account, onClose, onSignOut, signOu
               </>
             ) : (
               <div className="flex flex-col">
-                <Link className="flex h-[48.45px] items-center gap-2 pl-[30px] font-display uppercase tracking-[0.025em] text-mictlan-sage no-underline hover:text-mictlan-teal" href="/cuenta/iniciar-sesion" onClick={onClose}>
-                  <UserRound className="h-6 w-6 text-mictlan-sage/80" aria-hidden="true" /> Iniciar sesión
+                <Link className="group flex h-[48.45px] items-center gap-2 pl-[30px] font-display uppercase tracking-[0.025em] text-mictlan-sage no-underline transition-colors duration-150 ease-out hover:text-mictlan-teal focus-visible:text-mictlan-teal" href="/cuenta/iniciar-sesion" onClick={onClose}>
+                  <UserRound className="h-6 w-6 text-mictlan-sage/80 transition-colors duration-150 group-hover:text-mictlan-teal group-focus-visible:text-mictlan-teal" aria-hidden="true" /> Iniciar sesión
                 </Link>
               </div>
             )}

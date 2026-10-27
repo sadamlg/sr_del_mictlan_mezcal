@@ -70,7 +70,7 @@ export default function LandingHero({ mediaBaseUrl }) {
             href="#coleccion"
           >
             <span
-              className="absolute inset-0 [clip-path:polygon(0_0,100%_0,100%_100%,10%_100%,0_75%)] bg-mictlan-green transition-[transform,background-color] duration-300 ease-out group-hover:scale-110 group-hover:bg-mictlan-green/90"
+              className="absolute inset-0 [clip-path:polygon(0_0,100%_0,100%_100%,10%_100%,0_75%)] bg-mictlan-teal-deep transition-[transform_300ms_ease-out,background-color_150ms_ease-out] group-hover:scale-110 group-hover:bg-mictlan-teal-hover group-focus-visible:bg-mictlan-teal-hover"
               aria-hidden="true"
             />
             <span className="pointer-events-none relative z-[1] font-sans leading-[1.25] font-semibold tracking-[.1em] uppercase">
