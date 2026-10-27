@@ -4,6 +4,13 @@ async function acceptAgeForAccountFlow(page) {
   await page.addInitScript(() => window.sessionStorage.setItem('mictlan-age-confirmed-v1', 'yes'));
 }
 
+test('age verification is limited to the landing page', async ({ page }) => {
+  await page.goto('/cuenta/iniciar-sesion');
+  await expect(page.getByRole('heading', { name: 'Inicia sesión' })).toBeVisible();
+  await page.waitForTimeout(1800);
+  await expect(page.getByRole('dialog', { name: '¿Eres mayor de edad?' })).toHaveCount(0);
+});
+
 test('login updates the account greeting and exposes account actions', async ({ page }) => {
   await acceptAgeForAccountFlow(page);
   const account = {
