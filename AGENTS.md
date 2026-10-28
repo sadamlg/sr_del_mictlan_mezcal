@@ -11,9 +11,23 @@
 - Incorporar o cambiar imágenes, video y otros medios dentro de las superficies aprobadas de landing y catálogo es trabajo de contenido o presentación. No propongas ampliar el alcance por cada recurso visual.
 - Revisa `docs/MVP_SCOPE.md` si el cambio agrega una página, un flujo o una capacidad de usuario, o altera una inclusión o exclusión funcional.
 
+## Reutilizar referencias del proyecto anterior
+
+- Al iniciar cada fase funcional de implementación, revisa `../sr_del_mictlan` en busca de contratos, decisiones, flujos, casos límite, pruebas y código relacionado que se pueda aprovechar.
+- Trata ese repositorio como referencia, no como fuente de verdad. Conserva la arquitectura y el alcance actuales; adapta los casos y patrones compatibles, y reconstruye las partes ligadas a tecnologías o modelos de datos distintos.
+- Registra en el contrato del módulo qué se reutilizó, qué se adaptó y qué se rehízo, y la razón cuando no convenga portar código.
+
 ## Estilos del frontend
 
 - Usa Tailwind CSS 4 como sistema predeterminado para los estilos del frontend. Recurre a CSS escrito a mano sólo para necesidades puntuales que no puedan resolverse razonablemente con sus utilidades; mantén esas reglas mínimas y acotadas.
+
+## Contrato de color del frontend
+
+- `design.md` en la raíz es el contrato visual maestro. Consúltalo antes de crear o cambiar una interfaz; sus colores y excepciones guían las decisiones nuevas.
+- `frontend/src/app/globals.css` implementa los tokens de color del contrato. Usa sus clases `mictlan-*`; no inventes colores para imitar un token ni uses colores cromáticos de Tailwind como `text-slate-300`, `bg-blue-*` o `text-green-*` para la interfaz.
+- Para un estado más tenue, reutiliza el mismo token con opacidad. Conserva las excepciones de composición documentadas en `design.md` y no las copies como paleta general.
+- Si hace falta un rol cromático que no existe, agrega un token semántico a `:root`, expónlo en `@theme inline` y actualiza `design.md` en el mismo cambio.
+- Antes de retirar un token, busca sus referencias en `frontend/src`. Verifica visualmente en navegador cualquier cambio de color o composición de capas.
 
 ## Migración de secciones de la landing
 

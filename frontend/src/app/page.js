@@ -60,7 +60,7 @@ export default function Home() {
         <main>
           <LandingHero mediaBaseUrl={mediaBaseUrl} />
 
-          <Suspense fallback={<section id="coleccion" className="bg-mictlan-night px-6 py-24 text-center text-white" role="status">Cargando la colección…</section>}>
+          <Suspense fallback={<section id="coleccion" className="bg-mictlan-night px-6 py-24 text-center text-mictlan-bone" role="status">Cargando la colección…</section>}>
             <CatalogContent mediaBaseUrl={mediaBaseUrl} />
           </Suspense>
 

@@ -21,20 +21,20 @@
   --mictlan-earth: #4d4635;
   --mictlan-earth-muted: #99907c;
   --mictlan-gold: #e9bd82;
-  --mictlan-gold-light: #f2c98f;
   --mictlan-red: #a84652;
   --mictlan-burgundy: #711d28;
   --mictlan-red-hover: #bd5965;
   --mictlan-burgundy-deep: #7d1f2a;
+  --mictlan-error-text: #f0a0a2;
+  --mictlan-error-text-muted: #f0b7b9;
   --mictlan-teal: #97d2c6;
   --mictlan-teal-bright: #2dd4bf;
   --mictlan-teal-deep: #0f5047;
-  --mictlan-green: #047857;
+  --mictlan-teal-hover: #15695d;
   --mictlan-mint: #d1fae5;
   --mictlan-petrol: #0e7490;
   --background: var(--mictlan-background);
   --foreground: var(--mictlan-ivory);
-  --accent: var(--mictlan-gold);
   --mictlan-font-display: "Cinzel Decorative", Georgia, "Times New Roman", serif;
   --mictlan-font-body: "Open Sans Variable", "Open Sans", Arial, sans-serif;
   --mictlan-font-ui: "Montserrat Variable", Montserrat, sans-serif;
@@ -43,7 +43,6 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-accent: var(--accent);
   --color-mictlan-background: var(--mictlan-background);
   --color-mictlan-night: var(--mictlan-night);
   --color-mictlan-night-green: var(--mictlan-night-green);
@@ -63,15 +62,16 @@
   --color-mictlan-earth: var(--mictlan-earth);
   --color-mictlan-earth-muted: var(--mictlan-earth-muted);
   --color-mictlan-gold: var(--mictlan-gold);
-  --color-mictlan-gold-light: var(--mictlan-gold-light);
   --color-mictlan-red: var(--mictlan-red);
   --color-mictlan-burgundy: var(--mictlan-burgundy);
   --color-mictlan-red-hover: var(--mictlan-red-hover);
   --color-mictlan-burgundy-deep: var(--mictlan-burgundy-deep);
+  --color-mictlan-error-text: var(--mictlan-error-text);
+  --color-mictlan-error-text-muted: var(--mictlan-error-text-muted);
   --color-mictlan-teal: var(--mictlan-teal);
   --color-mictlan-teal-bright: var(--mictlan-teal-bright);
   --color-mictlan-teal-deep: var(--mictlan-teal-deep);
-  --color-mictlan-green: var(--mictlan-green);
+  --color-mictlan-teal-hover: var(--mictlan-teal-hover);
   --color-mictlan-mint: var(--mictlan-mint);
   --color-mictlan-petrol: var(--mictlan-petrol);
   --font-display: var(--mictlan-font-display);
@@ -136,12 +136,12 @@ body {
 }
 
 ::selection {
-  background: var(--mictlan-gold);
-  color: var(--mictlan-brown-ink);
+  background: var(--mictlan-teal);
+  color: var(--mictlan-ink);
 }
 
 :focus-visible {
-  outline: 2px solid var(--mictlan-gold-light);
+  outline: 2px solid var(--mictlan-teal);
   outline-offset: 3px;
 }
 
@@ -277,4 +277,8 @@ body {
   #preguntas .faq-disclosure[open]::details-content {
     block-size: auto;
   }
+}
+
+.account-sign-in-password input[type="password"]::-ms-reveal {
+  display: none;
 }

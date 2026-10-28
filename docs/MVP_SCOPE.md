@@ -28,10 +28,14 @@ Publicar una tienda en línea que presente la marca y sus productos, permita a v
 
 ### Cuentas y perfil
 
-- Una persona puede registrarse, iniciar y cerrar sesión, y recuperar su contraseña mediante un enlace enviado por correo.
-- El registro solicita nombre, correo electrónico, fecha de nacimiento y dirección en México. La fecha debe ser válida y acreditar que la persona tiene al menos 18 años.
+- Una persona puede registrarse, confirmar su correo antes de activar la cuenta, iniciar y cerrar sesión, y recuperar su contraseña mediante un enlace enviado por correo. El registro no inicia sesión ni permite consultar la cuenta hasta que se confirme la dirección; al confirmarla, la sesión se inicia y vuelve a la landing.
+- El registro solicita nombre(s), apellidos, correo electrónico, fecha de nacimiento y dirección en México. La fecha debe ser válida y acreditar que la persona tiene al menos 18 años.
 - La dirección incluye calle, número, colonia, ciudad o delegación, estado y código postal. Se validan los campos y el formato básico del código postal; no se consulta una base externa de direcciones.
-- La cuenta contiene dos vistas: información personal editable y “Mis pedidos”.
+- La información personal editable incluye nombre(s), apellidos, correo electrónico, fecha de nacimiento y todos los campos de dirección. La fecha de nacimiento nueva debe seguir acreditando que la persona tiene al menos 18 años.
+- Al registrarse se envía un correo de confirmación de cuenta. La cuenta permanece pendiente y no concede sesión ni acceso a sus datos hasta consumir el enlace de confirmación, que vence en 24 horas. La vista posterior al registro sólo ofrece volver a la landing; confirmar el enlace inicia la sesión y redirige ahí.
+- Para cambiar el correo, la persona debe confirmar el nuevo correo mediante un enlace enviado a esa dirección. El correo vigente permanece activo hasta que se confirme el cambio.
+- La cuenta contiene dos vistas: información personal editable y “Mis pedidos”. La vista aparece en esta fase; los pedidos reales se conectan cuando se implementen pagos y órdenes.
+- Con la sesión iniciada, el encabezado muestra “Hola” y el primer nombre. El menú ofrece “Mis pedidos”, “Cuenta” y “Cerrar sesión”.
 - Se requiere iniciar sesión para pagar, no para visitar la tienda ni para usar el carrito.
 
 ### Carrito y compra
@@ -49,7 +53,7 @@ Publicar una tienda en línea que presente la marca y sus productos, permita a v
 - El backend confirma el pago con la notificación firmada de Stripe; el regreso del navegador no confirma por sí mismo una compra.
 - Tras confirmarse el pago, se guarda la orden y aparece en “Mis pedidos”. Cada conjunto de compra pagado produce su propia orden.
 - Para cada compra confirmada se envía un correo con exactamente dos PDF adjuntos: comprobante de pago y copia de la orden.
-- El correo de recuperación de contraseña también está incluido. No se incluyen correos promocionales ni de recuperación de carritos.
+- Los correos de recuperación de contraseña, confirmación de registro y confirmación de cambio de correo también están incluidos. No se incluyen correos promocionales ni de recuperación de carritos.
 
 ## Fuera del MVP
 
@@ -65,7 +69,7 @@ Publicar una tienda en línea que presente la marca y sus productos, permita a v
 ## Criterios para considerar terminado el MVP
 
 - La landing presenta los productos activos y el aviso de edad cumple el flujo definido, sin depender del consentimiento de cookies.
-- El registro valida fecha de nacimiento y mayoría de edad; inicio de sesión, cierre de sesión, recuperación de contraseña y edición de información personal funcionan de extremo a extremo.
+- El registro valida fecha de nacimiento y mayoría de edad; la cuenta sólo permite iniciar sesión tras confirmar el correo. Cierre de sesión, recuperación de contraseña, confirmación de registro, cambio confirmado de correo y edición de información personal funcionan de extremo a extremo.
 - Un visitante puede preparar un carrito; al autenticarse, el conjunto invitado se conserva junto al carrito de cuenta sin mezclarse. Cada conjunto muestra su total, se paga por separado y produce una orden independiente.
 - Los productos activos se pueden comprar usando su precio vigente, sin control de existencias ni reserva de inventario.
 - Stripe confirma cada pago mediante su notificación firmada; la orden aparece en “Mis pedidos” y se envía el correo con exactamente los dos PDF acordados.

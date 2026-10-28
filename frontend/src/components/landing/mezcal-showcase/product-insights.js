@@ -97,7 +97,7 @@ export default function ProductInsights({ product }) {
               setActive((current) => nextInsight(current, `touch:${key}`));
             }
           }}
-          className={`inline-flex min-h-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 font-ui text-xs font-semibold uppercase tracking-[0.06em] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mictlan-gold sm:px-3 ${['profile', 'alcohol', 'volume'].includes(key) ? 'min-w-11' : ''} ${active === key ? 'border-mictlan-gold bg-mictlan-gold text-mictlan-brown-ink [text-shadow:none]' : 'border-white/55 bg-black/45 text-white hover:border-mictlan-gold hover:text-mictlan-gold'}`}
+          className={`inline-flex min-h-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 font-ui text-xs font-semibold uppercase tracking-[0.06em] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mictlan-teal sm:px-3 ${['profile', 'alcohol', 'volume'].includes(key) ? 'min-w-11' : ''} ${active === key ? 'border-mictlan-gold bg-mictlan-gold text-mictlan-brown-ink [text-shadow:none]' : 'border-mictlan-bone/55 bg-mictlan-ink/45 text-mictlan-bone hover:border-mictlan-gold hover:text-mictlan-gold'}`}
         >
           {display}
         </button>
@@ -113,23 +113,23 @@ export default function ProductInsights({ product }) {
             {active === 'profile' && (
               <>
                 <p className="font-ui text-xs font-semibold uppercase tracking-[0.1em] text-mictlan-gold">Sobre este destilado</p>
-                {product.labels?.[0] && <p className="mt-2 font-ui text-sm font-medium text-white">{product.labels[0]}</p>}
+                {product.labels?.[0] && <p className="mt-2 font-ui text-sm font-medium text-mictlan-bone">{product.labels[0]}</p>}
                 <p className="mt-2 font-serif text-base italic leading-6 text-mictlan-cream">{product.sensoryProfile}</p>
               </>
             )}
             {active === 'alcohol' && (
               <>
                 <p className="font-ui text-xs font-semibold uppercase tracking-[0.1em] text-mictlan-gold">Alc. Vol.</p>
-                <p className="mt-1 font-ui text-2xl font-medium tabular-nums text-white">{formatAlcohol(product.alcohol)}</p>
+                <p className="mt-1 font-ui text-2xl font-medium tabular-nums text-mictlan-bone">{formatAlcohol(product.alcohol)}</p>
                 {product.alcohol.minPercent !== product.alcohol.maxPercent && (
-                  <p className="mt-1 font-ui text-xs uppercase tracking-[0.05em] text-white/80">Rango indicado en el catálogo</p>
+                  <p className="mt-1 font-ui text-xs uppercase tracking-[0.05em] text-mictlan-bone/80">Rango indicado en el catálogo</p>
                 )}
               </>
             )}
             {active === 'volume' && (
               <>
                 <p className="font-ui text-xs font-semibold uppercase tracking-[0.1em] text-mictlan-gold">Contenido neto</p>
-                <p className="mt-1 font-ui text-2xl font-medium tabular-nums text-white">{product.volumeMl} ml</p>
+                <p className="mt-1 font-ui text-2xl font-medium tabular-nums text-mictlan-bone">{product.volumeMl} ml</p>
               </>
             )}
           </div>
