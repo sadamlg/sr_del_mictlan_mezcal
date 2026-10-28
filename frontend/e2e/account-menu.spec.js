@@ -93,6 +93,13 @@ test('registration separates first names and surnames', async ({ page }) => {
   await expect(page.getByLabel('Apellidos')).toBeVisible();
   await expect(page.getByLabel('Nombre(s)')).toHaveAttribute('required', '');
   await expect(page.getByLabel('Apellidos')).toHaveAttribute('required', '');
+  const birthDateButton = page.getByLabel('Fecha de nacimiento');
+  await birthDateButton.click();
+  const datePicker = page.getByRole('dialog', { name: 'Calendario de fecha de nacimiento' });
+  await expect(datePicker.getByLabel('Año de nacimiento')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(datePicker).not.toBeVisible();
+  await expect(birthDateButton).toBeFocused();
   await expect(page.getByRole('button', { name: 'Crear mi cuenta' })).toHaveCSS('background-color', 'rgb(15, 80, 71)');
 });
 
