@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { mediaObjectUrl } from '../../lib/media-url';
+import { useCart } from '../cart/cart-provider.js';
 import {
   AGE_GATE_PHASES,
   getShowcaseObserverOptions,
@@ -13,6 +14,7 @@ import {
 const AGE_CONFIRMATION_KEY = 'mictlan-age-confirmed-v1';
 
 export default function AgeGate({ children, mediaBaseUrl }) {
+  const { account, sessionState } = useCart();
   const [phase, setPhase] = useState(AGE_GATE_PHASES.CHECKING);
   const hasOpenedRef = useRef(false);
   const previousFocusRef = useRef(null);
@@ -30,8 +32,15 @@ export default function AgeGate({ children, mediaBaseUrl }) {
     } catch {
       // The page remains usable when browser storage is unavailable; the prompt will return on reload.
     }
+
+    if (account || sessionState === 'account') {
+      setPhase(AGE_GATE_PHASES.VERIFIED);
+      return;
+    }
+
+    if (sessionState === 'loading') return;
     setPhase(AGE_GATE_PHASES.ARMED);
-  }, []);
+  }, [account, sessionState]);
 
   useEffect(() => {
     if (phase !== AGE_GATE_PHASES.ARMED) return undefined;

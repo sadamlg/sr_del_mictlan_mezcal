@@ -31,14 +31,10 @@ export function CartProvider({ children }) {
   const refreshSession = useCallback(async () => {
     const sequence = ++requestSequence.current;
     setSessionState('loading');
+
+    let result;
     try {
-      const result = await accountRequest('auth/session');
-      const nextCart = await getAccountCart();
-      if (sequence !== requestSequence.current) return;
-      setAccount(result.account);
-      setAccountCart(nextCart);
-      setError('');
-      setSessionState('account');
+      result = await accountRequest('auth/session');
     } catch (requestError) {
       if (sequence !== requestSequence.current) return;
       if (requestError.status === 401) {
@@ -49,6 +45,22 @@ export function CartProvider({ children }) {
         setError(requestError.message || 'No se pudo comprobar tu sesión.');
         setSessionState('error');
       }
+      return;
+    }
+
+    if (sequence !== requestSequence.current) return;
+    setAccount(result.account);
+
+    try {
+      const nextCart = await getAccountCart();
+      if (sequence !== requestSequence.current) return;
+      setAccountCart(nextCart);
+      setError('');
+      setSessionState('account');
+    } catch (requestError) {
+      if (sequence !== requestSequence.current) return;
+      setError(requestError.message || 'No se pudo consultar el carrito de tu cuenta.');
+      setSessionState('error');
     }
   }, []);
 

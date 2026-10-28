@@ -47,7 +47,13 @@ function CartContents({ titleId, closeButtonRef, onDismiss, showCloseButton, ...
       <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-5 sm:px-7">
         {error && <p className="border border-mictlan-red/35 bg-mictlan-burgundy/20 px-4 py-3 text-sm text-mictlan-error-text" role="alert">{error}</p>}
         {sessionState === 'loading' && <p className="text-sm text-mictlan-sage-muted" role="status">Consultando tu cuenta…</p>}
-        {sessionState === 'error' && <p className="text-sm text-mictlan-error-text" role="alert">No pudimos consultar tu cuenta. Intenta cerrar y abrir el carrito.</p>}
+        {sessionState === 'error' && (
+          <p className="text-sm text-mictlan-error-text" role="alert">
+            {account
+              ? 'No pudimos cargar el carrito de tu cuenta. Intenta cerrar y abrir el carrito.'
+              : 'No pudimos consultar tu cuenta. Intenta cerrar y abrir el carrito.'}
+          </p>
+        )}
         <CartSet
           title="Carrito de invitado"
           items={guestLines}
