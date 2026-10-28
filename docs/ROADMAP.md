@@ -70,8 +70,8 @@ flowchart TB
 ### 08. Integración y aceptación en staging
 
 - **Dependencias:** fases 03 a 07.
-- **Resultado esperado:** servicios desplegados y configurados en staging para verificar los recorridos completos con Stripe en modo de prueba, correo y medios no productivos. Se configura aquí la capa pública de Cloudflare necesaria para staging, si corresponde.
-- **Criterio de cierre:** los criterios de terminado del MVP están verificados en staging; los fallos y limitaciones conocidos tienen resolución antes de producción. Los medios y datos de staging están separados de producción.
+- **Resultado esperado:** servicios desplegados y configurados en staging para verificar los recorridos completos con Stripe en modo de prueba, correo y medios no productivos. Se configura aquí la capa pública de Cloudflare necesaria para staging y Turnstile en modo administrado para registro e inicio de sesión; el backend valida los tokens con Siteverify.
+- **Criterio de cierre:** los criterios de terminado del MVP están verificados en staging; los formularios de registro e inicio de sesión aceptan tokens válidos y rechazan tokens ausentes o inválidos; los fallos y limitaciones conocidos tienen resolución antes de producción. Los medios y datos de staging están separados de producción.
 
 ### 09. Preparación y salida a producción
 
