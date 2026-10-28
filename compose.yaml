@@ -122,8 +122,10 @@ services:
     init: true
     environment:
       NODE_ENV: development
+      CI: "true"
       NEXT_TELEMETRY_DISABLED: "1"
-      INTERNAL_API_URL: ""
+      INTERNAL_API_URL: http://backend:3000
+      NEXT_PUBLIC_API_URL: http://backend:3000
       MEDIA_BASE_URL: http://localhost:3100
     volumes:
       - ./frontend/src:/app/src
@@ -131,6 +133,9 @@ services:
       - ./frontend/e2e:/app/e2e
       - ./frontend/playwright.config.js:/app/playwright.config.js:ro
     command: ["npm", "run", "test:e2e"]
+    depends_on:
+      backend:
+        condition: service_healthy
 
 volumes:
   postgres_data:

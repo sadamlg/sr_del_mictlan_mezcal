@@ -28,7 +28,7 @@ Publicar una tienda en línea que presente la marca y sus productos, permita a v
 
 ### Cuentas y perfil
 
-- Una persona puede registrarse, confirmar su correo antes de activar la cuenta, iniciar y cerrar sesión, y recuperar su contraseña mediante un enlace enviado por correo. El registro no inicia sesión ni permite consultar la cuenta hasta que se confirme la dirección; al confirmarla, la sesión se inicia y vuelve a la landing.
+- Una persona puede registrarse, iniciar y cerrar sesión, y recuperar su contraseña mediante correo. La cuenta queda pendiente hasta confirmar su dirección; al confirmarla, se inicia la sesión y vuelve a la landing.
 - El registro solicita nombre(s), apellidos, correo electrónico, fecha de nacimiento y dirección en México. La fecha debe ser válida y acreditar que la persona tiene al menos 18 años.
 - La dirección incluye calle, número, colonia, ciudad o delegación, estado y código postal. Se validan los campos y el formato básico del código postal; no se consulta una base externa de direcciones.
 - La información personal editable incluye nombre(s), apellidos, correo electrónico, fecha de nacimiento y todos los campos de dirección. La fecha de nacimiento nueva debe seguir acreditando que la persona tiene al menos 18 años.
@@ -42,9 +42,8 @@ Publicar una tienda en línea que presente la marca y sus productos, permita a v
 ### Carrito y compra
 
 - Un visitante puede agregar productos, cambiar cantidades y quitarlos sin crear una cuenta.
-- El carrito de invitado se conserva en el mismo navegador durante 30 días desde la última actividad y mantiene sus productos al registrarse o iniciar sesión. Si la cuenta ya tiene productos, ambos conjuntos permanecen separados y visibles en una sola sección de carrito, cada uno con sus propios artículos, total y acción de pago.
-- El carrito de la cuenta se conserva para futuras visitas. Completar una compra no vacía el otro conjunto.
-- Cada conjunto se paga por separado y genera una orden independiente. No se fusionan ni se cobran juntos.
+- El carrito de invitado se conserva en el mismo navegador durante 30 días desde la última actividad. Al registrarse o iniciar sesión, sus cantidades se suman por producto a las que ya tenga la cuenta y se muestra un solo carrito. La transferencia se puede reintentar sin duplicar artículos.
+- El carrito de la cuenta se conserva para futuras visitas. Cada compra confirmada genera un pedido; una cuenta puede tener varios pedidos en su historial.
 - Antes de iniciar el pago, el sistema vuelve a validar el estado activo y el precio vigente de cada producto. No reserva ni comprueba existencias.
 
 ### Pago, pedidos y correo
@@ -52,7 +51,7 @@ Publicar una tienda en línea que presente la marca y sus productos, permita a v
 - El pago se realiza en Stripe Checkout alojado.
 - Si el cliente da su consentimiento, Stripe puede guardar el método de pago para reutilizarlo en futuras compras. El perfil no incluye gestión de tarjetas: para usar otra tarjeta, el cliente la introduce en Stripe al pagar una nueva orden. La aplicación no almacena el número completo ni el código de seguridad.
 - El backend confirma el pago con la notificación firmada de Stripe; el regreso del navegador no confirma por sí mismo una compra.
-- Tras confirmarse el pago, se guarda la orden y aparece en “Mis pedidos”. Cada conjunto de compra pagado produce su propia orden.
+- Tras confirmarse el pago, se guarda la orden y aparece en “Mis pedidos”. Cada compra confirmada produce su propia orden.
 - Para cada compra confirmada se envía un correo con exactamente dos PDF adjuntos: comprobante de pago y copia de la orden.
 - Los correos de recuperación de contraseña, confirmación de registro y confirmación de cambio de correo también están incluidos. No se incluyen correos promocionales ni de recuperación de carritos.
 
@@ -61,7 +60,7 @@ Publicar una tienda en línea que presente la marca y sus productos, permita a v
 - Panel administrativo para administrar cuentas, productos, inventario o archivos.
 - Conteo, reserva, ajuste o verificación de existencias.
 - Módulo de logística o integración con proveedores de entrega.
-- Fusionar los productos de los conjuntos de compra o cobrarlos en una sola operación.
+- Mantener varios carritos o borradores de compra simultáneos por cuenta.
 - Páginas independientes de catálogo, categorías o detalle de producto.
 - Administración de tarjetas desde el perfil o un flujo separado para guardarlas sin realizar una compra.
 - Documentos fiscales; los únicos PDF de compra son el comprobante de pago y la copia de la orden.
@@ -71,7 +70,7 @@ Publicar una tienda en línea que presente la marca y sus productos, permita a v
 
 - La landing presenta los productos activos y el aviso de edad cumple el flujo definido, sin depender del consentimiento de cookies.
 - El registro valida fecha de nacimiento y mayoría de edad; la cuenta sólo permite iniciar sesión tras confirmar el correo. Cierre de sesión, recuperación de contraseña, confirmación de registro, cambio confirmado de correo y edición de información personal funcionan de extremo a extremo.
-- Un visitante puede preparar un carrito; al autenticarse, el conjunto invitado se conserva junto al carrito de cuenta sin mezclarse. Cada conjunto muestra su total, se paga por separado y produce una orden independiente.
+- Un visitante puede preparar un carrito; al autenticarse, sus artículos se suman a los del carrito de cuenta y se presenta un solo total. Cada compra confirmada produce un pedido independiente.
 - Los productos activos se pueden comprar usando su precio vigente, sin control de existencias ni reserva de inventario.
 - Stripe confirma cada pago mediante su notificación firmada; la orden aparece en “Mis pedidos” y se envía el correo con exactamente los dos PDF acordados.
 - Los criterios anteriores están cubiertos por los contratos de módulo y validados con las pruebas y verificaciones de aceptación correspondientes. No quedan flujos incluidos representados solo por pantallas incompletas o respuestas simuladas.

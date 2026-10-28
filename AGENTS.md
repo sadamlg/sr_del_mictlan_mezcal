@@ -51,6 +51,12 @@
 - TestSprite u otro generador de pruebas puede ayudar a descubrir recorridos o proponer casos, pero no sustituye la suite del proyecto. Una prueba generada sólo cuenta después de revisión, incorporación al repositorio y ejecución reproducible con datos de prueba.
 - Los cambios sólo de contenido o presentación que no alteren comportamiento no necesitan pruebas unitarias artificiales; verifica su resultado visual y las interacciones que sí cambien.
 
+## Consumo de recursos en pruebas locales
+
+- Antes de iniciar builds de Next.js o pruebas E2E, revisa la memoria del host con `free -h` y los servicios con `docker stats --no-stream` y `docker compose ps`.
+- Ejecuta en serie las cargas intensivas: builds, Playwright/E2E y varios comandos de prueba con Compose. Usa un worker de Playwright cuando la memoria disponible sea ajustada.
+- `docker compose run --rm` elimina el contenedor al terminar, pero no limita su consumo mientras se ejecuta. Considera detener `frontend` cuando confirmes que no se está usando; se reactiva con `docker compose start frontend`.
+
 ## Forma de trabajo
 
 - Si el usuario no especifica modalidad, trabaja de forma supervisada.

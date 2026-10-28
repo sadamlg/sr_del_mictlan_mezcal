@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ACCOUNT_INPUT_CLASS, AccountField } from './account-ui';
 
@@ -36,6 +36,10 @@ const monthYearDisplay = new Intl.DateTimeFormat('es-MX', {
   year: 'numeric',
   timeZone: 'UTC',
 });
+
+const subscribeToHydration = () => () => {};
+const getHydratedSnapshot = () => true;
+const getServerHydratedSnapshot = () => false;
 
 function utcDate(year, month, day) {
   return new Date(Date.UTC(year, month, day));
@@ -94,9 +98,11 @@ function monthIndex(date) {
 }
 
 export default function AccountDatePicker(props) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
+  const mounted = useSyncExternalStore(
+    subscribeToHydration,
+    getHydratedSnapshot,
+    getServerHydratedSnapshot,
+  );
 
   if (!mounted) {
     const selectedDate = parseISODate(props.value);

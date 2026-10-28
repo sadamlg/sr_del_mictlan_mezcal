@@ -1,8 +1,8 @@
 # Guía de construcción del entorno local con Docker Compose
 
-Esta guía documenta cómo construir la base de infraestructura local de desarrollo: Next.js, Express, PostgreSQL con Prisma, un proceso worker y Mailpit. Los pasos de creación reproducen el esqueleto mínimo y sus conexiones. Si ya clonaste la aplicación actual, esos archivos están presentes: sigue el arranque del [README](../../README.md#clonar-y-configurar-el-repositorio) y usa esta guía para entender o adaptar su configuración.
+Esta guía explica el esqueleto de Docker Compose con Next.js, Express, PostgreSQL con Prisma, worker y Mailpit. Sus pasos muestran una construcción inicial; si ya clonaste la aplicación, sigue el [arranque del README](../../README.md#clonar-y-configurar-el-repositorio). Las limitaciones de esos pasos no describen todas las capacidades del código actual.
 
-El worker de esta base comprueba la conexión con PostgreSQL. La lógica de lectura y actualización de trabajos de correo, así como su envío mediante Resend, se implementará con el modelo de datos de la aplicación. Cloudflare R2, Stripe y Resend son integraciones externas; no se levantan como contenedores locales. Mailpit queda disponible para pruebas de correo durante el desarrollo.
+La aplicación actual guarda los trabajos de correo en PostgreSQL y el worker los procesa; en Compose, los envía a Mailpit. R2, Stripe y Resend son servicios externos, no contenedores locales. R2 ya entrega los medios; Stripe Checkout se integra en la fase 06 y Resend para correo de producción en la fase 07.
 
 ## Requisitos y convenciones
 
@@ -32,8 +32,7 @@ flowchart LR
     Frontend -.->|"SSR · backend:3000 · red privada"| Backend
     Backend -->|"postgres:5432 · Prisma"| PostgreSQL
     Worker -->|"postgres:5432 · trabajos de correo"| PostgreSQL
-    Backend -.->|"SMTP · cuando se configure la integración"| Mailpit
-    Worker -.->|"SMTP · cuando se configure la integración"| Mailpit
+    Worker -->|"SMTP · correo local"| Mailpit
 ~~~
 
 | Servicio | Puerto dentro de Compose | Acceso desde el anfitrión |
@@ -47,11 +46,11 @@ flowchart LR
 
 Cuando Next.js consulte Express durante SSR, el destino será <code>http://backend:3000</code>, resoluble dentro de Compose. Las peticiones que el navegador envíe a la API usarán el puerto publicado del anfitrión, normalmente <code>http://localhost:4000</code>; el navegador no puede resolver el DNS privado <code>backend</code>.
 
-Compose publica la API para que el navegador del anfitrión pueda alcanzarla, pero no configura las llamadas de la aplicación ni su política CORS. La aplicación debe permitir el origen local del frontend cuando implemente esas peticiones. El worker comparte la conexión de red privada con PostgreSQL y no necesita un puerto HTTP.
+Compose publica la API en el anfitrión. El navegador usa <code>NEXT_PUBLIC_API_URL</code> y Express permite el origen configurado en <code>FRONTEND_ORIGIN</code>. Para probar desde la LAN, ajusta las direcciones públicas según la sección 9; SSR conserva <code>http://backend:3000</code> dentro de Compose. El worker usa PostgreSQL y Mailpit por la red privada y no necesita un puerto HTTP.
 
 ## Imágenes y versiones de referencia
 
-Las etiquetas siguientes fijan las versiones de esta guía, revisadas el 17 de octubre de 2026. Los tags exactos evitan que una reconstrucción normal cambie de versión sin una modificación explícita del repositorio. Antes de actualizar una etiqueta, revisa la página oficial y valida el cambio en el entorno local.
+Las etiquetas de servicio y versiones de paquetes siguientes coinciden con los archivos de construcción y manifiestos actuales. Los valores exactos hacen reproducibles las reconstrucciones; antes de actualizarlos, revisa las fuentes oficiales y valida el cambio en local.
 
 | Uso | Imagen / versión | Motivo |
 |---|---|---|
@@ -64,7 +63,7 @@ Las dependencias JavaScript de referencia también se fijan al crear los manifie
 | Área | Paquetes de referencia |
 |---|---|
 | Backend y worker | Express <code>5.3.0</code>; Prisma CLI, <code>@prisma/client</code> y <code>@prisma/adapter-pg</code> <code>7.10.1</code>; <code>pg</code> <code>8.23.1</code> |
-| Frontend | <code>create-next-app</code> y Next.js <code>16.4.0</code>; React y React DOM <code>19.3.0</code>; Tailwind CSS, <code>@tailwindcss/postcss</code> y <code>@tailwindcss/turbopack</code> <code>4.3.3</code>; PostCSS <code>8.5.29</code> |
+| Frontend | <code>create-next-app</code> <code>16.4.0</code>; Next.js <code>16.4.1</code>; React y React DOM <code>19.3.0</code>; Tailwind CSS, <code>@tailwindcss/postcss</code> y <code>@tailwindcss/turbopack</code> <code>4.3.3</code>; PostCSS <code>8.5.29</code> |
 
 El <code>package-lock.json</code> registra las dependencias transitivas. Se conserva en Git y las imágenes instalan con <code>npm ci</code>; no se instala <code>node_modules</code> en el anfitrión. Prisma 7 usa un adaptador para conectarse a PostgreSQL y su configuración CLI define <code>DATABASE_URL</code> en <code>prisma.config.ts</code>. [Configuración oficial de Prisma Client 7](https://www.prisma.io/docs/orm/prisma-client/setup-and-configuration/introduction)
 
@@ -321,7 +320,7 @@ try {
 }
 ~~~
 
-Este proceso confirma que Compose puede ejecutar el worker como servicio separado y que éste alcanza PostgreSQL. No implementa aún la lectura de trabajos de correo; esa lógica se incorporará junto con su modelo de datos y el flujo de envío mediante Resend.
+En este paso del tutorial, el worker sólo comprueba que alcanza PostgreSQL. La aplicación actual sí procesa trabajos de correo, como se describe al inicio de esta guía.
 
 ## 3. Generar el frontend Next.js con Tailwind
 
@@ -357,7 +356,7 @@ docker run --rm \
   --workdir /app \
   node:24.21.0-bookworm-slim \
   npm install --package-lock-only --save-exact \
-    next@16.4.0 react@19.3.0 react-dom@19.3.0
+    next@16.4.1 react@19.3.0 react-dom@19.3.0
 ~~~
 
 ~~~bash
@@ -623,11 +622,11 @@ El endpoint <code>/readyz</code> de Mailpit devuelve HTTP 200 cuando está listo
 
 ### Decisiones de Compose
 
-- Compose crea una red bridge <code>&lt;nombre-del-proyecto&gt;_default</code> y DNS para cada servicio. El backend y el worker usan <code>postgres:5432</code>; la aplicación puede usar <code>mailpit:1025</code> para SMTP local si configura esa integración. No fijes IPs ni uses <code>localhost</code> para conectar dos contenedores. [Redes de Compose](https://docs.docker.com/compose/how-tos/networking/)
+- Compose crea una red bridge <code>&lt;nombre-del-proyecto&gt;_default</code> y DNS para cada servicio. El backend y el worker usan <code>postgres:5432</code>; el worker envía correo local por <code>mailpit:1025</code>. No fijes IPs ni uses <code>localhost</code> para conectar dos contenedores. [Redes de Compose](https://docs.docker.com/compose/how-tos/networking/)
 - Sólo se publican los puertos que necesita el anfitrión. PostgreSQL y la API se enlazan por defecto a <code>127.0.0.1</code>; la UI de Mailpit sólo se publica en loopback; el SMTP de Mailpit no publica puerto. El acceso desde la LAN es opcional y se explica más adelante. [Publicación de puertos](https://docs.docker.com/engine/network/port-publishing/)
 - PostgreSQL 18 monta el volumen en <code>/var/lib/postgresql</code>; PostgreSQL 17 y anteriores requieren otra ruta. La ruta oficial de la versión debe coincidir con el volumen de Compose. [Imagen oficial de PostgreSQL: PGDATA y volúmenes](https://hub.docker.com/_/postgres)
 - PostgreSQL usa un volumen nombrado. <code>docker compose down</code> lo conserva; <code>docker compose down --volumes</code> lo elimina.
-- El worker comparte la imagen y las dependencias del backend, pero ejecuta otro proceso. Lee y actualiza trabajos de correo en PostgreSQL según la arquitectura del proyecto y no necesita puerto HTTP. El esqueleto de esta guía sólo verifica la conectividad con la base.
+- El worker comparte la imagen y las dependencias del backend, pero ejecuta otro proceso. Lee y actualiza trabajos de correo en PostgreSQL y no necesita puerto HTTP. El esqueleto de este tutorial sólo verifica la conectividad con la base.
 - Next.js usa <code>backend:3000</code> para las consultas SSR privadas. Las interacciones iniciadas por el navegador usan <code>NEXT_PUBLIC_API_URL</code> y el puerto publicado de Express.
 - El directorio generado de Prisma se encuentra en <code>/app/generated</code>, fuera de los volúmenes montados. Así, el montaje de <code>src/</code> no oculta el cliente y el inicio regenera el cliente a partir del esquema local.
 
@@ -661,7 +660,7 @@ docker compose exec --no-TTY backend npm run prisma:generate
 curl --fail --show-error --silent http://localhost:4000/health
 ~~~
 
-La respuesta esperada de <code>/health</code> es <code>{"status":"ok"}</code>. La ruta ejecuta <code>SELECT 1</code> con Prisma; si PostgreSQL no responde, Express devuelve HTTP 503. Todavía no hay modelos de negocio ni migraciones: crea la primera migración cuando el proyecto defina sus modelos.
+La respuesta esperada de <code>/health</code> es <code>{"status":"ok"}</code>. La ruta ejecuta <code>SELECT 1</code> con Prisma; si PostgreSQL no responde, Express devuelve HTTP 503. En este esqueleto inicial todavía no hay modelos de negocio ni migraciones; la aplicación actual sí los incluye.
 
 Comprueba el estado de todos los servicios:
 
@@ -670,7 +669,7 @@ docker compose ps
 docker compose logs --no-color --tail=30 worker
 ~~~
 
-Todos los servicios deben aparecer como <code>Up</code> y <code>healthy</code>. En los logs del worker debe aparecer <code>Worker iniciado; PostgreSQL está disponible.</code>. Esta comprobación sólo valida la conectividad; el procesamiento de trabajos se verificará cuando se implemente el modelo de trabajos de correo.
+Todos los servicios deben aparecer como <code>Up</code> y <code>healthy</code>. En los logs del worker debe aparecer <code>Worker iniciado; PostgreSQL está disponible.</code>. Este paso del tutorial sólo verifica la conectividad; el worker de la aplicación también procesa los trabajos de correo.
 
 ### Frontend
 
@@ -729,36 +728,31 @@ No confirmes un reset si hay datos locales que necesites conservar. Prisma docum
 
 ## 9. Acceso opcional desde la red local
 
-La aplicación actual usa Next.js 16.4.1 y ejecuta <code>next dev</code>; este repositorio no usa Vite. Next ya lee <code>NEXT_ALLOWED_DEV_ORIGIN</code> en <code>frontend/next.config.mjs</code> y lo pasa a la opción <code>allowedDevOrigins</code>. No hay que editar una configuración de Vite.
+La aplicación usa Next.js 16.4.1 con <code>next dev</code>. Para probar desde otro dispositivo, el frontend y la API deben publicarse en la LAN: el login, la cuenta y el carrito envían peticiones del navegador a Express.
 
-Estas tres variables resuelven cosas distintas:
+En <code>.env</code>, sustituye <code>192.168.1.20</code> por la IP LAN del anfitrión:
 
-| Variable | Qué controla | Valor para una prueba LAN |
-| --- | --- | --- |
-| <code>FRONTEND_BIND_ADDRESS</code> | La interfaz del anfitrión donde Compose publica el puerto del frontend. No cambia la red bridge ni la escucha interna del contenedor. | <code>0.0.0.0</code> |
-| <code>NEXT_ALLOWED_DEV_ORIGIN</code> | El host desde el que Next permite solicitudes de recursos y endpoints de desarrollo. Next compara sólo el hostname; omite protocolo y puerto. | La IP LAN del anfitrión, por ejemplo <code>192.168.1.20</code> |
-| <code>MEDIA_BASE_URL</code> | La base para formar URL de imágenes. No publica puertos ni autoriza orígenes de desarrollo. En LAN permite que el backend genere URL de catálogo accesibles desde el teléfono. | <code>http://192.168.1.20:3000</code> |
-
-Si pruebas el frontend en la LAN con medios de R2, conserva las dos primeras variables y usa la URL pública HTTPS de R2 como <code>MEDIA_BASE_URL</code>. El procedimiento de prueba está en la [guía de R2](../cloudflare/r2.md#estado-actual-y-prueba-local).
-
-Next y Express escuchan en <code>0.0.0.0</code> dentro de sus contenedores; la dirección izquierda de <code>ports</code> controla qué interfaces del anfitrión publican los puertos. Next sigue llamando a Express por <code>INTERNAL_API_URL=http://backend:3000</code> dentro de la red bridge. Si el navegador necesita llamar directamente a Express, aplica también los pasos opcionales de <code>BACKEND_BIND_ADDRESS</code>, <code>NEXT_PUBLIC_API_URL</code> y CORS descritos más abajo.
-
-Si necesitas probar la tienda desde otro dispositivo de tu LAN:
-
-1. En <code>.env</code>, cambia <code>FRONTEND_BIND_ADDRESS</code> a <code>0.0.0.0</code>.
-2. Establece <code>NEXT_ALLOWED_DEV_ORIGIN</code> con la IP LAN del equipo anfitrión, sin protocolo ni puerto, por ejemplo <code>192.168.1.20</code>.
-3. Si sirves medios locales, establece <code>MEDIA_BASE_URL</code> al origen del frontend con esa misma IP, por ejemplo <code>http://192.168.1.20:3000</code>. El backend usa ese valor para construir las URL del catálogo; el teléfono no debe recibir URL con <code>localhost</code>. Los medios estáticos del frontend usan rutas locales en este caso.
-4. Para medios locales, recrea el frontend y el backend para aplicar la configuración. Si usas R2, ejecuta el comando de la guía de R2:
-
-~~~bash
-docker compose up --detach --force-recreate frontend backend
+~~~dotenv
+FRONTEND_BIND_ADDRESS=0.0.0.0
+BACKEND_BIND_ADDRESS=0.0.0.0
+NEXT_ALLOWED_DEV_ORIGIN=192.168.1.20
+NEXT_PUBLIC_API_URL=http://192.168.1.20:4000
+FRONTEND_ORIGIN=http://192.168.1.20:3000
+MEDIA_BASE_URL=http://192.168.1.20:3000
+APP_BASE_URL=http://192.168.1.20:3000
 ~~~
 
-Desde el otro dispositivo abre <code>http://&lt;IP-LAN-del-anfitrión&gt;:3000</code>. <code>0.0.0.0</code> en <code>ports</code> enlaza el puerto publicado a todas las interfaces IPv4 del anfitrión; no es la IP de la red bridge ni cambia las conexiones privadas entre contenedores. Usa esta opción sólo en una red local confiable y permite el puerto en el firewall si tu sistema lo bloquea. [Opción <code>allowedDevOrigins</code> de Next.js](https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins)
+Si usas R2, conserva su URL pública HTTPS en <code>MEDIA_BASE_URL</code>. <code>APP_BASE_URL</code> hace que los enlaces de confirmación y recuperación apunten al frontend accesible desde el dispositivo. <code>NEXT_ALLOWED_DEV_ORIGIN</code> recibe sólo el hostname, sin protocolo ni puerto. <code>INTERNAL_API_URL=http://backend:3000</code> no cambia: Next.js sigue usando ese destino dentro de la red bridge.
 
-Si editas <code>frontend/next.config.mjs</code>, Compose no toma el archivo actualizado al recrear el contenedor porque no está montado como volumen; reconstruye la imagen con <code>--build</code>. La configuración de <code>images.remotePatterns</code> aparece en la sección 3; la [guía dedicada de R2](../cloudflare/r2.md) explica cuándo usar el origen público de medios.
+Recrea los servicios para aplicar las variables y abre <code>http://192.168.1.20:3000</code> desde el otro dispositivo:
 
-Esta opción sólo publica el frontend en la LAN. Si la página necesita enviar peticiones desde ese dispositivo a Express, también debes cambiar <code>BACKEND_BIND_ADDRESS</code> a <code>0.0.0.0</code>, actualizar <code>NEXT_PUBLIC_API_URL</code> con la IP LAN y puerto de la API, y permitir ese origen en la configuración CORS de Express. El acceso LAN del frontend no activa esas opciones por defecto.
+~~~bash
+docker compose up --detach --force-recreate frontend backend worker
+~~~
+
+<code>0.0.0.0</code> en <code>ports</code> publica los puertos en todas las interfaces IPv4 del anfitrión; no es la IP de la red bridge. Usa esta opción sólo en una red local confiable y permite los puertos en el firewall si hace falta. [Opción <code>allowedDevOrigins</code> de Next.js](https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins)
+
+Si editas <code>frontend/next.config.mjs</code>, reconstruye la imagen con <code>--build</code>, porque Compose no monta ese archivo dentro del contenedor. Para medios R2 y su configuración, consulta la [guía dedicada](../cloudflare/r2.md).
 
 ## 10. Detener y limpiar
 

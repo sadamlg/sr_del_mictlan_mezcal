@@ -166,6 +166,44 @@ Docker Compose construye las imágenes del frontend y backend, y levanta fronten
 | Mailpit; bandeja de correo de desarrollo | [http://localhost:8025](http://localhost:8025) |
 | PostgreSQL | `localhost:5432` |
 
+### Reiniciar, recrear o reconstruir frontend y API
+
+Usa el comando según el tipo de cambio:
+
+```bash
+# Reinicia los procesos dentro de los contenedores existentes.
+docker compose restart frontend backend
+
+# Recrea ambos contenedores para aplicar cambios de .env o compose.yaml.
+docker compose up --detach --force-recreate frontend backend
+
+# Reconstruye sus imágenes y recrea los contenedores tras cambiar Dockerfiles,
+# dependencias o configuración de Next.js que se copia a la imagen.
+docker compose up --build --detach --force-recreate frontend backend
+```
+
+`restart` no aplica cambios de variables de entorno ni de publicación de puertos; para eso usa `--force-recreate`. Reconstruir las imágenes no es necesario para cambios sólo en `.env`.
+
+### Acceder desde otro dispositivo de la red local
+
+Sustituye `192.168.1.20` por la IP LAN del equipo anfitrión. En `.env`, configura frontend y API con ese mismo host:
+
+```dotenv
+FRONTEND_BIND_ADDRESS=0.0.0.0
+BACKEND_BIND_ADDRESS=0.0.0.0
+NEXT_ALLOWED_DEV_ORIGIN=192.168.1.20
+NEXT_PUBLIC_API_URL=http://192.168.1.20:4000
+FRONTEND_ORIGIN=http://192.168.1.20:3000
+```
+
+Conserva `INTERNAL_API_URL=http://backend:3000`; sólo se usa entre contenedores. Si sirves imágenes locales, configura `MEDIA_BASE_URL=http://192.168.1.20:3000`; si usas R2, conserva su URL pública HTTPS. Aplica la configuración recreando los servicios:
+
+```bash
+docker compose up --detach --force-recreate frontend backend
+```
+
+Después abre `http://192.168.1.20:3000`. Publicar la API en la LAN también permite que otros dispositivos de esa red alcancen el puerto 4000; usa esta configuración sólo en una red confiable. La [guía de Docker Compose](docs/docker/guia-de-construccion-docker-compose.md#9-acceso-opcional-desde-la-red-local) explica los detalles.
+
 Para consultar la salida de los servicios, ejecuta `docker compose logs --follow`; Ctrl+C deja los contenedores en ejecución. Para detenerlos:
 
 ```bash

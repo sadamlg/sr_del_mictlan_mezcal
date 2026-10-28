@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { Eye, EyeOff, Mail } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -23,7 +22,7 @@ export default function SignInView() {
     setErrorKind('error');
     try {
       await accountRequest('auth/login', { method: 'POST', body: { email, password } });
-      router.replace('/cuenta');
+      router.replace('/');
     } catch (requestError) {
       setError(requestError.message);
       if (requestError.code === 'EMAIL_NOT_VERIFIED') setErrorKind('info');
@@ -36,7 +35,6 @@ export default function SignInView() {
     <AccountCard
       title="Inicia sesión"
       description="Vuelve a tu espacio personal y consulta tus datos y pedidos."
-      emblem={<Image src="/images/age-gate/skull.png" alt="" width={56} height={56} sizes="56px" loading="eager" className="size-12 object-contain opacity-80" />}
     >
       <form className="space-y-5" onSubmit={submit}>
         {error && <AccountNotice kind={errorKind}>{error}</AccountNotice>}
