@@ -8,29 +8,31 @@ import HeaderActions from './header-actions';
 import MobileMenu, { MobileMenuToggle } from './mobile-menu';
 import { ACCOUNT_SESSION_CHANGED_EVENT, accountRequest } from '../../lib/account-api';
 import { mediaObjectUrl } from '../../lib/media-url';
+import { useCart } from '../cart/cart-provider';
 import {
   lockBodyScroll,
-  nextMenuState,
   shouldDisplayHeader,
   shouldHideHeaderOnScroll,
 } from './behavior';
 
 export default function SiteHeader({ mediaBaseUrl }) {
   const router = useRouter();
+  const { activePanel, closeMobileMenu, closeMobilePanel, toggleMobileMenu } = useCart();
   const [account, setAccount] = useState(null);
   const [signOutPending, setSignOutPending] = useState(false);
   const [signOutError, setSignOutError] = useState('');
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
   const [brandImageReady, setBrandImageReady] = useState(false);
   const sessionRefreshSequence = useRef(0);
   const brandImageRef = useRef(null);
   const lastScrollY = useRef(0);
-  const headerShouldDisplay = shouldDisplayHeader(headerVisible, menuOpen);
-  const closeMenu = () => setMenuOpen((open) => nextMenuState(open, 'navigate'));
+  const menuOpen = activePanel === 'menu';
+  const headerShouldDisplay = shouldDisplayHeader(headerVisible, activePanel !== null);
+  const closeMenu = closeMobilePanel;
   const toggleMenu = () => {
     setHeaderVisible(true);
-    setMenuOpen((open) => nextMenuState(open, 'toggle'));
+    toggleMobileMenu();
   };
   const refreshAccount = useCallback(async () => {
     const requestSequence = ++sessionRefreshSequence.current;
@@ -47,7 +49,7 @@ export default function SiteHeader({ mediaBaseUrl }) {
     setSignOutError('');
     try {
       await accountRequest('auth/logout', { method: 'POST' });
-      setMenuOpen(false);
+      closeMobilePanel();
       router.replace('/cuenta/iniciar-sesion');
     } catch (error) {
       setSignOutError(error.message);
@@ -72,13 +74,15 @@ export default function SiteHeader({ mediaBaseUrl }) {
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(min-width: 1024px)');
-    const closeAtDesktop = (event) => {
-      if (event.matches) setMenuOpen((open) => nextMenuState(open, 'desktop'));
+    const updateViewport = (event) => {
+      setIsDesktop(event.matches);
+      if (event.matches) closeMobileMenu();
     };
 
-    mediaQuery.addEventListener('change', closeAtDesktop);
-    return () => mediaQuery.removeEventListener('change', closeAtDesktop);
-  }, []);
+    setIsDesktop(mediaQuery.matches);
+    mediaQuery.addEventListener('change', updateViewport);
+    return () => mediaQuery.removeEventListener('change', updateViewport);
+  }, [closeMobileMenu]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -92,9 +96,24 @@ export default function SiteHeader({ mediaBaseUrl }) {
   }, []);
 
   useEffect(() => {
-    if (!menuOpen) return undefined;
+    if (isDesktop || activePanel === null) return undefined;
     return lockBodyScroll(document.body);
-  }, [menuOpen]);
+  }, [activePanel, isDesktop]);
+
+  useEffect(() => {
+    if (isDesktop || activePanel === null) return undefined;
+
+    const closeOnEscape = (event) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      const toggleId = activePanel === 'cart' ? 'cart-toggle' : 'mobile-menu-toggle';
+      closeMobilePanel();
+      document.getElementById(toggleId)?.focus();
+    };
+
+    document.addEventListener('keydown', closeOnEscape);
+    return () => document.removeEventListener('keydown', closeOnEscape);
+  }, [activePanel, closeMobilePanel, isDesktop]);
 
   return (
     <>
@@ -150,6 +169,7 @@ export default function SiteHeader({ mediaBaseUrl }) {
           </nav>
           <HeaderActions
             account={account}
+            isDesktop={isDesktop}
             onSignOut={signOut}
             signOutPending={signOutPending}
             signOutError={signOutError}

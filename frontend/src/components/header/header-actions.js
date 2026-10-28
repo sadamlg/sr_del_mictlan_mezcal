@@ -1,12 +1,13 @@
-import { ShoppingBasket, UserRound } from 'lucide-react';
+import { ShoppingBasket, UserRound, X } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { useCart } from '../cart/cart-provider.js';
 
-export default function HeaderActions({ account, onSignOut, signOutPending, signOutError }) {
+export default function HeaderActions({ account, isDesktop, onSignOut, signOutPending, signOutError }) {
   const [isOpen, setIsOpen] = useState(false);
   const accountControlRef = useRef(null);
-  const { itemCount, openDrawer } = useCart();
+  const { activePanel, itemCount, toggleDrawer } = useCart();
+  const cartOpen = activePanel === 'cart';
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -62,13 +63,19 @@ export default function HeaderActions({ account, onSignOut, signOutPending, sign
         )}
       </div>
       <button
+        id="cart-toggle"
         type="button"
-        onClick={openDrawer}
+        onClick={toggleDrawer}
         className="relative inline-flex size-11 shrink-0 items-center justify-center rounded-sm text-mictlan-sand/90 transition-[color,transform] duration-100 hover:scale-90 hover:text-mictlan-teal focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mictlan-teal"
-        aria-label={`Abrir carrito, ${itemCount} ${itemCount === 1 ? 'unidad' : 'unidades'}`}
+        aria-label={`${cartOpen && !isDesktop ? 'Cerrar' : 'Abrir'} carrito, ${itemCount} ${itemCount === 1 ? 'unidad' : 'unidades'}`}
+        aria-expanded={cartOpen}
+        aria-controls={isDesktop ? (cartOpen ? 'desktop-cart-dialog' : undefined) : 'mobile-cart-panel'}
       >
-        <ShoppingBasket className="size-7" aria-hidden="true" />
-        {itemCount > 0 && <span className="absolute -right-0.5 -top-0.5 flex min-h-5 min-w-5 items-center justify-center rounded-full bg-mictlan-teal-deep px-1 font-ui text-[0.65rem] font-semibold tabular-nums text-mictlan-bone" aria-hidden="true">{itemCount}</span>}
+        <span className={`relative size-7 transition-transform duration-[800ms] ease-in-out motion-reduce:transition-none${cartOpen ? ' rotate-180 lg:rotate-0' : ''}`} aria-hidden="true">
+          <ShoppingBasket className={`absolute inset-0 size-7 text-current transition-opacity duration-500 motion-reduce:transition-none${cartOpen ? ' opacity-0 lg:opacity-100' : ' opacity-100'}`} />
+          <X className={`absolute inset-0 size-7 text-current transition-opacity duration-1000 motion-reduce:transition-none${cartOpen ? ' opacity-100 lg:opacity-0' : ' opacity-0'}`} />
+        </span>
+        {itemCount > 0 && <span className={`absolute -right-0.5 -top-0.5 min-h-5 min-w-5 items-center justify-center rounded-full bg-mictlan-teal-deep px-1 font-ui text-[0.65rem] font-semibold tabular-nums text-mictlan-bone${cartOpen ? ' hidden lg:flex' : ' flex'}`} aria-hidden="true">{itemCount}</span>}
       </button>
     </div>
   );
