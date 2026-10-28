@@ -5,6 +5,11 @@ export async function getAccountCart() {
   return result.cart;
 }
 
+export async function mergeGuestCart(transfer) {
+  const result = await accountRequest('cart/account/merge', { method: 'POST', body: transfer });
+  return result.cart;
+}
+
 export async function getPublicCatalog() {
   const result = await accountRequest('catalog/products');
   return Array.isArray(result.products) ? result.products : [];

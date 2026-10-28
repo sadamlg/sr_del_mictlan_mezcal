@@ -13,7 +13,9 @@ function CartContents({ titleId, closeButtonRef, onDismiss, showCloseButton, ...
     error,
     guestLines,
     guestSubtotal,
+    mergeConflict,
     removeItem,
+    retryCart,
     sessionState,
     setError,
     setQuantity,
@@ -48,38 +50,22 @@ function CartContents({ titleId, closeButtonRef, onDismiss, showCloseButton, ...
         {error && <p className="border border-mictlan-red/35 bg-mictlan-burgundy/20 px-4 py-3 text-sm text-mictlan-error-text" role="alert">{error}</p>}
         {sessionState === 'loading' && <p className="text-sm text-mictlan-sage-muted" role="status">Consultando tu cuenta…</p>}
         {sessionState === 'error' && (
-          <p className="text-sm text-mictlan-error-text" role="alert">
-            {account
-              ? 'No pudimos cargar el carrito de tu cuenta. Intenta cerrar y abrir el carrito.'
-              : 'No pudimos consultar tu cuenta. Intenta cerrar y abrir el carrito.'}
-          </p>
+          <button type="button" onClick={retryCart} className="min-h-11 border border-mictlan-teal/35 px-4 text-sm text-mictlan-teal focus-visible:outline-2 focus-visible:outline-mictlan-teal">Reintentar carga del carrito</button>
         )}
         <CartSet
-          title="Carrito de invitado"
-          items={guestLines}
-          subtotal={guestSubtotal}
-          type="guest"
-          busy={busy}
+          title="Tus productos"
+          items={sessionState === 'account' ? accountCart.items : guestLines}
+          subtotal={sessionState === 'account' ? accountCart.subtotal : guestSubtotal}
+          type={sessionState === 'account' ? 'account' : 'guest'}
+          busy={busy || sessionState === 'loading' || (sessionState === 'error' && Boolean(account) && !mergeConflict)}
           authenticated={Boolean(account)}
           onQuantityChange={setQuantity}
           onRemove={removeItem}
         />
-        {account && (
-          <CartSet
-            title="Carrito de tu cuenta"
-            items={accountCart.items}
-            subtotal={accountCart.subtotal}
-            type="account"
-            busy={busy}
-            authenticated
-            onQuantityChange={setQuantity}
-            onRemove={removeItem}
-          />
-        )}
         {sessionState === 'guest' && (
           <p className="border border-mictlan-sand/15 px-4 py-3 text-sm leading-6 text-mictlan-sage-muted">
             <ShoppingBasket className="mr-2 inline size-4 text-mictlan-teal" aria-hidden="true" />
-            Tu carrito de cuenta aparecerá aquí cuando inicies sesión. El de invitado se conserva en este navegador durante 30 días.
+            Tus productos se conservan en este navegador durante 30 días. Al iniciar sesión se agregarán a tu carrito.
           </p>
         )}
       </div>
@@ -126,7 +112,11 @@ function DesktopCartDialog({ contents, onDismiss }) {
     setHasEntered(false);
 
     const duration = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 300;
-    closingTimerRef.current = window.setTimeout(onDismiss, duration);
+    closingTimerRef.current = window.setTimeout(() => {
+      dialogRef.current?.close();
+      onDismiss();
+      document.getElementById('cart-toggle')?.focus();
+    }, duration);
   }
 
   return (
@@ -160,10 +150,12 @@ export default function CartDrawer() {
     closeDrawer,
     error,
     guestCart,
+    mergeConflict,
     sessionState,
     setError,
     setQuantity,
     removeItem,
+    retryCart,
   } = useCart();
   const cartOpen = activePanel === 'cart';
   const mobileCartOpen = cartOpen && !isDesktop;
@@ -207,7 +199,9 @@ export default function CartDrawer() {
     error,
     guestLines,
     guestSubtotal,
+    mergeConflict,
     removeItem,
+    retryCart,
     sessionState,
     setError,
     setQuantity,

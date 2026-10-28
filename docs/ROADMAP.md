@@ -51,16 +51,16 @@ flowchart TB
 
 ### 05. Carritos
 
-**Estado: concluida.** El carrito de invitado persiste 30 días en el navegador; el carrito de cuenta se guarda en PostgreSQL. La interfaz mantiene ambos conjuntos separados, muestra cantidades y subtotales con los precios actuales, y recupera el catálogo público desde páginas de cuenta cuando hace falta. Se validaron las rutas privadas, migración, expiración, aislamiento y recorridos en Compose. Cada conjunto muestra su botón de pago deshabilitado hasta conectar Stripe en la fase 06; no se crean pedidos ni se reservan existencias.
+**Estado: concluida.** El carrito de invitado persiste 30 días en el navegador; el carrito de cuenta se guarda en PostgreSQL. Al autenticarse, sus cantidades se suman de forma idempotente al carrito de cuenta y la interfaz muestra un único conjunto con precios actuales. El botón de pago permanece deshabilitado hasta conectar Stripe en la fase 06; no se crean pedidos ni se reservan existencias.
 
 - **Dependencias:** fases 03 y 04.
-- **Resultado esperado:** carrito de invitado persistente y carrito de cuenta, mostrados como conjuntos independientes; conservar el conjunto invitado al autenticarse y permitir preparar cada conjunto por separado.
-- **Criterio de cierre:** cada conjunto conserva sus artículos, cantidades y totales sin fusionarse; sus botones de pago permanecen separados y preparados para la fase 06. Los artículos inactivos se identifican y el catálogo vuelve a aportar los precios vigentes; Checkout volverá a validar ambos antes de cobrar. No se comprueban ni reservan existencias.
+- **Resultado esperado:** carrito de invitado persistente y carrito de cuenta; al autenticarse, sumar los artículos por producto y mostrar un único carrito.
+- **Criterio de cierre:** la transferencia resiste reintentos sin duplicar cantidades, conserva los artículos locales ante un error y muestra un solo total. El botón de pago permanece preparado para la fase 06. Los artículos inactivos se identifican y Checkout volverá a validar precios y disponibilidad antes de cobrar. No se comprueban ni reservan existencias.
 
 ### 06. Stripe Checkout y pedidos
 
 - **Dependencias:** fases 03, 04 y 05.
-- **Resultado esperado:** pago alojado en Stripe, confirmación mediante webhook firmado y una orden independiente por cada conjunto pagado.
+- **Resultado esperado:** pago alojado en Stripe, confirmación mediante webhook firmado y una orden independiente por cada compra confirmada.
 - **Criterio de cierre:** el precio y estado activo se vuelven a validar; sólo el webhook firmado confirma el pago; la orden queda guardada y visible en “Mis pedidos”. La aplicación no almacena el número completo ni el código de seguridad de la tarjeta.
 
 ### 07. Correo transaccional y PDF

@@ -61,3 +61,40 @@ test('removal is account-scoped and locates the product by its stable slug', asy
     ['delete', { where: { accountId, productId } }],
   ]);
 });
+
+test('guest transfer records its id and adds quantities in one transaction', async () => {
+  const calls = [];
+  const repository = createCartRepository({
+    async $transaction(action) {
+      calls.push('transaction');
+      return action({
+        accountCartMerge: { async createMany(input) { calls.push(['receipt', input]); return { count: 1 }; } },
+        product: { async findMany(input) { calls.push(['products', input]); return [{ id: productId, slug: 'mezcal-reposado' }]; } },
+        async $executeRaw(strings, ...values) { calls.push(['increment', values]); },
+      });
+    },
+  });
+
+  await repository.mergeGuestCart(accountId, 'd65ea75e-f24b-407b-8dba-c8c778950667', [{ slug: 'mezcal-reposado', quantity: 2 }]);
+
+  assert.equal(calls[0], 'transaction');
+  assert.deepEqual(calls[1][1], { data: [{ accountId, transferId: 'd65ea75e-f24b-407b-8dba-c8c778950667' }], skipDuplicates: true });
+  assert.deepEqual(calls[2][1], { where: { slug: { in: ['mezcal-reposado'] } }, select: { id: true, slug: true } });
+  assert.deepEqual(calls[3][1], [accountId, productId, 2]);
+});
+
+test('replaying a guest transfer does not add its items again', async () => {
+  let writes = 0;
+  const repository = createCartRepository({
+    async $transaction(action) {
+      return action({
+        accountCartMerge: { async createMany() { return { count: 0 }; } },
+        product: { async findMany() { throw new Error('should not read products'); } },
+        async $executeRaw() { writes += 1; },
+      });
+    },
+  });
+
+  await repository.mergeGuestCart(accountId, 'd65ea75e-f24b-407b-8dba-c8c778950667', [{ slug: 'mezcal-reposado', quantity: 2 }]);
+  assert.equal(writes, 0);
+});

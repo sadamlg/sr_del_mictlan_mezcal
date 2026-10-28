@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { getAccountCart, getPublicCatalog, removeAccountCartItem, setAccountCartItem } from '../src/lib/cart-api.js';
+import { getAccountCart, getPublicCatalog, mergeGuestCart, removeAccountCartItem, setAccountCartItem } from '../src/lib/cart-api.js';
 
 test('account cart API reads and writes only slugs and absolute quantities', async (context) => {
   const originalFetch = globalThis.fetch;
@@ -34,6 +34,23 @@ test('account cart removal safely encodes a slug and accepts a bodyless 204', as
   assert.equal(await removeAccountCartItem('mezcal-reposado'), null);
   assert.equal(request.url, 'http://localhost:4000/api/cart/account/items/mezcal-reposado');
   assert.equal(request.options.method, 'DELETE');
+});
+
+test('guest transfer sends only its id and product quantities', async (context) => {
+  const originalFetch = globalThis.fetch;
+  let request;
+  globalThis.fetch = async (url, options) => {
+    request = { url, options };
+    return { status: 200, ok: true, json: async () => ({ cart: { items: [], subtotal: { amount: 0, currency: 'MXN' } } }) };
+  };
+  context.after(() => { globalThis.fetch = originalFetch; });
+  const transfer = { transferId: 'd65ea75e-f24b-407b-8dba-c8c778950667', items: [{ slug: 'mezcal-reposado', quantity: 2 }] };
+
+  await mergeGuestCart(transfer);
+
+  assert.equal(request.url, 'http://localhost:4000/api/cart/account/merge');
+  assert.equal(request.options.method, 'POST');
+  assert.deepEqual(JSON.parse(request.options.body), transfer);
 });
 
 test('public catalog API fetches product names and current prices without caching', async (context) => {

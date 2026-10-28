@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { ACCOUNT_SESSION_CHANGED_EVENT, accountRequest } from '../../lib/account-api.js';
-import { getAccountCart, getPublicCatalog, removeAccountCartItem, setAccountCartItem } from '../../lib/cart-api.js';
+import { getAccountCart, getPublicCatalog, mergeGuestCart, removeAccountCartItem, setAccountCartItem } from '../../lib/cart-api.js';
 import {
   addGuestCartItem,
   setGuestCartQuantity,
@@ -10,6 +10,8 @@ import {
 import {
   getGuestCartSnapshot,
   getServerGuestCartSnapshot,
+  finishGuestCartTransfer,
+  prepareGuestCartTransfer,
   subscribeToGuestCart,
   updateGuestCart,
 } from '../../lib/guest-cart-store.js';
@@ -26,11 +28,13 @@ export function CartProvider({ children }) {
   const [activePanel, setActivePanel] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [mergeConflict, setMergeConflict] = useState(false);
   const requestSequence = useRef(0);
 
   const refreshSession = useCallback(async () => {
     const sequence = ++requestSequence.current;
     setSessionState('loading');
+    setMergeConflict(false);
 
     let result;
     try {
@@ -40,8 +44,10 @@ export function CartProvider({ children }) {
       if (requestError.status === 401) {
         setAccount(null);
         setAccountCart(EMPTY_ACCOUNT_CART);
+        setError('');
         setSessionState('guest');
       } else {
+        setAccount(null);
         setError(requestError.message || 'No se pudo comprobar tu sesión.');
         setSessionState('error');
       }
@@ -52,13 +58,27 @@ export function CartProvider({ children }) {
     setAccount(result.account);
 
     try {
-      const nextCart = await getAccountCart();
+      let nextCart;
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        const pending = getGuestCartSnapshot();
+        if (pending.items.length === 0) {
+          nextCart = await getAccountCart();
+          break;
+        }
+        nextCart = await mergeGuestCart(prepareGuestCartTransfer(pending));
+        if (sequence !== requestSequence.current) return;
+        updateGuestCart(finishGuestCartTransfer(pending, getGuestCartSnapshot()));
+      }
+      if (getGuestCartSnapshot().items.length > 0) {
+        throw new Error('El carrito cambió durante la transferencia. Vuelve a intentar.');
+      }
       if (sequence !== requestSequence.current) return;
       setAccountCart(nextCart);
       setError('');
       setSessionState('account');
     } catch (requestError) {
       if (sequence !== requestSequence.current) return;
+      setMergeConflict(requestError.code === 'PRODUCT_NOT_AVAILABLE');
       setError(requestError.message || 'No se pudo consultar el carrito de tu cuenta.');
       setSessionState('error');
     }
@@ -111,7 +131,7 @@ export function CartProvider({ children }) {
   }, [account, accountCart.items, guestCart, sessionState]);
 
   const setQuantity = useCallback(async (cartType, slug, quantity) => {
-    if (busy || !['guest', 'account'].includes(sessionState)) return;
+    if (busy || (cartType === 'account' && sessionState !== 'account') || (cartType === 'guest' && !(sessionState === 'guest' || (sessionState === 'error' && (!account || mergeConflict))))) return;
     setError('');
     if (cartType === 'guest') {
       updateGuestCart(setGuestCartQuantity(guestCart, slug, quantity));
@@ -130,7 +150,7 @@ export function CartProvider({ children }) {
     } finally {
       setBusy(false);
     }
-  }, [busy, guestCart, sessionState]);
+  }, [account, busy, guestCart, mergeConflict, sessionState]);
 
   const removeItem = useCallback((cartType, slug) => setQuantity(cartType, slug, 0), [setQuantity]);
   const registerCatalog = useCallback((products) => setCatalog(Array.isArray(products) ? products : []), []);
@@ -150,9 +170,9 @@ export function CartProvider({ children }) {
   const closeMobilePanel = useCallback(() => setActivePanel(null), []);
   const itemCount = useMemo(() => {
     const guestCount = guestCart.items.reduce((total, item) => total + item.quantity, 0);
-    const accountCount = account ? accountCart.items.reduce((total, item) => total + item.quantity, 0) : 0;
-    return guestCount + accountCount;
-  }, [account, accountCart.items, guestCart.items]);
+    const accountCount = accountCart.items.reduce((total, item) => total + item.quantity, 0);
+    return sessionState === 'account' ? accountCount : guestCount;
+  }, [accountCart.items, guestCart.items, sessionState]);
 
   const value = useMemo(() => ({
     account,
@@ -165,6 +185,7 @@ export function CartProvider({ children }) {
     error,
     guestCart,
     itemCount,
+    mergeConflict,
     openDrawer,
     toggleDrawer,
     closeDrawer,
@@ -173,11 +194,12 @@ export function CartProvider({ children }) {
     closeMobilePanel,
     ready: ['guest', 'account'].includes(sessionState),
     registerCatalog,
+    retryCart: refreshSession,
     removeItem,
     setError,
     setQuantity,
     sessionState,
-  }), [account, accountCart, activePanel, addProduct, busy, catalog, closeDrawer, closeMobileMenu, closeMobilePanel, error, guestCart, itemCount, openDrawer, registerCatalog, removeItem, sessionState, setQuantity, toggleDrawer, toggleMobileMenu]);
+  }), [account, accountCart, activePanel, addProduct, busy, catalog, closeDrawer, closeMobileMenu, closeMobilePanel, error, guestCart, itemCount, mergeConflict, openDrawer, refreshSession, registerCatalog, removeItem, sessionState, setQuantity, toggleDrawer, toggleMobileMenu]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

@@ -52,6 +52,7 @@ model Account {
   tokens          AccountToken[]
   emailJobs       EmailJob[]
   cartItems       AccountCartItem[]
+  cartMerges      AccountCartMerge[]
 
   @@map("accounts")
 }
@@ -137,6 +138,16 @@ model AccountCartItem {
   @@id([accountId, productId])
   @@index([accountId, createdAt])
   @@map("account_cart_items")
+}
+
+model AccountCartMerge {
+  accountId  String   @map("account_id") @db.Uuid
+  transferId String   @map("transfer_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  account    Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@id([accountId, transferId])
+  @@map("account_cart_merges")
 }
 
 model SiteVisit {

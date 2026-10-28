@@ -20,6 +20,12 @@ function parseCartItem(body) {
   return { slug: body.slug, quantity: body.quantity };
 }
 
+function parseGuestMerge(body) {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) throw invalidBody();
+  if (Object.keys(body).sort().join(',') !== 'items,transferId') throw invalidBody();
+  return { transferId: body.transferId, items: body.items };
+}
+
 export function createCartHandlers({ accountService, cartService, logger = console }) {
   async function withAccount(request, action) {
     const account = await accountService.getSession(readSessionCookie(request));
@@ -56,6 +62,9 @@ export function createCartHandlers({ accountService, cartService, logger = conso
     }))),
     setAccountItem: wrap((request) => withAccount(request, async (accountId) => ({
       cart: await cartService.setAccountItem(accountId, parseCartItem(request.body)),
+    }))),
+    mergeGuestCart: wrap((request) => withAccount(request, async (accountId) => ({
+      cart: await cartService.mergeGuestCart(accountId, parseGuestMerge(request.body)),
     }))),
     removeAccountItem: wrap((request) => withAccount(request, async (accountId) => {
       await cartService.removeAccountItem(accountId, request.params.slug);

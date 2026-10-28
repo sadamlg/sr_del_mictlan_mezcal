@@ -2,9 +2,9 @@
 
 ## Propósito y límites
 
-El módulo permite preparar una compra sin mezclar el carrito de invitado con el carrito de cuenta. No crea sesiones de Stripe, órdenes, reservas ni verificaciones de existencias; esos comportamientos pertenecen a la fase de Checkout.
+El módulo permite preparar una compra con un único carrito visible. No crea sesiones de Stripe, órdenes, reservas ni verificaciones de existencias; esos comportamientos pertenecen a la fase de Checkout.
 
-El carrito de invitado se conserva en `localStorage` del mismo navegador durante 30 días desde su última actividad. El carrito de cuenta se guarda en PostgreSQL y se recupera al iniciar sesión. Autenticarse no copia, fusiona ni elimina artículos del carrito de invitado. Si hay una sesión, la interfaz presenta ambos conjuntos, con cantidades y subtotales independientes. Cerrar sesión oculta el conjunto de cuenta y conserva el de invitado.
+El carrito de invitado se conserva en `localStorage` del mismo navegador durante 30 días desde su última actividad. El carrito de cuenta se guarda en PostgreSQL. Al iniciar sesión, el backend suma por producto las cantidades del navegador y de la cuenta en una transacción; el resultado se muestra como un solo carrito. Cada cantidad final tiene un máximo de 99. El navegador borra únicamente las cantidades transferidas después de recibir confirmación. Si la petición falla, conserva los artículos y ofrece reintentar. Cerrar sesión oculta el carrito de cuenta y deja disponible un carrito local nuevo.
 
 ## Artículos y precios
 
@@ -24,6 +24,7 @@ Todas las rutas de este contrato requieren la cookie de sesión válida. La cuen
 | `GET /api/cart/account` | Devuelve el carrito de la cuenta, incluidos artículos inactivos y el subtotal actual. Un carrito vacío responde `200` con `items: []` y subtotal cero. |
 | `PUT /api/cart/account/items` | Recibe `{ "slug": "mezcal-reposado", "quantity": 2 }`; agrega o establece la cantidad para un producto activo y devuelve el carrito actualizado. |
 | `DELETE /api/cart/account/items/:slug` | Quita el artículo de esa cuenta y devuelve `204`; repetir la operación también responde `204`. |
+| `POST /api/cart/account/merge` | Recibe `{ "transferId": "uuid", "items": [{ "slug": "mezcal-reposado", "quantity": 2 }] }`. Suma las cantidades en una transacción y devuelve el carrito. Repetir el mismo `transferId` para esa cuenta no vuelve a sumarlas. |
 
 Un cuerpo inválido o una cantidad fuera de 1–99 responde `422`. Un producto inexistente o inactivo no se puede agregar y responde `409 PRODUCT_NOT_AVAILABLE`. La falta o vencimiento de sesión responde `401`. Un fallo de almacenamiento responde `503 CART_UNAVAILABLE` sin filtrar detalles internos.
 
@@ -51,15 +52,15 @@ Para un producto inactivo, `available` es `false`, `unitPrice` y `lineTotal` son
 
 ## Interfaz
 
-El encabezado abre una sección lateral accesible desde teclado. Las acciones de producto agregan una unidad. La sección diferencia “Carrito de invitado” y “Carrito de tu cuenta”, con sus propios artículos, controles de cantidad, eliminación y subtotales. Un estado vacío explica cómo agregar un producto; los estados de carga, error y producto no disponible son explícitos. La cantidad global del encabezado suma las unidades de ambos conjuntos sin sugerir que están fusionadas. Como no había un prototipo disponible, el dueño aprobó usar los tokens, la tipografía y los patrones accesibles de `design.md` y de las superficies actuales.
+El encabezado abre una sección lateral accesible desde teclado. Las acciones de producto agregan una unidad. La sección muestra un único conjunto de artículos, controles de cantidad, eliminación y subtotal. Un estado vacío explica cómo agregar un producto; los estados de carga, error y producto no disponible son explícitos. La cantidad del encabezado corresponde al carrito visible. Como no había un prototipo disponible, el dueño aprobó usar los tokens, la tipografía y los patrones accesibles de `design.md` y de las superficies actuales.
 
-La fase 05 no inicia Checkout ni vacía ningún carrito tras una compra. La acción de pagar cada conjunto se conecta con Stripe y la autenticación requerida en la fase 06.
+La fase 05 no inicia Checkout ni vacía el carrito tras una compra. La acción de pagar el carrito se conecta con Stripe y la autenticación requerida en la fase 06.
 
 ## Persistencia y pruebas
 
-La tabla `account_cart_items` tiene una relación única por cuenta y producto; las eliminaciones de cuenta o producto limpian sus filas relacionadas. PostgreSQL restringe las cantidades al rango 1–99. El navegador guarda sólo `slug`, `quantity` y la fecha de última actividad, no precios.
+La tabla `account_cart_items` tiene una relación única por cuenta y producto; las eliminaciones de cuenta o producto limpian sus filas relacionadas. `account_cart_merges` registra los identificadores de transferencia por cuenta para evitar sumas repetidas. PostgreSQL restringe las cantidades al rango 1–99. El navegador guarda sólo `slug`, `quantity` y la fecha de última actividad del carrito, además de un identificador técnico para reintentos; nunca guarda precios.
 
-Las pruebas cubren validación de cantidades y slugs, separación de identidades, totales con precio actual, artículos inactivos, operaciones privadas, persistencia Prisma y vencimiento móvil de 30 días del carrito de invitado. Los recorridos de navegador comprueban agregar, actualizar, quitar, recargar, conservar ambos bloques al iniciar sesión, recuperar el catálogo desde páginas de cuenta y mostrar el panel en 320, 768 y 1440 px.
+Las pruebas cubren validación de cantidades y slugs, aislamiento de cuentas, suma e idempotencia de transferencias, totales con precio actual, artículos inactivos, operaciones privadas, persistencia Prisma y vencimiento móvil de 30 días del carrito de invitado. Los recorridos de navegador comprueban agregar, actualizar, quitar, recargar, unir el carrito al iniciar sesión, recuperar el catálogo desde páginas de cuenta y mostrar el panel en 320, 768 y 1440 px.
 
 ## Referencia revisada
 

@@ -30,6 +30,17 @@ function createHarness() {
       const product = products.find((item) => item.slug === slug);
       if (product) rows.delete(`${accountId}:${product.id}`);
     },
+    async mergeGuestCart(accountId, transferId, items) {
+      if (calls.some(([action, id]) => action === 'merge' && id === transferId)) return;
+      calls.push(['merge', transferId]);
+      for (const item of items) {
+        const product = products.find((entry) => entry.slug === item.slug);
+        if (!product) throw new Error('unknown product');
+        const key = `${accountId}:${product.id}`;
+        const current = rows.get(key)?.quantity || 0;
+        rows.set(key, { accountId, productId: product.id, quantity: Math.min(99, current + item.quantity) });
+      }
+    },
   };
   return { calls, rows, service: createCartService(repository) };
 }
@@ -48,6 +59,28 @@ test('account cart uses current product prices and excludes inactive items from 
     ],
     subtotal: { amount: 24690, currency: 'MXN' },
   });
+});
+
+test('guest merge sums repeated products and is idempotent for the same transfer', async () => {
+  const { service } = createHarness();
+  await service.setAccountItem('account-a', { slug: 'mezcal-reposado', quantity: 2 });
+  const input = { transferId: 'd65ea75e-f24b-407b-8dba-c8c778950667', items: [{ slug: 'mezcal-reposado', quantity: 1 }, { slug: 'mezcal-joven', quantity: 2 }] };
+
+  const first = await service.mergeGuestCart('account-a', input);
+  const again = await service.mergeGuestCart('account-a', input);
+
+  assert.deepEqual(first.items.map(({ slug, quantity }) => [slug, quantity]), [['mezcal-reposado', 3], ['mezcal-joven', 2]]);
+  assert.deepEqual(again, first);
+});
+
+test('guest merge caps quantity at 99 and rejects malformed transfers', async () => {
+  const { service } = createHarness();
+  await service.setAccountItem('account-a', { slug: 'mezcal-reposado', quantity: 98 });
+  const cart = await service.mergeGuestCart('account-a', { transferId: 'd65ea75e-f24b-407b-8dba-c8c778950668', items: [{ slug: 'mezcal-reposado', quantity: 3 }] });
+  assert.equal(cart.items[0].quantity, 99);
+
+  await assert.rejects(service.mergeGuestCart('account-a', { transferId: 'bad', items: [{ slug: 'mezcal-reposado', quantity: 1 }] }), CartError);
+  await assert.rejects(service.mergeGuestCart('account-a', { transferId: 'd65ea75e-f24b-407b-8dba-c8c778950669', items: [{ slug: 'mezcal-reposado', quantity: 1 }, { slug: 'mezcal-reposado', quantity: 1 }] }), CartError);
 });
 
 test('setting an account item stores only its product and absolute quantity', async () => {

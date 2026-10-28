@@ -101,6 +101,17 @@ test('Compose API keeps account carts private and calculates totals from current
     });
     assert.equal((await changedPrice.json()).cart.subtotal.amount, 40000);
 
+    const transfer = { transferId: randomUUID(), items: [{ slug: productSlug, quantity: 1 }] };
+    for (const expectedQuantity of [3, 3]) {
+      const merged = await fetch(`${apiUrl}/api/cart/account/merge`, {
+        method: 'POST',
+        headers: { Cookie: cookie, Origin: frontendOrigin, 'Content-Type': 'application/json' },
+        body: JSON.stringify(transfer),
+      });
+      assert.equal(merged.status, 200);
+      assert.equal((await merged.json()).cart.items[0].quantity, expectedQuantity);
+    }
+
     const noSession = await fetch(`${apiUrl}/api/cart/account`, { headers: { Origin: frontendOrigin } });
     assert.equal(noSession.status, 401);
     const wrongOrigin = await fetch(`${apiUrl}/api/cart/account`, { headers: { Origin: 'http://attacker.example' } });

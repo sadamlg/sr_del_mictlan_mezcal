@@ -22,7 +22,7 @@ test('visitor can add, update, remove, and restore the guest cart after reload',
   await addButton.click();
 
   const drawer = page.getByRole('dialog', { name: 'Tu carrito' });
-  const guestCart = drawer.getByRole('region', { name: 'Carrito de invitado' });
+  const guestCart = drawer.getByRole('region', { name: 'Tus productos' });
   await expect(guestCart).toContainText(product.name);
   const item = guestCart.getByRole('listitem').filter({ hasText: product.name });
   await expect(item.getByLabel('Cantidad: 1')).toBeVisible();
@@ -32,10 +32,10 @@ test('visitor can add, update, remove, and restore the guest cart after reload',
 
   await page.reload();
   await page.getByRole('button', { name: /Abrir carrito/ }).click();
-  const restoredCart = page.getByRole('dialog', { name: 'Tu carrito' }).getByRole('region', { name: 'Carrito de invitado' });
+  const restoredCart = page.getByRole('dialog', { name: 'Tu carrito' }).getByRole('region', { name: 'Tus productos' });
   const restoredItem = restoredCart.getByRole('listitem').filter({ hasText: product.name });
   await expect(restoredItem.getByLabel('Cantidad: 2')).toBeVisible();
-  await restoredItem.getByRole('button', { name: `Quitar ${product.name} del carrito de invitado` }).click();
+  await restoredItem.getByRole('button', { name: `Quitar ${product.name} del carrito` }).click();
   await expect(restoredCart).toContainText('Tu carrito está vacío');
 });
 
@@ -53,9 +53,12 @@ test('cart drawer fits narrow and wide viewports and closes with Escape', async 
     await trigger.click();
     const drawer = page.getByRole('dialog', { name: 'Tu carrito' });
     await expect(drawer).toBeVisible();
+    await expect.poll(async () => {
+      const bounds = await drawer.boundingBox();
+      return bounds.x + bounds.width;
+    }).toBeLessThanOrEqual(width);
     const drawerBounds = await drawer.boundingBox();
     expect(drawerBounds.x).toBeGreaterThanOrEqual(0);
-    expect(drawerBounds.x + drawerBounds.width).toBeLessThanOrEqual(width);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await page.keyboard.press('Escape');
     await expect(drawer).not.toBeVisible();
@@ -64,8 +67,13 @@ test('cart drawer fits narrow and wide viewports and closes with Escape', async 
   expect(hydrationErrors).toEqual([]);
 });
 
-test('authenticated view keeps guest and account carts in separate blocks', async ({ page }) => {
+test('signing in combines guest and account quantities into one cart without repeating the transfer', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(window.crypto, 'randomUUID', { value: undefined, configurable: true });
+  });
   await page.addInitScript(({ storageKey, slug }) => {
+    if (window.sessionStorage.getItem('guest-cart-seeded')) return;
+    window.sessionStorage.setItem('guest-cart-seeded', 'yes');
     window.localStorage.setItem(storageKey, JSON.stringify({
       items: [{ slug, quantity: 1 }],
       lastActivityAt: Date.now(),
@@ -77,29 +85,74 @@ test('authenticated view keeps guest and account carts in separate blocks', asyn
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ account: { id: 'account-a', firstName: 'Ana' } }) });
   });
   await page.unroute('**/api/cart/account**');
+  let merges = 0;
+  let savedCart = {
+    items: [{ slug: product.slug, name: product.name, quantity: 2, available: true, unitPrice: { amount: 25000, currency: 'MXN' }, lineTotal: { amount: 50000, currency: 'MXN' } }],
+    subtotal: { amount: 50000, currency: 'MXN' },
+  };
   await page.route('**/api/cart/account**', async (route) => {
+    if (route.request().method() === 'POST') {
+      merges += 1;
+      const transfer = route.request().postDataJSON();
+      expect(transfer.items).toEqual([{ slug: product.slug, quantity: 1 }]);
+      savedCart = {
+        items: [{ ...savedCart.items[0], quantity: 3, lineTotal: { amount: 75000, currency: 'MXN' } }],
+        subtotal: { amount: 75000, currency: 'MXN' },
+      };
+    }
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ cart: {
-        items: [{ slug: 'mezcal-joven', name: 'Mezcal joven · Una destilación', quantity: 2, available: true, unitPrice: { amount: 35000, currency: 'MXN' }, lineTotal: { amount: 70000, currency: 'MXN' } }],
-        subtotal: { amount: 70000, currency: 'MXN' },
-      } }),
+      body: JSON.stringify({ cart: savedCart }),
     });
   });
 
   await page.goto('/');
+  expect(await page.evaluate(() => typeof crypto.randomUUID)).toBe('undefined');
   await page.getByRole('button', { name: /Abrir carrito/ }).click();
 
   const drawer = page.getByRole('dialog', { name: 'Tu carrito' });
-  const guestCart = drawer.getByRole('region', { name: 'Carrito de invitado' });
-  const accountCart = drawer.getByRole('region', { name: 'Carrito de tu cuenta' });
-  await expect(guestCart).toContainText(product.name);
-  await expect(accountCart).toContainText('Mezcal joven · Una destilación');
-  await expect(guestCart).toContainText('Subtotal');
-  await expect(accountCart).toContainText('Subtotal');
-  await expect(guestCart).not.toContainText('Mezcal joven · Una destilación');
-  await expect(accountCart).not.toContainText(product.name);
+  const cart = drawer.getByRole('region', { name: 'Tus productos' });
+  await expect(cart.getByLabel('Cantidad: 3')).toBeVisible();
+  await expect(drawer.getByRole('region')).toHaveCount(1);
+  expect(await page.evaluate((key) => localStorage.getItem(key), guestCartKey)).toBeNull();
+  await page.reload();
+  await expect.poll(() => merges).toBe(1);
+});
+
+test('a failed transfer keeps guest products and retry does not add them twice', async ({ page }) => {
+  await page.addInitScript(({ storageKey, slug }) => {
+    if (sessionStorage.getItem('guest-cart-seeded')) return;
+    sessionStorage.setItem('guest-cart-seeded', 'yes');
+    localStorage.setItem(storageKey, JSON.stringify({ items: [{ slug, quantity: 1 }], lastActivityAt: Date.now() }));
+  }, { storageKey: guestCartKey, slug: product.slug });
+  await page.unroute('**/api/auth/session');
+  await page.route('**/api/auth/session', (route) => route.fulfill({
+    status: 200, contentType: 'application/json', body: JSON.stringify({ account: { id: 'account-a', firstName: 'Ana' } }),
+  }));
+  await page.unroute('**/api/cart/account**');
+  let attempts = 0;
+  await page.route('**/api/cart/account**', async (route) => {
+    if (route.request().method() === 'POST') {
+      attempts += 1;
+      if (attempts === 1) return route.abort('failed');
+    }
+    const quantity = attempts > 1 ? 3 : 2;
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ cart: {
+      items: [{ slug: product.slug, name: product.name, quantity, available: true, unitPrice: { amount: 25000, currency: 'MXN' }, lineTotal: { amount: 25000 * quantity, currency: 'MXN' } }],
+      subtotal: { amount: 25000 * quantity, currency: 'MXN' },
+    } }) });
+  });
+
+  await page.goto('/');
+  await page.getByRole('button', { name: /Abrir carrito/ }).click();
+  const drawer = page.getByRole('dialog', { name: 'Tu carrito' });
+  await expect(drawer.getByRole('button', { name: 'Reintentar carga del carrito' })).toBeVisible();
+  expect(await page.evaluate((key) => localStorage.getItem(key), guestCartKey)).not.toBeNull();
+  await drawer.getByRole('button', { name: 'Reintentar carga del carrito' }).click();
+  await expect(drawer.getByLabel('Cantidad: 3')).toBeVisible();
+  expect(await page.evaluate((key) => localStorage.getItem(key), guestCartKey)).toBeNull();
+  expect(attempts).toBe(2);
 });
 
 test('guest cart resolves current product names and prices from account pages', async ({ page }) => {
@@ -124,7 +177,7 @@ test('guest cart resolves current product names and prices from account pages', 
   await page.goto('/cuenta');
   await page.getByRole('button', { name: /Abrir carrito/ }).click();
 
-  const guestCart = page.getByRole('dialog', { name: 'Tu carrito' }).getByRole('region', { name: 'Carrito de invitado' });
+  const guestCart = page.getByRole('dialog', { name: 'Tu carrito' }).getByRole('region', { name: 'Tus productos' });
   await expect(guestCart).toContainText(product.name);
   await expect(guestCart).toContainText(/123\.45/);
 });
@@ -155,9 +208,7 @@ test('adding a product to an account cart sends only the absolute quantity', asy
   await page.locator(`[data-product-slug="${product.slug}"]`).click();
 
   await expect.poll(() => savedItem).toEqual({ slug: product.slug, quantity: 2 });
-  const accountCart = page.getByRole('dialog', { name: 'Tu carrito' }).getByRole('region', { name: 'Carrito de tu cuenta' });
+  const accountCart = page.getByRole('dialog', { name: 'Tu carrito' }).getByRole('region', { name: 'Tus productos' });
   await expect(accountCart.getByLabel('Cantidad: 2')).toBeVisible();
-  const guestCart = page.getByRole('dialog', { name: 'Tu carrito' }).getByRole('region', { name: 'Carrito de invitado' });
-  await expect(guestCart).toContainText('Tu carrito está vacío');
-  await expect(guestCart).not.toContainText(product.name);
+  await expect(accountCart).not.toContainText('Tu carrito está vacío');
 });

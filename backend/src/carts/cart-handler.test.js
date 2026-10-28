@@ -80,3 +80,20 @@ test('removal is idempotent at the API boundary', async () => {
   assert.equal(result.statusCode, 204);
   assert.equal(result.ended, true);
 });
+
+test('guest transfer accepts only a transfer id and items for the signed-in account', async () => {
+  let input;
+  const handlers = createCartHandlers({
+    accountService: { async getSession() { return { id: 'account-a' }; } },
+    cartService: { async mergeGuestCart(accountId, value) { input = [accountId, value]; return cart(); } },
+  });
+  const valid = { transferId: 'd65ea75e-f24b-407b-8dba-c8c778950667', items: [{ slug: 'mezcal-reposado', quantity: 1 }] };
+  const result = response();
+  await handlers.mergeGuestCart({ headers: { cookie: 'mictlan_session=session-token-123' }, body: valid }, result);
+  assert.deepEqual(input, ['account-a', valid]);
+  assert.deepEqual(result.body, { cart: cart() });
+
+  const invalid = response();
+  await handlers.mergeGuestCart({ headers: { cookie: 'mictlan_session=session-token-123' }, body: { ...valid, accountId: 'account-b' } }, invalid);
+  assert.equal(invalid.statusCode, 422);
+});

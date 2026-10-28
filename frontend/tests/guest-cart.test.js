@@ -10,6 +10,7 @@ import {
   saveGuestCart,
   setGuestCartQuantity,
 } from '../src/lib/guest-cart.js';
+import { finishGuestCartTransfer, prepareGuestCartTransfer } from '../src/lib/guest-cart-store.js';
 
 function storageWith(value = null) {
   const values = new Map(value === null ? [] : [[GUEST_CART_STORAGE_KEY, value]]);
@@ -78,4 +79,38 @@ test('guest quantity is limited to 99 and rejects invalid product slugs', () => 
   assert.equal(addGuestCartItem(cart, 'mezcal-reposado', 2).items[0].quantity, 99);
   assert.throws(() => addGuestCartItem(cart, '../other', 2), /producto/);
   assert.throws(() => setGuestCartQuantity(cart, 'mezcal-reposado', 100, 2), /cantidad/);
+});
+
+test('a transfer retry keeps its id and a changed guest cart receives a new id', () => {
+  const storage = storageWith();
+  const cart = { items: [{ slug: 'mezcal-reposado', quantity: 1 }], lastActivityAt: 1000 };
+  const first = prepareGuestCartTransfer(cart, storage);
+  assert.equal(prepareGuestCartTransfer(cart, storage).transferId, first.transferId);
+  assert.notEqual(prepareGuestCartTransfer({ ...cart, lastActivityAt: 2000 }, storage).transferId, first.transferId);
+});
+
+test('guest transfer creates a UUID when randomUUID is unavailable on a LAN HTTP page', () => {
+  const storage = storageWith();
+  const cart = { items: [{ slug: 'mezcal-reposado', quantity: 1 }], lastActivityAt: 1000 };
+  const insecureContextCrypto = {
+    getRandomValues(bytes) {
+      for (let index = 0; index < bytes.length; index += 1) bytes[index] = index;
+      return bytes;
+    },
+  };
+
+  const transfer = prepareGuestCartTransfer(cart, storage, insecureContextCrypto);
+
+  assert.equal(transfer.transferId, '00010203-0405-4607-8809-0a0b0c0d0e0f');
+  assert.equal(prepareGuestCartTransfer(cart, storage, insecureContextCrypto).transferId, transfer.transferId);
+});
+
+test('a confirmed transfer clears only the transferred quantities', () => {
+  const original = { items: [{ slug: 'mezcal-reposado', quantity: 1 }], lastActivityAt: 1000 };
+  const changed = { items: [{ slug: 'mezcal-reposado', quantity: 2 }, { slug: 'mezcal-joven', quantity: 1 }], lastActivityAt: 2000 };
+  assert.deepEqual(finishGuestCartTransfer(original, changed), {
+    items: [{ slug: 'mezcal-reposado', quantity: 1 }, { slug: 'mezcal-joven', quantity: 1 }],
+    lastActivityAt: 2000,
+  });
+  assert.deepEqual(finishGuestCartTransfer(original, original), emptyGuestCart());
 });

@@ -77,6 +77,7 @@ Estas operaciones requieren la cookie de una sesión válida:
 | `PATCH /api/profile` | Actualiza el perfil de la persona conectada. Cambiar el correo también requiere su contraseña actual y confirmar el nuevo correo. |
 | `GET /api/orders` | Consulta los pedidos de la persona conectada. En esta fase devuelve una lista vacía hasta que exista el módulo de pedidos. |
 | `GET /api/cart/account` | Consulta el carrito persistido de la persona conectada, con precios y subtotal actuales del catálogo. |
+| `POST /api/cart/account/merge` | Suma los productos del navegador al carrito de la cuenta una sola vez por identificador de transferencia. |
 | `PUT /api/cart/account/items` | Crea o actualiza la cantidad de un producto en el carrito de la cuenta. El backend toma el precio del catálogo. |
 | `DELETE /api/cart/account/items/:slug` | Retira un producto del carrito de la cuenta. |
 
@@ -93,7 +94,7 @@ Para ver el perfil o los pedidos, el navegador envía la cookie automáticamente
 
 ## Qué todavía no tiene rutas
 
-El carrito de invitado se guarda en el navegador y no tiene una ruta de API. Para cuentas ya están definidas las operaciones privadas descritas arriba. Aún no hay operaciones para iniciar checkout ni crear pedidos: `GET /api/orders` devuelve una lista vacía hasta la fase 06. El catálogo se muestra dentro de la landing; no hay una ruta de detalle individual de producto.
+El carrito de invitado se guarda en el navegador; al autenticarse se transfiere mediante la operación privada descrita arriba. Aún no hay operaciones para iniciar checkout ni crear pedidos: `GET /api/orders` devuelve una lista vacía hasta la fase 06. El catálogo se muestra dentro de la landing; no hay una ruta de detalle individual de producto.
 
 ## Dónde se mantienen estas rutas
 

@@ -120,8 +120,9 @@ export function createApp({
   });
   app.get('/api/orders', accountHandlers.orders);
 
-  app.use('/api/cart', express.json({ limit: '4kb' }));
+  app.use('/api/cart', express.json({ limit: '16kb' }));
   app.get('/api/cart/account', cartHandlers.getAccountCart);
+  app.post('/api/cart/account/merge', cartHandlers.mergeGuestCart);
   app.put('/api/cart/account/items', cartHandlers.setAccountItem);
   app.delete('/api/cart/account/items/:slug', cartHandlers.removeAccountItem);
   app.use('/api/cart', (error, _request, response, next) => {

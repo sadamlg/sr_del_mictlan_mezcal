@@ -54,13 +54,18 @@ test('PostgreSQL keeps account cart items separate and reads the current product
 
     await service.setAccountItem(accountId, { slug: productSlug, quantity: 2 });
     assert.equal((await service.getAccountCart(accountId)).subtotal.amount, 24690);
+    const transfer = { transferId: randomUUID(), items: [{ slug: productSlug, quantity: 3 }] };
+    assert.equal((await service.mergeGuestCart(accountId, transfer)).items[0].quantity, 5);
+    assert.equal((await service.mergeGuestCart(accountId, transfer)).items[0].quantity, 5);
+    await assert.rejects(service.mergeGuestCart(accountId, { transferId: randomUUID(), items: [{ slug: 'producto-inexistente', quantity: 1 }] }), (error) => error instanceof CartError && error.status === 409);
+    assert.equal((await service.getAccountCart(accountId)).items[0].quantity, 5);
     assert.deepEqual(await service.getAccountCart(accountIdTwo), {
       items: [],
       subtotal: { amount: 0, currency: 'MXN' },
     });
 
     await prisma.product.update({ where: { id: product.id }, data: { priceCents: 20000 } });
-    assert.equal((await service.getAccountCart(accountId)).subtotal.amount, 40000);
+    assert.equal((await service.getAccountCart(accountId)).subtotal.amount, 100000);
 
     await prisma.product.update({ where: { id: product.id }, data: { active: false } });
     const unavailableCart = await service.getAccountCart(accountId);

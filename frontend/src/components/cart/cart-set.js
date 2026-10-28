@@ -37,7 +37,7 @@ function CartLine({ item, cartType, busy, onQuantityChange, onRemove }) {
           disabled={busy}
           onClick={() => onRemove(cartType, item.slug)}
           className="inline-flex size-10 shrink-0 items-center justify-center rounded-sm text-mictlan-sage-muted transition-colors hover:text-mictlan-error-text focus-visible:outline-2 focus-visible:outline-mictlan-teal disabled:opacity-50"
-          aria-label={`Quitar ${name} del carrito de ${cartType === 'guest' ? 'invitado' : 'tu cuenta'}`}
+          aria-label={`Quitar ${name} del carrito`}
         >
           <Trash2 className="size-4" aria-hidden="true" />
         </button>
@@ -82,7 +82,7 @@ function CheckoutAction({ isGuest, authenticated }) {
       >
         Continuar al pago
       </button>
-      <p className="mt-2 text-center text-xs leading-5 text-mictlan-sage-muted">El pago de cada carrito se habilitará en la siguiente fase.</p>
+      <p className="mt-2 text-center text-xs leading-5 text-mictlan-sage-muted">El pago se habilitará en la siguiente fase.</p>
       {isGuest && !authenticated && (
         <Link href="/cuenta/iniciar-sesion" className="mt-2 inline-flex min-h-10 w-full items-center justify-center text-sm text-mictlan-teal underline underline-offset-4 hover:text-mictlan-teal-bright">
           Inicia sesión para preparar el pago

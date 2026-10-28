@@ -10,6 +10,7 @@ export class CartError extends Error {
 const CURRENCY = 'MXN';
 const MAX_QUANTITY = 99;
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function validateAccountId(accountId) {
   if (typeof accountId !== 'string' || accountId.length === 0) {
@@ -62,6 +63,25 @@ export function createCartService(repository) {
 
   return {
     getAccountCart,
+
+    async mergeGuestCart(accountId, { transferId, items } = {}) {
+      validateAccountId(accountId);
+      if (typeof transferId !== 'string' || !UUID_PATTERN.test(transferId) || !Array.isArray(items) || items.length < 1 || items.length > 100) {
+        throw new CartError(422, 'INVALID_CART_MERGE', 'No se pudo validar el carrito de invitado.');
+      }
+      const seen = new Set();
+      for (const item of items) {
+        if (!item || typeof item !== 'object' || Array.isArray(item) || Object.keys(item).sort().join(',') !== 'quantity,slug') {
+          throw new CartError(422, 'INVALID_CART_MERGE', 'No se pudo validar el carrito de invitado.');
+        }
+        validateSlug(item.slug);
+        validateQuantity(item.quantity);
+        if (seen.has(item.slug)) throw new CartError(422, 'INVALID_CART_MERGE', 'El carrito contiene productos duplicados.');
+        seen.add(item.slug);
+      }
+      await repository.mergeGuestCart(accountId, transferId, items);
+      return getAccountCart(accountId);
+    },
 
     async setAccountItem(accountId, { slug, quantity } = {}) {
       validateAccountId(accountId);
