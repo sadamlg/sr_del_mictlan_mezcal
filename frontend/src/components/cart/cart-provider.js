@@ -96,13 +96,13 @@ export function CartProvider({ children }) {
   }, [refreshSession]);
 
   useEffect(() => {
-    if (catalog.length > 0 || guestCart.items.length === 0) return undefined;
+    if (catalog.length > 0 || (guestCart.items.length === 0 && accountCart.items.length === 0)) return undefined;
     let active = true;
     getPublicCatalog()
       .then((products) => { if (active) setCatalog(products); })
       .catch(() => {});
     return () => { active = false; };
-  }, [catalog.length, guestCart.items.length]);
+  }, [accountCart.items.length, catalog.length, guestCart.items.length]);
 
   const addProduct = useCallback(async (product) => {
     if (!['guest', 'account'].includes(sessionState)) return false;

@@ -1,14 +1,39 @@
 'use client';
 
+import Link from 'next/link';
 import { ShoppingBasket, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCart } from './cart-provider.js';
-import CartSet from './cart-set.js';
+import CartSet, { formatMoney } from './cart-set.js';
+
+function CartFooter({ subtotal, isGuest, authenticated }) {
+  return (
+    <footer className="shrink-0 border-t border-mictlan-sand/15 bg-mictlan-carbon px-5 py-4 sm:px-7">
+      <div className="flex items-center justify-between gap-4 font-ui text-base">
+        <span className="font-semibold uppercase text-mictlan-sage-muted">Subtotal</span>
+        <span className="text-lg font-semibold tabular-nums text-mictlan-gold">{formatMoney(subtotal.amount)}</span>
+      </div>
+      <button
+        type="button"
+        disabled
+        className="mt-4 flex min-h-11 w-full items-center justify-center border border-mictlan-teal/30 bg-mictlan-teal-deep/60 px-5 font-ui text-xs font-semibold uppercase tracking-[0.12em] text-mictlan-bone/80 disabled:cursor-not-allowed"
+      >
+        Continuar al pago
+      </button>
+      {isGuest && !authenticated && (
+        <Link href="/cuenta/iniciar-sesion" className="mt-2 inline-flex min-h-10 w-full items-center justify-center text-sm text-mictlan-teal underline underline-offset-4 hover:text-mictlan-teal-bright">
+          Inicia sesión para preparar el pago
+        </Link>
+      )}
+    </footer>
+  );
+}
 
 function CartContents({ titleId, closeButtonRef, onDismiss, showCloseButton, ...cart }) {
   const {
     account,
     accountCart,
+    accountLines,
     busy,
     error,
     guestLines,
@@ -20,6 +45,10 @@ function CartContents({ titleId, closeButtonRef, onDismiss, showCloseButton, ...
     setError,
     setQuantity,
   } = cart;
+  const cartType = sessionState === 'account' ? 'account' : 'guest';
+  const items = cartType === 'account' ? accountLines : guestLines;
+  const subtotal = cartType === 'account' ? accountCart.subtotal : guestSubtotal;
+  const isEmptyCart = items.length === 0 && ['account', 'guest'].includes(sessionState) && !error;
 
   function dismiss(event) {
     event?.preventDefault?.();
@@ -30,9 +59,11 @@ function CartContents({ titleId, closeButtonRef, onDismiss, showCloseButton, ...
   return (
     <div className="flex h-full flex-col">
       <header className="flex items-center justify-between gap-4 border-b border-mictlan-sand/15 px-5 py-4 sm:px-7">
-        <div>
-          <p className="font-ui text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-mictlan-teal">Señor del Mictlán</p>
-          <h1 id={titleId} className="mt-1 font-display text-2xl text-mictlan-ivory">Tu carrito</h1>
+        <div className="flex min-w-0 items-baseline">
+          <h1 id={titleId} className="whitespace-nowrap font-display text-xl text-mictlan-ivory sm:text-2xl">Tu carrito</h1>
+          <span className="whitespace-nowrap pl-2 font-ui text-xs font-semibold uppercase tracking-[0.12em] text-mictlan-sage-muted">
+            {cart.itemCount} {cart.itemCount === 1 ? 'artículo' : 'artículos'}
+          </span>
         </div>
         {showCloseButton && (
           <button
@@ -46,29 +77,50 @@ function CartContents({ titleId, closeButtonRef, onDismiss, showCloseButton, ...
           </button>
         )}
       </header>
-      <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-5 sm:px-7">
-        {error && <p className="border border-mictlan-red/35 bg-mictlan-burgundy/20 px-4 py-3 text-sm text-mictlan-error-text" role="alert">{error}</p>}
-        {sessionState === 'loading' && <p className="text-sm text-mictlan-sage-muted" role="status">Consultando tu cuenta…</p>}
-        {sessionState === 'error' && (
-          <button type="button" onClick={retryCart} className="min-h-11 border border-mictlan-teal/35 px-4 text-sm text-mictlan-teal focus-visible:outline-2 focus-visible:outline-mictlan-teal">Reintentar carga del carrito</button>
-        )}
-        <CartSet
-          title="Tus productos"
-          items={sessionState === 'account' ? accountCart.items : guestLines}
-          subtotal={sessionState === 'account' ? accountCart.subtotal : guestSubtotal}
-          type={sessionState === 'account' ? 'account' : 'guest'}
-          busy={busy || sessionState === 'loading' || (sessionState === 'error' && Boolean(account) && !mergeConflict)}
-          authenticated={Boolean(account)}
-          onQuantityChange={setQuantity}
-          onRemove={removeItem}
-        />
-        {sessionState === 'guest' && (
-          <p className="border border-mictlan-sand/15 px-4 py-3 text-sm leading-6 text-mictlan-sage-muted">
-            <ShoppingBasket className="mr-2 inline size-4 text-mictlan-teal" aria-hidden="true" />
-            Tus productos se conservan en este navegador durante 30 días. Al iniciar sesión se agregarán a tu carrito.
-          </p>
-        )}
-      </div>
+      {isEmptyCart ? (
+        <>
+          <div className="grid min-h-0 flex-1 place-items-center px-5 sm:px-7">
+            <p className="font-ui text-sm uppercase tracking-[0.08em] text-mictlan-sage-muted" role="status">El carrito está vacío</p>
+          </div>
+          <footer className="shrink-0 border-t border-mictlan-sand/15 bg-mictlan-carbon px-5 py-4 sm:px-7">
+            <button
+              type="button"
+              onClick={dismiss}
+              className="flex min-h-11 w-full items-center justify-center border border-mictlan-teal/30 bg-mictlan-teal-deep px-5 font-ui text-xs font-semibold uppercase tracking-[0.12em] text-mictlan-bone transition-colors hover:bg-mictlan-teal-hover focus-visible:outline-2 focus-visible:outline-mictlan-teal"
+            >
+              Seguir comprando
+            </button>
+          </footer>
+        </>
+      ) : (
+        <>
+          <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-5 sm:px-7">
+            {error && <p className="border border-mictlan-red/35 bg-mictlan-burgundy/20 px-4 py-3 text-sm text-mictlan-error-text" role="alert">{error}</p>}
+            {sessionState === 'loading' && <p className="text-sm text-mictlan-sage-muted" role="status">Consultando tu cuenta…</p>}
+            {sessionState === 'error' && (
+              <button type="button" onClick={retryCart} className="min-h-11 border border-mictlan-teal/35 px-4 text-sm text-mictlan-teal focus-visible:outline-2 focus-visible:outline-mictlan-teal">Reintentar carga del carrito</button>
+            )}
+            {items.length > 0 && (
+              <CartSet
+                items={items}
+                type={cartType}
+                busy={busy || sessionState === 'loading' || (sessionState === 'error' && Boolean(account) && !mergeConflict)}
+                onQuantityChange={setQuantity}
+                onRemove={removeItem}
+              />
+            )}
+            {sessionState === 'guest' && items.length > 0 && (
+              <p className="text-sm leading-6 text-mictlan-sage-muted">
+                <ShoppingBasket className="mr-2 inline size-4 text-mictlan-teal" aria-hidden="true" />
+                El carrito se conserva en este navegador durante 30 días. Al iniciar sesión, se agregará a tu cuenta.
+              </p>
+            )}
+          </div>
+          {items.length > 0 && (
+            <CartFooter subtotal={subtotal} isGuest={cartType === 'guest'} authenticated={Boolean(account)} />
+          )}
+        </>
+      )}
     </div>
   );
 }
@@ -150,6 +202,7 @@ export default function CartDrawer() {
     closeDrawer,
     error,
     guestCart,
+    itemCount,
     mergeConflict,
     sessionState,
     setError,
@@ -167,11 +220,16 @@ export default function CartDrawer() {
       slug,
       name: product?.name || null,
       quantity,
+      image: product?.image || null,
       available,
       unitPrice: available ? product.price : null,
       lineTotal: available ? { amount: product.price.amount * quantity, currency: product.price.currency } : null,
     };
   }), [catalog, guestCart.items]);
+  const accountLines = useMemo(() => accountCart.items.map((item) => ({
+    ...item,
+    image: catalog.find((product) => product.slug === item.slug)?.image || null,
+  })), [accountCart.items, catalog]);
   const guestSubtotal = useMemo(() => ({
     amount: guestLines.reduce((sum, item) => sum + (item.lineTotal?.amount || 0), 0),
     currency: 'MXN',
@@ -195,10 +253,12 @@ export default function CartDrawer() {
   const contents = {
     account,
     accountCart,
+    accountLines,
     busy,
     error,
     guestLines,
     guestSubtotal,
+    itemCount,
     mergeConflict,
     removeItem,
     retryCart,
