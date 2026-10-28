@@ -87,9 +87,69 @@ function CartContents({ titleId, closeButtonRef, onDismiss, showCloseButton, ...
   );
 }
 
-export default function CartDrawer() {
+function DesktopCartDialog({ contents, onDismiss }) {
   const dialogRef = useRef(null);
   const closeButtonRef = useRef(null);
+  const firstFrameRef = useRef(null);
+  const secondFrameRef = useRef(null);
+  const closingTimerRef = useRef(null);
+  const isExitingRef = useRef(false);
+  const [hasEntered, setHasEntered] = useState(false);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return undefined;
+
+    dialog.showModal();
+    closeButtonRef.current?.focus();
+
+    firstFrameRef.current = window.requestAnimationFrame(() => {
+      secondFrameRef.current = window.requestAnimationFrame(() => setHasEntered(true));
+    });
+
+    return () => {
+      if (firstFrameRef.current !== null) window.cancelAnimationFrame(firstFrameRef.current);
+      if (secondFrameRef.current !== null) window.cancelAnimationFrame(secondFrameRef.current);
+      if (closingTimerRef.current !== null) window.clearTimeout(closingTimerRef.current);
+      if (dialog.open) dialog.close();
+    };
+  }, []);
+
+  function requestDismiss(event) {
+    event?.preventDefault?.();
+    if (isExitingRef.current) return;
+
+    isExitingRef.current = true;
+    contents.setError('');
+    if (firstFrameRef.current !== null) window.cancelAnimationFrame(firstFrameRef.current);
+    if (secondFrameRef.current !== null) window.cancelAnimationFrame(secondFrameRef.current);
+    setHasEntered(false);
+
+    const duration = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 300;
+    closingTimerRef.current = window.setTimeout(onDismiss, duration);
+  }
+
+  return (
+    <dialog
+      id="desktop-cart-dialog"
+      ref={dialogRef}
+      onCancel={requestDismiss}
+      onClick={(event) => { if (event.target === event.currentTarget) requestDismiss(event); }}
+      aria-labelledby="desktop-cart-title"
+      className={`fixed inset-y-0 right-0 m-0 ml-auto h-dvh max-h-dvh w-full max-w-lg border-l border-mictlan-teal/25 bg-mictlan-carbon p-0 text-mictlan-ivory shadow-2xl backdrop:bg-mictlan-carbon/75 transition-transform duration-300 ease-in-out motion-reduce:transition-none${hasEntered ? ' translate-x-0' : ' translate-x-full'}`}
+    >
+      <CartContents
+        titleId="desktop-cart-title"
+        closeButtonRef={closeButtonRef}
+        onDismiss={requestDismiss}
+        showCloseButton
+        {...contents}
+      />
+    </dialog>
+  );
+}
+
+export default function CartDrawer() {
   const [isDesktop, setIsDesktop] = useState(false);
   const {
     account,
@@ -134,16 +194,6 @@ export default function CartDrawer() {
     return () => mediaQuery.removeEventListener('change', updateViewport);
   }, []);
 
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return undefined;
-    dialog.showModal();
-    closeButtonRef.current?.focus();
-    return () => {
-      if (dialog.open) dialog.close();
-    };
-  }, [cartOpen, isDesktop]);
-
   function dismiss(event) {
     event?.preventDefault?.();
     setError('');
@@ -186,22 +236,7 @@ export default function CartDrawer() {
         <CartContents titleId="mobile-cart-title" onDismiss={dismiss} showCloseButton={false} {...contents} />
       </aside>
       {cartOpen && isDesktop && (
-        <dialog
-          id="desktop-cart-dialog"
-          ref={dialogRef}
-          onCancel={dismiss}
-          onClick={(event) => { if (event.target === event.currentTarget) dismiss(event); }}
-          aria-labelledby="desktop-cart-title"
-          className="fixed inset-y-0 right-0 m-0 ml-auto h-dvh max-h-dvh w-full max-w-lg border-l border-mictlan-teal/25 bg-mictlan-carbon p-0 text-mictlan-ivory shadow-2xl backdrop:bg-mictlan-carbon/75"
-        >
-          <CartContents
-            titleId="desktop-cart-title"
-            closeButtonRef={closeButtonRef}
-            onDismiss={dismiss}
-            showCloseButton
-            {...contents}
-          />
-        </dialog>
+        <DesktopCartDialog contents={contents} onDismiss={dismiss} />
       )}
     </>
   );
