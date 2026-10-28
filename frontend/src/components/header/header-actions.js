@@ -1,10 +1,12 @@
 import { ShoppingBasket, UserRound } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
+import { useCart } from '../cart/cart-provider.js';
 
 export default function HeaderActions({ account, onSignOut, signOutPending, signOutError }) {
   const [isOpen, setIsOpen] = useState(false);
   const accountControlRef = useRef(null);
+  const { itemCount, openDrawer } = useCart();
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -59,9 +61,15 @@ export default function HeaderActions({ account, onSignOut, signOutPending, sign
           </nav>
         )}
       </div>
-      <span className="relative flex h-7 w-7 shrink-0 items-center justify-center text-mictlan-sand/90 transition-[color,transform] duration-100 hover:scale-90 hover:text-mictlan-teal max-[560px]:inline-flex" aria-hidden="true">
-        <ShoppingBasket className="h-7 w-7" />
-      </span>
+      <button
+        type="button"
+        onClick={openDrawer}
+        className="relative inline-flex size-11 shrink-0 items-center justify-center rounded-sm text-mictlan-sand/90 transition-[color,transform] duration-100 hover:scale-90 hover:text-mictlan-teal focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mictlan-teal"
+        aria-label={`Abrir carrito, ${itemCount} ${itemCount === 1 ? 'unidad' : 'unidades'}`}
+      >
+        <ShoppingBasket className="size-7" aria-hidden="true" />
+        {itemCount > 0 && <span className="absolute -right-0.5 -top-0.5 flex min-h-5 min-w-5 items-center justify-center rounded-full bg-mictlan-teal-deep px-1 font-ui text-[0.65rem] font-semibold tabular-nums text-mictlan-bone" aria-hidden="true">{itemCount}</span>}
+      </button>
     </div>
   );
 }

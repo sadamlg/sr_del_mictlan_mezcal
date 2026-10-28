@@ -9,14 +9,14 @@ flowchart TB
     p01["✅ 01 · Stack y entorno local<br/>Concluida"] --> p02["✅ 02 · Alcance y plan maestro<br/>Concluida"]
     p02 --> p03["✅ 03 · Landing, catálogo y medios<br/>Concluida"]
     p03 --> p04["✅ 04 · Cuentas y perfil<br/>Concluida"]
-    p04 --> p05["🔵 05 · Carritos<br/>Siguiente"]
-    p05 --> p06["▫️ 06 · Stripe Checkout y pedidos<br/>Planeada"]
+    p04 --> p05["✅ 05 · Carritos<br/>Concluida"]
+    p05 --> p06["🔵 06 · Stripe Checkout y pedidos<br/>Siguiente"]
     p06 --> p07["▫️ 07 · Correo transaccional y PDF<br/>Planeada"]
     p07 --> p08["▫️ 08 · Integración y aceptación en staging<br/>Planeada"]
     p08 --> p09["▫️ 09 · Preparación y salida a producción<br/>Planeada"]
 ```
 
-**Leyenda:** ✅ concluida · 🔵 siguiente · ▫️ posterior. Las fases 03 y 04 quedaron concluidas. La landing y el catálogo están implementados, las doce imágenes de desarrollo están en R2 y los componentes resuelven sus medios mediante `MEDIA_BASE_URL`. El mapa resume el orden y el estado; los resultados, dependencias y criterios de cierre se detallan en cada fase.
+**Leyenda:** ✅ concluida · 🔵 siguiente · ▫️ posterior. Las fases 03, 04 y 05 quedaron concluidas. La landing y el catálogo están implementados, las doce imágenes de desarrollo están en R2 y los componentes resuelven sus medios mediante `MEDIA_BASE_URL`. El mapa resume el orden y el estado; los resultados, dependencias y criterios de cierre se detallan en cada fase.
 
 ## Fases
 
@@ -51,9 +51,11 @@ flowchart TB
 
 ### 05. Carritos
 
+**Estado: concluida.** El carrito de invitado persiste 30 días en el navegador; el carrito de cuenta se guarda en PostgreSQL. La interfaz mantiene ambos conjuntos separados, muestra cantidades y subtotales con los precios actuales, y recupera el catálogo público desde páginas de cuenta cuando hace falta. Se validaron las rutas privadas, migración, expiración, aislamiento y recorridos en Compose. Cada conjunto muestra su botón de pago deshabilitado hasta conectar Stripe en la fase 06; no se crean pedidos ni se reservan existencias.
+
 - **Dependencias:** fases 03 y 04.
 - **Resultado esperado:** carrito de invitado persistente y carrito de cuenta, mostrados como conjuntos independientes; conservar el conjunto invitado al autenticarse y permitir preparar cada conjunto por separado.
-- **Criterio de cierre:** cada conjunto conserva sus artículos, cantidades, totales y acción de pago sin fusionarse; los productos inactivos o con precio cambiado se revalidan antes del pago. No se comprueban ni reservan existencias.
+- **Criterio de cierre:** cada conjunto conserva sus artículos, cantidades y totales sin fusionarse; sus botones de pago permanecen separados y preparados para la fase 06. Los artículos inactivos se identifican y el catálogo vuelve a aportar los precios vigentes; Checkout volverá a validar ambos antes de cobrar. No se comprueban ni reservan existencias.
 
 ### 06. Stripe Checkout y pedidos
 

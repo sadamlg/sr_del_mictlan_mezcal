@@ -16,6 +16,8 @@ En las rutas de API, la palabra al principio indica qué se quiere hacer:
 - `GET`: consultar información.
 - `POST`: enviar información o solicitar una acción.
 - `PATCH`: actualizar información existente.
+- `PUT`: crear o reemplazar el estado de un elemento.
+- `DELETE`: retirar un elemento.
 
 ## Tres formas de acceso
 
@@ -74,6 +76,9 @@ Estas operaciones requieren la cookie de una sesión válida:
 | `GET /api/profile` | Consulta el perfil de la persona conectada. |
 | `PATCH /api/profile` | Actualiza el perfil de la persona conectada. Cambiar el correo también requiere su contraseña actual y confirmar el nuevo correo. |
 | `GET /api/orders` | Consulta los pedidos de la persona conectada. En esta fase devuelve una lista vacía hasta que exista el módulo de pedidos. |
+| `GET /api/cart/account` | Consulta el carrito persistido de la persona conectada, con precios y subtotal actuales del catálogo. |
+| `PUT /api/cart/account/items` | Crea o actualiza la cantidad de un producto en el carrito de la cuenta. El backend toma el precio del catálogo. |
+| `DELETE /api/cart/account/items/:slug` | Retira un producto del carrito de la cuenta. |
 
 ## Cómo se conectan las rutas al confirmar una cuenta
 
@@ -88,7 +93,7 @@ Para ver el perfil o los pedidos, el navegador envía la cookie automáticamente
 
 ## Qué todavía no tiene rutas
 
-En el sistema actual no están definidas operaciones para carrito, iniciar checkout ni crear pedidos. Existe `GET /api/orders` para consultar pedidos, pero el módulo que los genera se implementará después. El catálogo se muestra dentro de la landing; no hay una ruta de detalle individual de producto.
+El carrito de invitado se guarda en el navegador y no tiene una ruta de API. Para cuentas ya están definidas las operaciones privadas descritas arriba. Aún no hay operaciones para iniciar checkout ni crear pedidos: `GET /api/orders` devuelve una lista vacía hasta la fase 06. El catálogo se muestra dentro de la landing; no hay una ruta de detalle individual de producto.
 
 ## Dónde se mantienen estas rutas
 
@@ -96,5 +101,6 @@ La lista debe mantenerse de acuerdo con el código, no sólo con este documento:
 
 - Las páginas web están en `frontend/src/app/`.
 - Las operaciones del backend están declaradas en `backend/src/server.js`.
+- Las operaciones de carrito se conectan en `backend/src/carts/cart-handler.js`; los cambios de cantidad y consultas se implementan en `backend/src/carts/cart-service.js` y `backend/src/carts/cart-repository.js`.
 - La comprobación de sesión y el acceso a perfil y pedidos se conectan en `backend/src/accounts/account-handler.js`.
 - El endpoint del frontend `POST /api/visits` está en `frontend/src/app/api/visits/route.js` y reenvía la solicitud al backend.

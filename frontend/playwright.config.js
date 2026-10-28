@@ -3,6 +3,7 @@ const { defineConfig } = require('@playwright/test');
 module.exports = defineConfig({
   testDir: './e2e',
   fullyParallel: true,
+  workers: process.env.CI ? 2 : undefined,
   reporter: 'list',
   use: {
     baseURL: 'http://localhost:3100',
@@ -17,8 +18,8 @@ module.exports = defineConfig({
     timeout: 120_000,
     env: {
       ...process.env,
-      INTERNAL_API_URL: '',
-      MEDIA_BASE_URL: 'http://localhost:3100',
+      INTERNAL_API_URL: process.env.INTERNAL_API_URL || '',
+      MEDIA_BASE_URL: process.env.MEDIA_BASE_URL || 'http://localhost:3100',
     },
   },
 });

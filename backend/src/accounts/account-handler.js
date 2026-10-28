@@ -1,29 +1,7 @@
 import { AccountError } from './account-service.js';
+import { createSessionCookie, readSessionCookie } from './session-cookie.js';
 
 export { AccountError };
-
-const COOKIE_NAME = 'mictlan_session';
-const SESSION_MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
-
-function readSessionCookie(request) {
-  const cookie = request.headers?.cookie;
-  if (typeof cookie !== 'string') return undefined;
-  const prefix = `${COOKIE_NAME}=`;
-  const item = cookie.split(';').map((part) => part.trim()).find((part) => part.startsWith(prefix));
-  return item?.slice(prefix.length);
-}
-
-function sessionCookie(token, secure) {
-  const parts = [
-    `${COOKIE_NAME}=${token}`,
-    'Path=/',
-    `Max-Age=${token ? SESSION_MAX_AGE_SECONDS : 0}`,
-    'HttpOnly',
-    'SameSite=Lax',
-  ];
-  if (secure) parts.push('Secure');
-  return parts.join('; ');
-}
 
 function setCommonHeaders(response) {
   response.set('Cache-Control', 'no-store');
@@ -55,7 +33,7 @@ export function createAccountHandlers(service, { secureCookies = false, logger =
         const result = await action(request);
         const shouldSetCookie = typeof cookie === 'function' ? cookie(result) : cookie;
         if (shouldSetCookie || clearCookie) {
-          response.set('Set-Cookie', sessionCookie(shouldSetCookie ? result.sessionToken : '', secureCookies));
+          response.set('Set-Cookie', createSessionCookie(shouldSetCookie ? result.sessionToken : '', secureCookies));
         }
         if (empty) return response.status(status).end();
         const body = { ...(result ?? {}) };
