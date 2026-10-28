@@ -22,7 +22,7 @@ export default function SignInView() {
     setErrorKind('error');
     try {
       await accountRequest('auth/login', { method: 'POST', body: { email, password } });
-      router.replace('/cuenta');
+      router.replace('/');
     } catch (requestError) {
       setError(requestError.message);
       if (requestError.code === 'EMAIL_NOT_VERIFIED') setErrorKind('info');

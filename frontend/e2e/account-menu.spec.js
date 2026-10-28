@@ -11,7 +11,7 @@ test('age verification is limited to the landing page', async ({ page }) => {
   await expect(page.getByRole('dialog', { name: '¿Eres mayor de edad?' })).toHaveCount(0);
 });
 
-test('login updates the account greeting and exposes account actions', async ({ page }) => {
+test('successful login returns to the landing page and exposes account actions', async ({ page }) => {
   await acceptAgeForAccountFlow(page);
   const account = {
     id: 'account-id',
@@ -67,8 +67,14 @@ test('login updates the account greeting and exposes account actions', async ({ 
 
   const accountButton = page.getByRole('button', { name: 'Hola, Ana María' });
   await expect(accountButton).toBeVisible();
+  await expect(page).toHaveURL('/');
   await expect.poll(() => initialSessionCompleted).toBe(true);
   await expect(accountButton).toBeVisible();
+
+  await accountButton.click();
+  const accountOptions = page.getByRole('navigation', { name: 'Opciones de cuenta' });
+  await accountOptions.getByRole('link', { name: 'Cuenta' }).click();
+  await expect(page).toHaveURL('/cuenta');
   await expect(page.getByLabel('Nombre(s)')).toHaveValue('Ana María');
   await expect(page.getByLabel('Apellidos')).toHaveValue('Martínez López');
   await page.getByLabel('Nombre(s)').fill('Ana');
