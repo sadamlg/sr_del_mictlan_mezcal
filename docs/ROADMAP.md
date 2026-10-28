@@ -39,9 +39,9 @@ flowchart TB
 - **Cloudflare R2:** durante esta fase, justo antes de integrar archivos reales, el responsable del proyecto crea y configura la cuenta de Cloudflare. R2 se prepara para desarrollo/staging por separado de producción. `r2.dev` puede usarse sólo en entornos no productivos; no se configura DNS ni un dominio personalizado como parte de la integración local de R2.
 - **Criterio de cierre:** la landing y el escaparate cumplen el alcance; los productos activos y sus medios se muestran correctamente y el aviso de edad funciona. Las claves estables y metadatos de medios se resuelven desde la configuración del entorno. **Completado:** los doce medios de desarrollo están cargados en R2; `MEDIA_BASE_URL` está configurado en frontend y backend, y la API local devuelve las URL públicas R2 de las imágenes del catálogo.
 
-### 04. Cuentas y perfil
+### 04. Cuentas y perfil — concluida
 
-**Estado: concluida.** Registro con nombre(s) y apellidos separados, sesiones, saludo y menú de cuenta, perfil editable, confirmación y cambio de correo, recuperación de contraseña y vista vacía de pedidos están conectados en Compose. El registro permanece pendiente, sin sesión ni acceso a datos privados, hasta confirmar el correo; la confirmación inicia la sesión y redirige a la landing. Mailpit recibió y permitió confirmar los mensajes de registro y cambio de correo. Las suites del backend, frontend y navegador, ESLint y el build de producción del frontend terminaron correctamente.
+**Verificación:** las suites de backend, frontend y navegador, ESLint y el build de producción terminaron correctamente. Mailpit recibió los mensajes de registro y cambio de correo.
 
 - **Dependencias:** fases 01 y 02; las pantallas se integran con las superficies definidas en fase 03.
 - **Resultado esperado:** registro con validación de mayoría de edad y dirección, inicio/cierre y restauración de sesión, recuperación de contraseña, edición de nombre(s), apellidos, correo, fecha de nacimiento y dirección, y las vistas de perfil y “Mis pedidos”.
@@ -49,12 +49,10 @@ flowchart TB
 - **Pedidos:** la vista protegida muestra un estado vacío hasta que la fase 06 cree y conecte las órdenes reales; no presenta pedidos de ejemplo.
 - **Criterio de cierre:** los recorridos incluidos funcionan de extremo a extremo en Docker Compose, con validaciones del backend, pruebas automatizadas y estados de interfaz completos. Las contraseñas y tokens no se exponen en respuestas ni logs.
 
-### 05. Carritos
-
-**Estado: concluida.** El carrito de invitado persiste 30 días en el navegador; el carrito de cuenta se guarda en PostgreSQL. Al autenticarse, sus cantidades se suman de forma idempotente al carrito de cuenta y la interfaz muestra un único conjunto con precios actuales. El botón de pago permanece deshabilitado hasta conectar Stripe en la fase 06; no se crean pedidos ni se reservan existencias.
+### 05. Carritos — concluida
 
 - **Dependencias:** fases 03 y 04.
-- **Resultado esperado:** carrito de invitado persistente y carrito de cuenta; al autenticarse, sumar los artículos por producto y mostrar un único carrito.
+- **Resultado:** carrito de invitado persistente durante 30 días y carrito de cuenta en PostgreSQL. Al autenticarse, las cantidades se suman de forma idempotente y se muestra un solo carrito con precios actuales.
 - **Criterio de cierre:** la transferencia resiste reintentos sin duplicar cantidades, conserva los artículos locales ante un error y muestra un solo total. El botón de pago permanece preparado para la fase 06. Los artículos inactivos se identifican y Checkout volverá a validar precios y disponibilidad antes de cobrar. No se comprueban ni reservan existencias.
 
 ### 06. Stripe Checkout y pedidos

@@ -1,6 +1,6 @@
 # Servicios y costos
 
-> Tarifas revisadas el 17 de octubre de 2026. Los precios están expresados en USD, salvo donde se indica MXN. Las tarifas y cuotas pueden cambiar; vuelve a consultar las páginas oficiales antes de contratar o ajustar el presupuesto.
+> Tarifas revisadas el 28 de octubre de 2026. Los precios están expresados en USD, salvo donde se indica MXN. Las tarifas y cuotas pueden cambiar; vuelve a consultar las páginas oficiales antes de contratar o ajustar el presupuesto.
 
 ## Servicios previstos
 

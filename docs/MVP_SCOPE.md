@@ -28,7 +28,7 @@ Publicar una tienda en línea que presente la marca y sus productos, permita a v
 
 ### Cuentas y perfil
 
-- Una persona puede registrarse, confirmar su correo antes de activar la cuenta, iniciar y cerrar sesión, y recuperar su contraseña mediante un enlace enviado por correo. El registro no inicia sesión ni permite consultar la cuenta hasta que se confirme la dirección; al confirmarla, la sesión se inicia y vuelve a la landing.
+- Una persona puede registrarse, iniciar y cerrar sesión, y recuperar su contraseña mediante correo. La cuenta queda pendiente hasta confirmar su dirección; al confirmarla, se inicia la sesión y vuelve a la landing.
 - El registro solicita nombre(s), apellidos, correo electrónico, fecha de nacimiento y dirección en México. La fecha debe ser válida y acreditar que la persona tiene al menos 18 años.
 - La dirección incluye calle, número, colonia, ciudad o delegación, estado y código postal. Se validan los campos y el formato básico del código postal; no se consulta una base externa de direcciones.
 - La información personal editable incluye nombre(s), apellidos, correo electrónico, fecha de nacimiento y todos los campos de dirección. La fecha de nacimiento nueva debe seguir acreditando que la persona tiene al menos 18 años.

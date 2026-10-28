@@ -17,14 +17,14 @@ El carrito de invitado se conserva en `localStorage` del mismo navegador durante
 
 ## API del carrito de cuenta
 
-Todas las rutas de este contrato requieren la cookie de sesión válida. La cuenta se deriva exclusivamente de esa sesión. Las respuestas usan `Cache-Control: no-store`, aceptan sólo el origen frontend configurado y mantienen el formato de error `{ "error": { "code", "message", "fields?" } }`.
+Todas las operaciones de este contrato requieren una cookie de sesión válida; la cuenta se deriva exclusivamente de ella. Las respuestas usan `Cache-Control: no-store`. Si la solicitud incluye `Origin`, el backend sólo acepta el frontend configurado. Los errores usan `{ "error": { "code", "message", "fields?" } }`.
 
 | Método y ruta | Resultado |
 |---|---|
 | `GET /api/cart/account` | Devuelve el carrito de la cuenta, incluidos artículos inactivos y el subtotal actual. Un carrito vacío responde `200` con `items: []` y subtotal cero. |
 | `PUT /api/cart/account/items` | Recibe `{ "slug": "mezcal-reposado", "quantity": 2 }`; agrega o establece la cantidad para un producto activo y devuelve el carrito actualizado. |
 | `DELETE /api/cart/account/items/:slug` | Quita el artículo de esa cuenta y devuelve `204`; repetir la operación también responde `204`. |
-| `POST /api/cart/account/merge` | Recibe `{ "transferId": "uuid", "items": [{ "slug": "mezcal-reposado", "quantity": 2 }] }`. Suma las cantidades en una transacción y devuelve el carrito. Repetir el mismo `transferId` para esa cuenta no vuelve a sumarlas. |
+| `POST /api/cart/account/merge` | Recibe `{ "transferId": "uuid", "items": [{ "slug": "mezcal-reposado", "quantity": 2 }] }`, con hasta 100 productos distintos. Suma las cantidades en una transacción y devuelve el carrito. Repetir el mismo `transferId` para esa cuenta no vuelve a sumarlas. |
 
 Un cuerpo inválido o una cantidad fuera de 1–99 responde `422`. Un producto inexistente o inactivo no se puede agregar y responde `409 PRODUCT_NOT_AVAILABLE`. La falta o vencimiento de sesión responde `401`. Un fallo de almacenamiento responde `503 CART_UNAVAILABLE` sin filtrar detalles internos.
 
@@ -52,7 +52,7 @@ Para un producto inactivo, `available` es `false`, `unitPrice` y `lineTotal` son
 
 ## Interfaz
 
-El encabezado abre una sección lateral accesible desde teclado. Las acciones de producto agregan una unidad. La sección muestra un único conjunto de artículos, controles de cantidad, eliminación y subtotal. Un estado vacío explica cómo agregar un producto; los estados de carga, error y producto no disponible son explícitos. La cantidad del encabezado corresponde al carrito visible. Como no había un prototipo disponible, el dueño aprobó usar los tokens, la tipografía y los patrones accesibles de `design.md` y de las superficies actuales.
+El encabezado abre una sección lateral accesible desde teclado. Las acciones de producto agregan una unidad; el carrito muestra artículos, cantidades, eliminación y subtotal. Si está vacío, indica que no hay artículos y ofrece volver a la tienda. También expone estados de carga, error y producto no disponible. El contador corresponde al carrito visible. Sin prototipo disponible, se aprobó seguir los tokens, la tipografía y los patrones accesibles actuales de `design.md`.
 
 La fase 05 no inicia Checkout ni vacía el carrito tras una compra. La acción de pagar el carrito se conecta con Stripe y la autenticación requerida en la fase 06.
 
