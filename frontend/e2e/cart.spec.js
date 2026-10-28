@@ -22,7 +22,7 @@ test('visitor can add, update, remove, and restore the guest cart after reload',
   await addButton.click();
 
   const drawer = page.getByRole('dialog', { name: 'Tu carrito' });
-  const guestCart = drawer.getByRole('region', { name: 'Tus productos' });
+  const guestCart = drawer.getByRole('region', { name: 'Artículos del carrito' });
   await expect(guestCart).toContainText(product.name);
   const item = guestCart.getByRole('listitem').filter({ hasText: product.name });
   await expect(item.getByLabel('Cantidad: 1')).toBeVisible();
@@ -32,11 +32,12 @@ test('visitor can add, update, remove, and restore the guest cart after reload',
 
   await page.reload();
   await page.getByRole('button', { name: /Abrir carrito/ }).click();
-  const restoredCart = page.getByRole('dialog', { name: 'Tu carrito' }).getByRole('region', { name: 'Tus productos' });
+  const restoredDrawer = page.getByRole('dialog', { name: 'Tu carrito' });
+  const restoredCart = restoredDrawer.getByRole('region', { name: 'Artículos del carrito' });
   const restoredItem = restoredCart.getByRole('listitem').filter({ hasText: product.name });
   await expect(restoredItem.getByLabel('Cantidad: 2')).toBeVisible();
   await restoredItem.getByRole('button', { name: `Quitar ${product.name} del carrito` }).click();
-  await expect(restoredCart).toContainText('Tu carrito está vacío');
+  await expect(restoredDrawer.getByRole('status')).toHaveText('El carrito está vacío');
 });
 
 test('cart drawer fits narrow and wide viewports and closes with Escape', async ({ page }) => {
@@ -112,7 +113,7 @@ test('signing in combines guest and account quantities into one cart without rep
   await page.getByRole('button', { name: /Abrir carrito/ }).click();
 
   const drawer = page.getByRole('dialog', { name: 'Tu carrito' });
-  const cart = drawer.getByRole('region', { name: 'Tus productos' });
+  const cart = drawer.getByRole('region', { name: 'Artículos del carrito' });
   await expect(cart.getByLabel('Cantidad: 3')).toBeVisible();
   await expect(drawer.getByRole('region')).toHaveCount(1);
   expect(await page.evaluate((key) => localStorage.getItem(key), guestCartKey)).toBeNull();
@@ -177,7 +178,7 @@ test('guest cart resolves current product names and prices from account pages', 
   await page.goto('/cuenta');
   await page.getByRole('button', { name: /Abrir carrito/ }).click();
 
-  const guestCart = page.getByRole('dialog', { name: 'Tu carrito' }).getByRole('region', { name: 'Tus productos' });
+  const guestCart = page.getByRole('dialog', { name: 'Tu carrito' }).getByRole('region', { name: 'Artículos del carrito' });
   await expect(guestCart).toContainText(product.name);
   await expect(guestCart).toContainText(/123\.45/);
 });
@@ -208,7 +209,7 @@ test('adding a product to an account cart sends only the absolute quantity', asy
   await page.locator(`[data-product-slug="${product.slug}"]`).click();
 
   await expect.poll(() => savedItem).toEqual({ slug: product.slug, quantity: 2 });
-  const accountCart = page.getByRole('dialog', { name: 'Tu carrito' }).getByRole('region', { name: 'Tus productos' });
+  const accountCart = page.getByRole('dialog', { name: 'Tu carrito' }).getByRole('region', { name: 'Artículos del carrito' });
   await expect(accountCart.getByLabel('Cantidad: 2')).toBeVisible();
-  await expect(accountCart).not.toContainText('Tu carrito está vacío');
+  await expect(accountCart).not.toContainText('El carrito está vacío');
 });
