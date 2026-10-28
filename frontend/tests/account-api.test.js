@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { AccountApiError, accountRequest } from '../src/lib/account-api.js';
 
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
 test('account requests include credentials, avoid caching, and serialize JSON bodies', async (context) => {
   const originalFetch = globalThis.fetch;
   let request;
@@ -13,7 +15,7 @@ test('account requests include credentials, avoid caching, and serialize JSON bo
 
   const result = await accountRequest('profile', { method: 'PATCH', body: { firstName: 'Ana', lastName: 'Martínez' } });
 
-  assert.equal(request.url, 'http://localhost:4000/api/profile');
+  assert.equal(request.url, `${apiBaseUrl}/api/profile`);
   assert.equal(request.options.credentials, 'include');
   assert.equal(request.options.cache, 'no-store');
   assert.equal(request.options.headers['Content-Type'], 'application/json');

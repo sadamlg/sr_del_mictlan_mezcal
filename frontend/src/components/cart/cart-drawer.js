@@ -5,6 +5,7 @@ import { ShoppingBasket, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCart } from './cart-provider.js';
 import CartSet, { formatMoney } from './cart-set.js';
+import { useDesktopViewport } from '../../hooks/use-desktop-viewport.js';
 
 function CartFooter({ subtotal, isGuest, authenticated }) {
   return (
@@ -192,7 +193,7 @@ function DesktopCartDialog({ contents, onDismiss }) {
 }
 
 export default function CartDrawer() {
-  const [isDesktop, setIsDesktop] = useState(false);
+  const isDesktop = useDesktopViewport();
   const {
     account,
     accountCart,
@@ -234,15 +235,6 @@ export default function CartDrawer() {
     amount: guestLines.reduce((sum, item) => sum + (item.lineTotal?.amount || 0), 0),
     currency: 'MXN',
   }), [guestLines]);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(min-width: 1024px)');
-    const updateViewport = (event) => setIsDesktop(event.matches);
-
-    setIsDesktop(mediaQuery.matches);
-    mediaQuery.addEventListener('change', updateViewport);
-    return () => mediaQuery.removeEventListener('change', updateViewport);
-  }, []);
 
   function dismiss(event) {
     event?.preventDefault?.();

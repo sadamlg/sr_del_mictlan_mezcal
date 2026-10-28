@@ -1,7 +1,7 @@
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./fixtures');
 
 const guestCartKey = 'mictlan-guest-cart-v1';
-const product = { slug: 'calios', name: 'Calios · Destilado de pulque' };
+const product = { slug: 'calios', name: 'Calios · Destilado de pulque', primaryName: 'Calios', descriptor: 'Destilado de pulque' };
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -23,8 +23,9 @@ test('visitor can add, update, remove, and restore the guest cart after reload',
 
   const drawer = page.getByRole('dialog', { name: 'Tu carrito' });
   const guestCart = drawer.getByRole('region', { name: 'Artículos del carrito' });
-  await expect(guestCart).toContainText(product.name);
-  const item = guestCart.getByRole('listitem').filter({ hasText: product.name });
+  await expect(guestCart.getByRole('heading', { name: product.primaryName })).toBeVisible();
+  await expect(guestCart).toContainText(product.descriptor);
+  const item = guestCart.getByRole('listitem').filter({ hasText: product.primaryName });
   await expect(item.getByLabel('Cantidad: 1')).toBeVisible();
   await item.getByRole('button', { name: `Aumentar cantidad de ${product.name}` }).click();
   await expect(item.getByLabel('Cantidad: 2')).toBeVisible();
@@ -34,13 +35,13 @@ test('visitor can add, update, remove, and restore the guest cart after reload',
   await page.getByRole('button', { name: /Abrir carrito/ }).click();
   const restoredDrawer = page.getByRole('dialog', { name: 'Tu carrito' });
   const restoredCart = restoredDrawer.getByRole('region', { name: 'Artículos del carrito' });
-  const restoredItem = restoredCart.getByRole('listitem').filter({ hasText: product.name });
+  const restoredItem = restoredCart.getByRole('listitem').filter({ hasText: product.primaryName });
   await expect(restoredItem.getByLabel('Cantidad: 2')).toBeVisible();
   await restoredItem.getByRole('button', { name: `Quitar ${product.name} del carrito` }).click();
   await expect(restoredDrawer.getByRole('status')).toHaveText('El carrito está vacío');
 });
 
-test('cart drawer fits narrow and wide viewports and closes with Escape', async ({ page }) => {
+test('cart drawer keeps its layout, design tokens, and escape behavior across responsive breakpoints', async ({ page }) => {
   const hydrationErrors = [];
   page.on('console', (message) => {
     if (message.type() === 'error' && message.text().includes('Hydration failed')) hydrationErrors.push(message.text());
@@ -49,7 +50,7 @@ test('cart drawer fits narrow and wide viewports and closes with Escape', async 
   await page.goto('/');
   const trigger = page.getByRole('button', { name: /Abrir carrito/ });
 
-  for (const width of [320, 768, 1440]) {
+  for (const width of [320, 360, 390, 428, 768, 820, 1023, 1024, 1280, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await trigger.click();
     const drawer = page.getByRole('dialog', { name: 'Tu carrito' });
@@ -61,11 +62,124 @@ test('cart drawer fits narrow and wide viewports and closes with Escape', async 
     const drawerBounds = await drawer.boundingBox();
     expect(drawerBounds.x).toBeGreaterThanOrEqual(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+    await expect(drawer.getByRole('status')).toHaveText('El carrito está vacío');
+    await expect(drawer.getByRole('button', { name: 'Seguir comprando' })).toBeVisible();
+    await expect(drawer.getByText('Subtotal', { exact: true })).toHaveCount(0);
+    await expect(drawer.getByRole('button', { name: 'Continuar al pago' })).toHaveCount(0);
+    await expect(drawer.getByRole('region', { name: 'Artículos del carrito' })).toHaveCount(0);
     await page.keyboard.press('Escape');
     await expect(drawer).not.toBeVisible();
     await expect(trigger).toBeFocused();
   }
   expect(hydrationErrors).toEqual([]);
+});
+
+test('menu and cart exchange the active mobile panel and restore an empty cart cleanly', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+
+  const menu = page.locator('#mobile-navigation');
+  const menuToggle = page.locator('#mobile-menu-toggle');
+  const cartToggle = page.locator('#cart-toggle');
+  const cartPanel = page.locator('#mobile-cart-panel');
+  const drawer = page.getByRole('dialog', { name: 'Tu carrito' });
+
+  await menuToggle.click();
+  await expect(menu).toHaveAttribute('aria-hidden', 'false');
+  await expect(menuToggle).toHaveAttribute('aria-expanded', 'true');
+
+  await cartToggle.click();
+  await expect(drawer).toBeVisible();
+  await expect(menu).toHaveAttribute('aria-hidden', 'true');
+  await expect(menuToggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(cartToggle).toHaveAttribute('aria-expanded', 'true');
+
+  await menuToggle.click();
+  await expect(menu).toHaveAttribute('aria-hidden', 'false');
+  await expect(cartPanel).toHaveAttribute('aria-hidden', 'true');
+  await expect(cartToggle).toHaveAttribute('aria-expanded', 'false');
+});
+
+test('mobile navigation closes when the viewport crosses into the desktop breakpoint', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+
+  const menu = page.locator('#mobile-navigation');
+  await page.locator('#mobile-menu-toggle').click();
+  await expect(menu).toHaveAttribute('aria-hidden', 'false');
+
+  await page.setViewportSize({ width: 1024, height: 844 });
+  await expect(menu).toHaveAttribute('aria-hidden', 'true');
+  await expect(page.getByRole('navigation', { name: 'Navegación principal' })).toBeVisible();
+  await expect(page.locator('#cart-toggle')).toBeVisible();
+});
+
+test('cart item alignment and visual tokens hold from compact mobile through desktop', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.addInitScript(({ storageKey, slug }) => {
+    window.localStorage.setItem(storageKey, JSON.stringify({
+      items: [{ slug, quantity: 2 }],
+      lastActivityAt: Date.now(),
+    }));
+  }, { storageKey: guestCartKey, slug: product.slug });
+  await page.route('**/api/catalog/products', (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ products: [{
+      slug: product.slug,
+      name: product.name,
+      price: { amount: 12345, currency: 'MXN' },
+    }] }),
+  }));
+
+  await page.goto('/cuenta');
+  const cartToggle = page.getByRole('button', { name: /Abrir carrito/ });
+  const drawer = page.getByRole('dialog', { name: 'Tu carrito' });
+  const widths = [320, 360, 390, 428, 768, 820, 1023, 1024, 1280, 1440];
+
+  for (const width of widths) {
+    await page.setViewportSize({ width, height: 900 });
+    await cartToggle.click();
+    await expect(drawer).toBeVisible();
+    const item = drawer.getByRole('listitem').filter({ hasText: product.primaryName });
+    const image = item.locator(':scope > div > div').first();
+    const title = item.getByRole('heading', { name: product.primaryName });
+    const price = item.locator('p.text-mictlan-gold');
+    const remove = item.getByRole('button', { name: `Quitar ${product.name} del carrito` });
+    const controls = item.locator('div.inline-flex.items-center.border');
+    const increase = item.getByRole('button', { name: `Aumentar cantidad de ${product.name}` });
+    const footer = drawer.locator('footer');
+
+    await expect(title).toBeVisible();
+    await expect(item).toContainText(product.descriptor);
+    await expect(price).toContainText('246.90');
+    await expect(title).toHaveCSS('color', 'rgb(241, 231, 214)');
+    await expect(price).toHaveCSS('color', 'rgb(233, 189, 130)');
+    await expect(drawer.getByText('Subtotal', { exact: true })).toBeVisible();
+    await expect(drawer.getByRole('button', { name: 'Continuar al pago' })).toBeDisabled();
+    await expect(remove).toBeVisible();
+    await expect(increase).toBeVisible();
+    await expect.poll(async () => {
+      const [imageBox, titleBox, priceBox, removeBox, controlsBox] = await Promise.all([
+        image.boundingBox(), title.boundingBox(), price.boundingBox(), remove.boundingBox(), controls.boundingBox(),
+      ]);
+      return Math.max(
+        Math.abs(imageBox.y - titleBox.y),
+        Math.abs(imageBox.y - priceBox.y),
+        Math.abs(imageBox.y - removeBox.y),
+        Math.abs(imageBox.y + imageBox.height - controlsBox.y - controlsBox.height),
+      );
+    }).toBeLessThanOrEqual(2);
+    await expect.poll(async () => {
+      const [drawerBox, footerBox] = await Promise.all([drawer.boundingBox(), footer.boundingBox()]);
+      return Math.abs(drawerBox.y + drawerBox.height - footerBox.y - footerBox.height);
+    }).toBeLessThanOrEqual(2);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+    expect(await title.evaluate((element) => getComputedStyle(element).fontFamily)).toContain('Cinzel Decorative');
+    expect(await price.evaluate((element) => getComputedStyle(element).fontFamily)).toContain('Montserrat');
+    await page.keyboard.press('Escape');
+    await expect(drawer).not.toBeVisible();
+  }
 });
 
 test('signing in combines guest and account quantities into one cart without repeating the transfer', async ({ page }) => {
@@ -179,8 +293,9 @@ test('guest cart resolves current product names and prices from account pages', 
   await page.getByRole('button', { name: /Abrir carrito/ }).click();
 
   const guestCart = page.getByRole('dialog', { name: 'Tu carrito' }).getByRole('region', { name: 'Artículos del carrito' });
-  await expect(guestCart).toContainText(product.name);
-  await expect(guestCart).toContainText(/123\.45/);
+  await expect(guestCart.getByRole('heading', { name: product.primaryName })).toBeVisible();
+  await expect(guestCart).toContainText(product.descriptor);
+  await expect(guestCart.locator('p.text-mictlan-gold')).toContainText(/246\.90/);
 });
 
 test('adding a product to an account cart sends only the absolute quantity', async ({ page }) => {

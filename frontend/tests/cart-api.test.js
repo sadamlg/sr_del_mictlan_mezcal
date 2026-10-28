@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { getAccountCart, getPublicCatalog, mergeGuestCart, removeAccountCartItem, setAccountCartItem } from '../src/lib/cart-api.js';
 
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
 test('account cart API reads and writes only slugs and absolute quantities', async (context) => {
   const originalFetch = globalThis.fetch;
   const requests = [];
@@ -14,7 +16,7 @@ test('account cart API reads and writes only slugs and absolute quantities', asy
   await getAccountCart();
   await setAccountCartItem('mezcal-reposado', 3);
 
-  assert.equal(requests[0].url, 'http://localhost:4000/api/cart/account');
+  assert.equal(requests[0].url, `${apiBaseUrl}/api/cart/account`);
   assert.equal(requests[0].options.method, 'GET');
   assert.equal(requests[0].options.credentials, 'include');
   assert.equal(requests[0].options.cache, 'no-store');
@@ -32,7 +34,7 @@ test('account cart removal safely encodes a slug and accepts a bodyless 204', as
   context.after(() => { globalThis.fetch = originalFetch; });
 
   assert.equal(await removeAccountCartItem('mezcal-reposado'), null);
-  assert.equal(request.url, 'http://localhost:4000/api/cart/account/items/mezcal-reposado');
+  assert.equal(request.url, `${apiBaseUrl}/api/cart/account/items/mezcal-reposado`);
   assert.equal(request.options.method, 'DELETE');
 });
 
@@ -48,7 +50,7 @@ test('guest transfer sends only its id and product quantities', async (context) 
 
   await mergeGuestCart(transfer);
 
-  assert.equal(request.url, 'http://localhost:4000/api/cart/account/merge');
+  assert.equal(request.url, `${apiBaseUrl}/api/cart/account/merge`);
   assert.equal(request.options.method, 'POST');
   assert.deepEqual(JSON.parse(request.options.body), transfer);
 });
@@ -64,7 +66,7 @@ test('public catalog API fetches product names and current prices without cachin
   context.after(() => { globalThis.fetch = originalFetch; });
 
   assert.deepEqual(await getPublicCatalog(), products);
-  assert.equal(request.url, 'http://localhost:4000/api/catalog/products');
+  assert.equal(request.url, `${apiBaseUrl}/api/catalog/products`);
   assert.equal(request.options.cache, 'no-store');
   assert.equal(request.options.credentials, 'include');
 });

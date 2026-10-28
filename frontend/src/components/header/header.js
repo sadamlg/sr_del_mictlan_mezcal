@@ -14,6 +14,7 @@ import {
   shouldDisplayHeader,
   shouldHideHeaderOnScroll,
 } from './behavior';
+import { useDesktopViewport } from '../../hooks/use-desktop-viewport';
 
 export default function SiteHeader({ mediaBaseUrl }) {
   const router = useRouter();
@@ -21,7 +22,7 @@ export default function SiteHeader({ mediaBaseUrl }) {
   const [account, setAccount] = useState(null);
   const [signOutPending, setSignOutPending] = useState(false);
   const [signOutError, setSignOutError] = useState('');
-  const [isDesktop, setIsDesktop] = useState(false);
+  const isDesktop = useDesktopViewport(closeMobileMenu);
   const [headerVisible, setHeaderVisible] = useState(true);
   const [brandImageReady, setBrandImageReady] = useState(false);
   const sessionRefreshSequence = useRef(0);
@@ -71,18 +72,6 @@ export default function SiteHeader({ mediaBaseUrl }) {
       window.removeEventListener(ACCOUNT_SESSION_CHANGED_EVENT, refreshAccount);
     };
   }, [refreshAccount]);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(min-width: 1024px)');
-    const updateViewport = (event) => {
-      setIsDesktop(event.matches);
-      if (event.matches) closeMobileMenu();
-    };
-
-    setIsDesktop(mediaQuery.matches);
-    mediaQuery.addEventListener('change', updateViewport);
-    return () => mediaQuery.removeEventListener('change', updateViewport);
-  }, [closeMobileMenu]);
 
   useEffect(() => {
     const handleScroll = () => {

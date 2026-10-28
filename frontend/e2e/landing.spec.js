@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('./fixtures');
 
 test('visitor counter shows the API total and reuses its session after reload', async ({ page }) => {
   const visitIds = [];
@@ -8,6 +8,7 @@ test('visitor counter shows the API total and reuses its session after reload', 
   });
 
   await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('data-scroll-behavior', 'smooth');
   const counter = page.locator('section[aria-labelledby="visitor-counter-title"]');
   await expect(counter).toContainText('27');
   await page.reload();
@@ -28,6 +29,7 @@ test('landing hero CTA uses the account teal palette and keeps its hover scale',
   const ctaSurface = cta.locator('span[aria-hidden="true"]');
 
   await expect(cta).toBeVisible();
+  await expect(page.locator('img[src*="hero-background.png"]')).toHaveAttribute('loading', 'eager');
   await expect(cta).toHaveCSS('color', 'rgb(226, 227, 224)');
   await expect(ctaSurface).toHaveCSS('background-color', 'rgb(15, 80, 71)');
   await cta.hover();
@@ -44,6 +46,7 @@ test('age confirmation unlocks the landing and is remembered for the session', a
   const confirmButton = dialog.getByRole('button', { name: 'Entrar al Mictlán' });
 
   await expect(dialog).toBeVisible();
+  await expect(dialog.locator('img[src*="skull.png"]')).toHaveAttribute('loading', 'eager');
   await expect(confirmButton).toBeFocused();
   await expect(confirmButton).toHaveCSS('background-color', 'rgb(15, 80, 71)');
   await confirmButton.hover();
