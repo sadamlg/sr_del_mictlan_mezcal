@@ -22,6 +22,7 @@ const port = Number(process.env.PORT || 3000);
 export function createApp({
   database,
   mediaBaseUrl,
+  stripeMediaBaseUrl = process.env.STRIPE_MEDIA_BASE_URL,
   allowInsecureDevHttp = false,
   frontendOrigin = process.env.FRONTEND_ORIGIN || 'http://localhost:3000',
   secureCookies = process.env.NODE_ENV === 'production',
@@ -44,7 +45,7 @@ export function createApp({
   });
   const checkoutHandlers = createCheckoutHandlers({
     accountService,
-    checkoutService: createCheckoutService({ repository: checkoutRepository, stripe, frontendOrigin }),
+    checkoutService: createCheckoutService({ repository: checkoutRepository, stripe, frontendOrigin, stripeMediaBaseUrl }),
     stripe,
     webhookSecret: stripeWebhookSecret,
   });

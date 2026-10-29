@@ -20,7 +20,7 @@ export function createCheckoutRepository(database) {
           version: true,
           updatedAt: true,
           product: {
-            select: { slug: true, name: true, active: true, priceCents: true },
+            select: { slug: true, name: true, active: true, priceCents: true, imageKey: true },
           },
         },
         orderBy: [{ createdAt: 'asc' }, { productId: 'asc' }],

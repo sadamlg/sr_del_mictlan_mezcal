@@ -1,3 +1,5 @@
+import { mediaObjectUrl, normalizeMediaBaseUrl } from '../catalog/media.js';
+
 const MAX_CHECKOUT_ITEMS = 100;
 const MAX_QUANTITY = 99;
 const MAX_PERSISTED_AMOUNT_CENTS = 2_147_483_647;
@@ -67,6 +69,7 @@ function lineFromCart(item) {
     productId: item.productId,
     slug: item.slug,
     name: item.name,
+    imageKey: item.imageKey,
     quantity: item.quantity,
     cartItemVersion: item.version,
     unitPriceCents: item.priceCents,
@@ -77,6 +80,17 @@ function lineFromCart(item) {
 
 function checkoutUrl(frontendOrigin, path) {
   return new URL(path, frontendOrigin).toString();
+}
+
+function stripeProductImageUrl(mediaBaseUrl, imageKey) {
+  if (typeof imageKey !== 'string' || !mediaBaseUrl) return null;
+
+  try {
+    return mediaObjectUrl(normalizeMediaBaseUrl(mediaBaseUrl), imageKey);
+  } catch {
+    // Local/private media origins cannot be fetched by Stripe. Keep checkout usable without an image.
+    return null;
+  }
 }
 
 function recipientFromAccount(account) {
@@ -94,7 +108,7 @@ function recipientFromAccount(account) {
   };
 }
 
-export function createCheckoutService({ repository, stripe, frontendOrigin, now = () => new Date() }) {
+export function createCheckoutService({ repository, stripe, frontendOrigin, stripeMediaBaseUrl, now = () => new Date() }) {
   return {
     async listSavedPaymentMethods(account) {
       if (!account?.id) throw new CheckoutError(401, 'AUTHENTICATION_REQUIRED', 'Inicia sesión para continuar.');
@@ -215,14 +229,20 @@ export function createCheckoutService({ repository, stripe, frontendOrigin, now 
             payment_method_save: 'enabled',
             ...(stripeCustomerId ? { allow_redisplay_filters: ['always'] } : {}),
           },
-          line_items: items.map((item) => ({
-            price_data: {
-              currency: 'mxn',
-              unit_amount: item.unitPriceCents,
-              product_data: { name: item.name },
-            },
-            quantity: item.quantity,
-          })),
+          line_items: items.map((item) => {
+            const imageUrl = stripeProductImageUrl(stripeMediaBaseUrl, item.imageKey);
+            return {
+              price_data: {
+                currency: 'mxn',
+                unit_amount: item.unitPriceCents,
+                product_data: {
+                  name: item.name,
+                  ...(imageUrl ? { images: [imageUrl] } : {}),
+                },
+              },
+              quantity: item.quantity,
+            };
+          }),
           success_url: checkoutUrl(frontendOrigin, '/cuenta/pedidos?checkout=return'),
           cancel_url: checkoutUrl(frontendOrigin, '/?checkout=cancelled#coleccion'),
         };
