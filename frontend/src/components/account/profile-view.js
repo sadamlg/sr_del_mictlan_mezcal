@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { accountRequest } from '../../lib/account-api';
 import AccountDatePicker from './account-date-picker';
 import { AccountCard, AccountField, AccountNavigation, AccountNotice, AccountSubmit, AccountTextLink, AddressFields, FormGrid, PasswordVisibilityToggle, SignOutButton } from './account-ui';
 
 const ADDRESS_FIELDS = ['street', 'number', 'neighborhood', 'locality', 'state', 'postalCode'];
+const EMPTY_FEEDBACK = { errors: {}, message: '', messageKind: 'success' };
 
 function normalizedText(value) {
   return String(value ?? '').trim();
@@ -41,31 +42,37 @@ export default function ProfileView() {
   const pathname = usePathname();
   const [account, setAccount] = useState(null);
   const [form, setForm] = useState(null);
-  const [errors, setErrors] = useState({});
-  const [message, setMessage] = useState('');
-  const [messageKind, setMessageKind] = useState('success');
+  const [feedback, setFeedback] = useState({ pathname: null, ...EMPTY_FEEDBACK });
+  const activeFeedback = feedback.pathname === pathname ? feedback : EMPTY_FEEDBACK;
+  const { errors, message, messageKind } = activeFeedback;
   const [busy, setBusy] = useState(true);
   const [saving, setSaving] = useState(false);
   const [emailPasswordVisible, setEmailPasswordVisible] = useState(false);
   const [signedOut, setSignedOut] = useState(false);
 
-  useEffect(() => {
-    setMessage('');
-    setMessageKind('success');
-    setErrors({});
+  const updateFeedback = useCallback((patch) => {
+    setFeedback((current) => ({
+      ...(current.pathname === pathname ? current : { pathname, ...EMPTY_FEEDBACK }),
+      ...patch,
+      pathname,
+    }));
   }, [pathname]);
 
   useEffect(() => {
+    const clearFeedbackForVisit = () => setFeedback({ pathname, ...EMPTY_FEEDBACK });
+    const timeoutId = window.setTimeout(clearFeedbackForVisit, 0);
+
     function clearNoticeOnPageRestore(event) {
       if (!event.persisted) return;
-      setMessage('');
-      setMessageKind('success');
-      setErrors({});
+      clearFeedbackForVisit();
     }
 
     window.addEventListener('pageshow', clearNoticeOnPageRestore);
-    return () => window.removeEventListener('pageshow', clearNoticeOnPageRestore);
-  }, []);
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.removeEventListener('pageshow', clearNoticeOnPageRestore);
+    };
+  }, [pathname]);
 
   useEffect(() => {
     let mounted = true;
@@ -78,14 +85,11 @@ export default function ProfileView() {
       .catch((error) => {
         if (!mounted) return;
         if (error.status === 401) setSignedOut(true);
-        else {
-          setMessage(error.message);
-          setMessageKind('error');
-        }
+        else updateFeedback({ message: error.message, messageKind: 'error' });
       })
       .finally(() => { if (mounted) setBusy(false); });
     return () => { mounted = false; };
-  }, []);
+  }, [updateFeedback]);
 
   function update(field, value) {
     setForm((previous) => ({ ...previous, [field]: value }));
@@ -97,11 +101,10 @@ export default function ProfileView() {
     event.preventDefault();
     if (!hasChanges) return;
     setSaving(true);
-    setErrors({});
-    setMessage('');
+    updateFeedback({ errors: {}, message: '' });
     const emailChanged = normalizedEmail(form.email) !== normalizedEmail(account.email);
     if (emailChanged && !form.currentPassword) {
-      setErrors({ currentPassword: 'Escribe tu contraseña actual para confirmar el cambio de correo.' });
+      updateFeedback({ errors: { currentPassword: 'Escribe tu contraseña actual para confirmar el cambio de correo.' } });
       setSaving(false);
       return;
     }
@@ -119,14 +122,14 @@ export default function ProfileView() {
       const result = await accountRequest('profile', { method: 'PATCH', body });
       setAccount(result.account);
       setForm(profileForm(result.account));
-      setMessage(result.account.pendingEmail
-        ? `Te enviamos un enlace a ${result.account.pendingEmail}. Tu correo actual seguirá activo hasta que confirmes el cambio.`
-        : 'Guardamos tus cambios.');
-      setMessageKind('success');
+      updateFeedback({
+        message: result.account.pendingEmail
+          ? `Te enviamos un enlace a ${result.account.pendingEmail}. Tu correo actual seguirá activo hasta que confirmes el cambio.`
+          : 'Guardamos tus cambios.',
+        messageKind: 'success',
+      });
     } catch (error) {
-      setErrors(error.fields || {});
-      setMessage(error.message);
-      setMessageKind('error');
+      updateFeedback({ errors: error.fields || {}, message: error.message, messageKind: 'error' });
     } finally {
       setSaving(false);
     }

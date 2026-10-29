@@ -80,13 +80,25 @@ test('successful login returns to the landing page and exposes account actions',
   await page.getByLabel('Nombre(s)').fill('Ana');
   await page.getByRole('button', { name: 'Guardar cambios' }).click();
   await expect(page.getByRole('button', { name: 'Hola, Ana' })).toBeVisible();
+  await expect(page.getByText('Guardamos tus cambios.', { exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: 'Hola, Ana' }).click();
   const options = page.getByRole('navigation', { name: 'Opciones de cuenta' });
   await expect(options.getByRole('link', { name: 'Mis pedidos' })).toBeVisible();
   await expect(options.getByRole('link', { name: 'Cuenta' })).toBeVisible();
   await expect(options.getByRole('link', { name: 'Mis pedidos' })).toHaveAttribute('href', '/cuenta/pedidos');
-  await options.getByRole('button', { name: 'Cerrar sesión' }).click();
+  await options.getByRole('link', { name: 'Mis pedidos' }).click();
+  await expect(page).toHaveURL('/cuenta/pedidos');
+  await page.getByRole('button', { name: 'Hola, Ana' }).click();
+  await page.getByRole('navigation', { name: 'Opciones de cuenta' }).getByRole('link', { name: 'Cuenta' }).click();
+  await expect(page).toHaveURL('/cuenta');
+  await expect(page.getByText('Guardamos tus cambios.', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('Correo confirmado: ana@example.com', { exact: true })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Hola, Ana' }).click();
+  const reopenedOptions = page.getByRole('navigation', { name: 'Opciones de cuenta' });
+  await expect(reopenedOptions.getByRole('link', { name: 'Mis pedidos' })).toBeVisible();
+  await reopenedOptions.getByRole('button', { name: 'Cerrar sesión' }).click();
 
   await expect(page.getByRole('link', { name: 'Iniciar sesión' })).toBeVisible();
 });
