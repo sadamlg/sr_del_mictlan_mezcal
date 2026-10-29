@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { ArrowLeft, CalendarDays, Wine } from 'lucide-react';
 import { accountRequest } from '../../lib/account-api';
 import { AccountCard, AccountNavigation, AccountNotice, AccountTextLink, SignOutButton } from './account-ui';
 
@@ -25,33 +26,49 @@ function OrderSummary({ order }) {
   const reference = typeof order.id === 'string' ? order.id.slice(0, 8).toUpperCase() : '—';
 
   return (
-    <article className="py-6 first:pt-2">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="font-display text-lg text-mictlan-ivory">Pedido {reference}</h2>
-          <p className="mt-1 text-sm text-mictlan-sage-muted">{formatOrderDate(order.createdAt)}</p>
+    <article className="overflow-hidden border border-mictlan-sand/15 bg-mictlan-carbon/25">
+      <header className="flex flex-wrap items-center justify-between gap-x-5 gap-y-3 border-b border-mictlan-sand/10 bg-mictlan-carbon/35 px-4 py-4 sm:px-5">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1.5">
+          <h2 className="font-display text-base uppercase tracking-[0.02em] text-mictlan-ivory sm:text-lg">Pedido {reference}</h2>
+          <p className="inline-flex items-center gap-2 text-xs text-mictlan-sage-muted sm:text-sm">
+            <CalendarDays className="size-3.5 shrink-0 text-mictlan-sage-muted" aria-hidden="true" />
+            <span>{formatOrderDate(order.createdAt)}</span>
+          </p>
         </div>
-        <span className="inline-flex min-h-8 items-center border border-mictlan-teal/30 bg-mictlan-teal-deep/20 px-3 font-ui text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-mictlan-teal">
+        <span className="inline-flex min-h-7 shrink-0 items-center border border-mictlan-teal/30 bg-mictlan-teal-deep/20 px-3 font-ui text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-mictlan-teal">
           Pagado
         </span>
       </header>
 
-      <ul className="mt-4 divide-y divide-mictlan-sand/10 border-y border-mictlan-sand/10">
+      <ul className="m-0 list-none divide-y divide-mictlan-sand/10 px-4 sm:px-5">
         {items.map((item, index) => (
-          <li className="flex items-center justify-between gap-4 py-3 text-sm" key={`${item.slug}-${index}`}>
-            <div className="min-w-0">
-              <p className="break-words text-mictlan-ivory">{item.name}</p>
-              <p className="mt-1 text-xs text-mictlan-sage-muted">{item.quantity} × {formatMoney(item.unitPrice)}</p>
+          <li className="flex items-center gap-3 py-4 sm:gap-4" key={`${item.slug}-${index}`}>
+            <span className="flex size-11 shrink-0 items-center justify-center border border-mictlan-sand/10 bg-mictlan-background text-mictlan-gold/80 sm:size-12">
+              <Wine className="size-[1.125rem]" strokeWidth={1.5} aria-hidden="true" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="break-words text-sm font-medium text-mictlan-ivory sm:text-base">{item.name}</p>
+              <p className="mt-1 text-xs tabular-nums text-mictlan-sage-muted">{item.quantity} × {formatMoney(item.unitPrice)}</p>
             </div>
-            <span className="shrink-0 font-ui text-sm tabular-nums text-mictlan-cream">{formatMoney(item.lineTotal)}</span>
+            <span className="shrink-0 text-right font-ui text-sm tabular-nums text-mictlan-cream sm:text-base">{formatMoney(item.lineTotal)}</span>
           </li>
         ))}
       </ul>
 
-      <div className="mt-4 flex items-baseline justify-between gap-4">
-        <span className="font-ui text-xs font-semibold uppercase tracking-[0.12em] text-mictlan-sage-muted">Total</span>
-        <span className="font-ui text-lg font-semibold tabular-nums text-mictlan-gold">{formatMoney(order.total)}</span>
-      </div>
+      <footer className="flex flex-col-reverse gap-4 border-t border-mictlan-sand/10 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+        <Link
+          className="inline-flex min-h-11 items-center gap-2 self-start font-ui text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-mictlan-sage-muted transition-colors hover:text-mictlan-teal focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-mictlan-teal"
+          href="/#coleccion"
+          aria-label={`Ver la colección después del pedido ${reference}`}
+        >
+          <ArrowLeft className="size-4" aria-hidden="true" />
+          Ver colección
+        </Link>
+        <div className="flex items-baseline justify-between gap-4 sm:justify-end sm:gap-5">
+          <span className="font-ui text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-mictlan-sage-muted">Total</span>
+          <span className="font-display text-xl tabular-nums text-mictlan-gold sm:text-2xl">{formatMoney(order.total)}</span>
+        </div>
+      </footer>
     </article>
   );
 }
@@ -96,7 +113,7 @@ export default function OrdersView({ checkoutReturned }) {
   }
 
   return (
-    <AccountCard eyebrow="Tu historial" title="Mis pedidos" description="Consulta aquí el estado y los detalles de tus compras." wide>
+    <AccountCard title="Mis pedidos" description="Consulta aquí el estado y los detalles de tus compras." wide>
       <AccountNavigation active="orders" />
       {checkoutReturned && (
         <AccountNotice kind="success">
@@ -109,17 +126,26 @@ export default function OrdersView({ checkoutReturned }) {
           <button
             type="button"
             onClick={retryOrders}
-            className="min-h-10 border border-mictlan-teal/35 px-4 font-ui text-xs font-semibold uppercase tracking-[0.1em] text-mictlan-teal transition-colors hover:bg-mictlan-teal-deep/20 focus-visible:outline-2 focus-visible:outline-mictlan-teal"
+            className="min-h-11 border border-mictlan-teal/35 px-4 font-ui text-xs font-semibold uppercase tracking-[0.1em] text-mictlan-teal transition-colors hover:bg-mictlan-teal-deep/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mictlan-teal"
           >
             Reintentar
           </button>
         </div>
       )}
       {orders === null && !error && (
-        <div className="mt-4 space-y-3 border border-mictlan-sand/10 p-4" role="status" aria-busy="true" aria-label="Cargando tus pedidos">
-          <span className="block h-4 w-32 animate-pulse bg-mictlan-sand/10" />
-          <span className="block h-3 w-48 animate-pulse bg-mictlan-sand/10" />
-          <span className="block h-12 animate-pulse bg-mictlan-sand/10" />
+        <div className="mt-4 space-y-4" role="status" aria-busy="true" aria-label="Cargando tus pedidos">
+          {[0, 1].map((placeholder) => (
+            <div className="border border-mictlan-sand/10" key={placeholder}>
+              <div className="flex items-center justify-between gap-4 border-b border-mictlan-sand/10 px-4 py-4 sm:px-5">
+                <span className="h-4 w-36 animate-pulse bg-mictlan-sand/10 motion-reduce:animate-none" />
+                <span className="h-7 w-16 animate-pulse bg-mictlan-sand/10 motion-reduce:animate-none" />
+              </div>
+              <div className="flex items-center gap-4 px-4 py-4 sm:px-5">
+                <span className="size-12 shrink-0 animate-pulse bg-mictlan-sand/10 motion-reduce:animate-none" />
+                <span className="h-4 w-2/3 animate-pulse bg-mictlan-sand/10 motion-reduce:animate-none" />
+              </div>
+            </div>
+          ))}
         </div>
       )}
       {orders?.length === 0 && !error && (
@@ -136,7 +162,7 @@ export default function OrdersView({ checkoutReturned }) {
             <button
               type="button"
               onClick={retryOrders}
-              className="mt-5 inline-flex min-h-10 items-center justify-center border border-mictlan-teal/35 px-4 font-ui text-xs font-semibold uppercase tracking-[0.1em] text-mictlan-teal transition-colors hover:bg-mictlan-teal-deep/20 focus-visible:outline-2 focus-visible:outline-mictlan-teal"
+              className="mt-5 inline-flex min-h-11 items-center justify-center border border-mictlan-teal/35 px-4 font-ui text-xs font-semibold uppercase tracking-[0.1em] text-mictlan-teal transition-colors hover:bg-mictlan-teal-deep/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mictlan-teal"
             >
               Actualizar pedidos
             </button>
@@ -149,7 +175,7 @@ export default function OrdersView({ checkoutReturned }) {
         </div>
       )}
       {orders?.length > 0 && (
-        <div className="divide-y divide-mictlan-sand/10">
+        <div className="mt-4 space-y-4">
           {orders.map((order) => <OrderSummary key={order.id} order={order} />)}
         </div>
       )}
