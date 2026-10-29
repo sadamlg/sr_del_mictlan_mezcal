@@ -3,7 +3,17 @@
 import { useEffect, useState } from 'react';
 import { accountRequest } from '../../lib/account-api';
 import AccountDatePicker from './account-date-picker';
-import { AccountCard, AccountField, AccountNavigation, AccountNotice, AccountSubmit, AccountTextLink, AddressFields, FormGrid, SignOutButton } from './account-ui';
+import { AccountCard, AccountField, AccountNavigation, AccountNotice, AccountSubmit, AccountTextLink, AddressFields, FormGrid, PasswordVisibilityToggle, SignOutButton } from './account-ui';
+
+const ADDRESS_FIELDS = ['street', 'number', 'neighborhood', 'locality', 'state', 'postalCode'];
+
+function normalizedText(value) {
+  return String(value ?? '').trim();
+}
+
+function normalizedEmail(value) {
+  return normalizedText(value).toLowerCase();
+}
 
 function profileForm(account) {
   return {
@@ -16,6 +26,16 @@ function profileForm(account) {
   };
 }
 
+function profileHasChanges(form, account) {
+  if (!form || !account) return false;
+
+  return normalizedText(form.firstName) !== normalizedText(account.firstName)
+    || normalizedText(form.lastName) !== normalizedText(account.lastName)
+    || normalizedEmail(form.email) !== normalizedEmail(account.email)
+    || form.dateOfBirth !== account.dateOfBirth
+    || ADDRESS_FIELDS.some((field) => normalizedText(form.address?.[field]) !== normalizedText(account.address?.[field]));
+}
+
 export default function ProfileView() {
   const [account, setAccount] = useState(null);
   const [form, setForm] = useState(null);
@@ -24,6 +44,7 @@ export default function ProfileView() {
   const [messageKind, setMessageKind] = useState('success');
   const [busy, setBusy] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [emailPasswordVisible, setEmailPasswordVisible] = useState(false);
   const [signedOut, setSignedOut] = useState(false);
 
   useEffect(() => {
@@ -50,12 +71,15 @@ export default function ProfileView() {
     setForm((previous) => ({ ...previous, [field]: value }));
   }
 
+  const hasChanges = profileHasChanges(form, account);
+
   async function submit(event) {
     event.preventDefault();
+    if (!hasChanges) return;
     setSaving(true);
     setErrors({});
     setMessage('');
-    const emailChanged = form.email.trim().toLowerCase() !== account.email;
+    const emailChanged = normalizedEmail(form.email) !== normalizedEmail(account.email);
     if (emailChanged && !form.currentPassword) {
       setErrors({ currentPassword: 'Escribe tu contraseña actual para confirmar el cambio de correo.' });
       setSaving(false);
@@ -113,7 +137,7 @@ export default function ProfileView() {
         {account.pendingEmail && <AccountNotice>El cambio a {account.pendingEmail} está pendiente. Tu correo actual sigue activo hasta confirmar el enlace.</AccountNotice>}
         {message && <AccountNotice kind={messageKind}>{message}</AccountNotice>}
       </div>
-      <form className="space-y-7" onSubmit={submit}>
+      <form className="space-y-7" noValidate onSubmit={submit}>
         <div>
           <h2 className="mb-4 font-display text-lg text-mictlan-ivory">Información personal</h2>
           <FormGrid>
@@ -122,7 +146,18 @@ export default function ProfileView() {
             <AccountField id="email" label="Correo electrónico" type="email" autoComplete="email" required maxLength={254} value={form.email} onChange={(event) => update('email', event.target.value)} error={errors.email} />
             <AccountDatePicker id="dateOfBirth" label="Fecha de nacimiento" value={form.dateOfBirth} onChange={(value) => update('dateOfBirth', value)} error={errors.dateOfBirth} />
             {form.email.trim().toLowerCase() !== account.email && (
-              <AccountField id="currentPassword" label="Contraseña actual · para confirmar el correo" type="password" autoComplete="current-password" required maxLength={128} value={form.currentPassword} onChange={(event) => update('currentPassword', event.target.value)} error={errors.currentPassword} />
+              <AccountField
+                id="currentPassword"
+                label="Contraseña actual · para confirmar el correo"
+                type={emailPasswordVisible ? 'text' : 'password'}
+                autoComplete="current-password"
+                required
+                maxLength={128}
+                value={form.currentPassword}
+                onChange={(event) => update('currentPassword', event.target.value)}
+                error={errors.currentPassword}
+                inputAction={<PasswordVisibilityToggle id="currentPassword" visible={emailPasswordVisible} onToggle={() => setEmailPasswordVisible((visible) => !visible)} />}
+              />
             )}
           </FormGrid>
         </div>
@@ -130,9 +165,9 @@ export default function ProfileView() {
           <h2 className="mb-4 font-display text-lg text-mictlan-ivory">Domicilio</h2>
           <AddressFields address={form.address} setAddress={(address) => update('address', address)} errors={errors} />
         </div>
-        <AccountSubmit busy={saving}>Guardar cambios</AccountSubmit>
-        <SignOutButton />
+        <AccountSubmit busy={saving} disabled={!hasChanges}>Guardar cambios</AccountSubmit>
       </form>
+      <div className="mt-7"><SignOutButton /></div>
     </AccountCard>
   );
 }

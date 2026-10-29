@@ -8,8 +8,9 @@ function notifyAccountSessionChanged(path, method) {
     'auth/email-confirmations',
     'auth/password-resets',
   ].includes(path);
+  const passwordChanged = method === 'PATCH' && path === 'profile/password';
   const profileChanged = method === 'PATCH' && path === 'profile';
-  if (typeof window !== 'undefined' && (sessionChangingRequest || profileChanged)) {
+  if (typeof window !== 'undefined' && (sessionChangingRequest || passwordChanged || profileChanged)) {
     window.dispatchEvent(new Event(ACCOUNT_SESSION_CHANGED_EVENT));
   }
 }

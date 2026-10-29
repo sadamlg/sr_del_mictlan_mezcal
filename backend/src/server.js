@@ -138,6 +138,7 @@ export function createApp({
   app.use('/api/profile', express.json({ limit: '16kb' }));
   app.get('/api/profile', accountHandlers.getProfile);
   app.patch('/api/profile', accountHandlers.updateProfile);
+  app.patch('/api/profile/password', accountHandlers.changePassword);
   app.use('/api/profile', (error, _request, response, next) => {
     response.set('Cache-Control', 'no-store');
     if (error?.type === 'entity.too.large') {
