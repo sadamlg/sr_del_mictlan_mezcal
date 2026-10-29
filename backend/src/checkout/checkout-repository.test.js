@@ -6,6 +6,7 @@ const snapshot = {
   productId: '11111111-1111-4111-8111-111111111111',
   slug: 'mezcal-reposado',
   name: 'Mezcal Reposado',
+  imageKey: 'catalog/mezcal-reposado/front.webp',
   quantity: 2,
   cartItemVersion: '11111111-1111-4111-8111-111111111114',
   unitPriceCents: 12345,
@@ -72,7 +73,7 @@ test('checkout cart read is scoped to the account and takes current product stat
         quantity: 2,
         version: snapshot.cartItemVersion,
         updatedAt: snapshot.cartItemUpdatedAt,
-        product: { slug: snapshot.slug, name: snapshot.name, active: true, priceCents: 20000 },
+        product: { slug: snapshot.slug, name: snapshot.name, active: true, priceCents: 20000, imageKey: snapshot.imageKey },
       }];
     } },
   };
@@ -81,7 +82,7 @@ test('checkout cart read is scoped to the account and takes current product stat
   const items = await repository.getAccountCartForCheckout('account-1');
 
   assert.deepEqual(received.where, { accountId: 'account-1' });
-  assert.deepEqual(received.select.product.select, { slug: true, name: true, active: true, priceCents: true });
+  assert.deepEqual(received.select.product.select, { slug: true, name: true, active: true, priceCents: true, imageKey: true });
   assert.deepEqual(items, [{
     productId: snapshot.productId,
     quantity: 2,
@@ -89,6 +90,7 @@ test('checkout cart read is scoped to the account and takes current product stat
     updatedAt: snapshot.cartItemUpdatedAt,
     slug: snapshot.slug,
     name: snapshot.name,
+    imageKey: snapshot.imageKey,
     active: true,
     priceCents: 20000,
   }]);

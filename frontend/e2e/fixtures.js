@@ -1,7 +1,7 @@
 const { test: base, expect } = require('@playwright/test');
 
 const test = base.extend({
-  page: async ({ page }, use, testInfo) => {
+  page: async ({ page }, applyFixture, testInfo) => {
     const runtimeErrors = [];
     page.on('pageerror', (error) => runtimeErrors.push(`Uncaught page error: ${error.message}`));
     page.on('console', (message) => {
@@ -22,7 +22,7 @@ const test = base.extend({
       return route.fulfill({ status: 404, json: { error: { message: 'Ruta de prueba no simulada.' } } });
     });
 
-    await use(page);
+    await applyFixture(page);
 
     expect(runtimeErrors, `Browser runtime errors in ${testInfo.title}`).toEqual([]);
   },

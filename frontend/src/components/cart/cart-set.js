@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 
 const priceFormatter = new Intl.NumberFormat('es-MX', {
@@ -27,11 +28,11 @@ function CartLine({ item, cartType, busy, onQuantityChange, onRemove }) {
       <div className="flex items-stretch gap-[clamp(0.375rem,1.8vw,0.75rem)]">
         <div className="relative min-h-[clamp(5rem,20vw,6rem)] w-[clamp(3rem,12vw,5rem)] shrink-0 self-stretch overflow-hidden border border-mictlan-sand/15 bg-mictlan-carbon/70">
           {item.image?.url ? (
-            <img
+            <Image
               src={item.image.url}
               alt={item.image.alt || name}
-              width="64"
-              height="80"
+              width={64}
+              height={80}
               loading="lazy"
               decoding="async"
               referrerPolicy="no-referrer"

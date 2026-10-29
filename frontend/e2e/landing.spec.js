@@ -40,6 +40,7 @@ test('landing hero CTA uses the account teal palette and keeps its hover scale',
 
 test('age confirmation unlocks the landing and is remembered for the session', async ({ page }) => {
   await page.goto('/');
+  await expect(page.locator('#coleccion')).toHaveCount(1);
   await page.locator('#coleccion').scrollIntoViewIfNeeded();
 
   const dialog = page.getByRole('dialog', { name: '¿Eres mayor de edad?' });

@@ -1,107 +1,74 @@
-# Rutas del sistema y quién puede usarlas
+# Rutas y acceso
 
-Esta guía explica, sin asumir conocimientos técnicos, qué direcciones tiene la tienda y cuándo hace falta iniciar sesión o usar un enlace recibido por correo.
+Esta guía diferencia las páginas que muestra el navegador de las operaciones de la API. Las primeras presentan la interfaz; las segundas leen o cambian datos en el backend.
 
-## Primero: ¿qué es una ruta?
+## Tipos de acceso
 
-Una **ruta** es una dirección que lleva a una página o pide una acción al sistema. Por ejemplo:
-
-- `/cuenta/registro` abre el formulario para crear una cuenta.
-- `POST /api/auth/register` envía ese formulario al backend para procesar el registro.
-
-La ruta de la página y la ruta de la API son distintas aunque formen parte del mismo recorrido. La página muestra la interfaz; la API recibe o devuelve datos.
-
-En las rutas de API, la palabra al principio indica qué se quiere hacer:
-
-- `GET`: consultar información.
-- `POST`: enviar información o solicitar una acción.
-- `PATCH`: actualizar información existente.
-- `PUT`: crear o reemplazar el estado de un elemento.
-- `DELETE`: retirar un elemento.
-
-## Tres formas de acceso
-
-| Tipo | Qué significa |
+| Acceso | Significado |
 |---|---|
-| **Pública** | Se puede usar sin iniciar sesión. Puede seguir teniendo validaciones o límites de uso. |
-| **Protegida por enlace** | No requiere una sesión, pero sí un token válido de un solo uso enviado por correo. |
-| **Privada** | Requiere una sesión iniciada. El backend comprueba la cookie de sesión antes de devolver o modificar datos personales. |
+| Público | No requiere sesión; puede tener validaciones adicionales. |
+| Con enlace | Requiere un token vigente, de un solo uso, enviado por correo. |
+| Privado | Requiere una sesión válida; el backend obtiene la identidad de la cookie. |
+| Firma de Stripe | El webhook no usa sesión de cliente; requiere una firma válida de Stripe. |
 
-Una dirección pública no significa que cualquier persona pueda consultar los datos de una cuenta. Significa únicamente que no hace falta haber iniciado sesión para abrir esa página o llamar a esa operación.
+En la API, `GET` consulta, `POST` solicita una acción, `PATCH` actualiza campos, `PUT` establece el estado de un elemento y `DELETE` lo elimina.
 
-## Páginas de la tienda
+## Páginas
 
-| Dirección | Acceso | Qué ocurre |
+| Ruta | Acceso | Uso |
 |---|---|---|
-| `/` | Pública | Muestra la landing y el catálogo. |
-| `/cuenta/iniciar-sesion` | Pública | Permite iniciar sesión. |
-| `/cuenta/registro` | Pública | Permite registrar una cuenta. Después muestra instrucciones para confirmar el correo. |
-| `/cuenta/recuperar-contrasena` | Pública | Permite pedir un enlace para restablecer la contraseña. |
-| `/cuenta/restablecer-contrasena?token=…` | Protegida por enlace | El formulario necesita un token vigente enviado por correo. |
-| `/cuenta/confirmar-correo?token=…` | Protegida por enlace | Confirma la dirección. Para una cuenta nueva, inicia la sesión y vuelve a la landing. |
-| `/cuenta` | Página de cuenta | Sin sesión, muestra opciones para iniciar sesión o registrarse. Con sesión, muestra el perfil. |
-| `/cuenta/pedidos` | Página de cuenta | Sin sesión, muestra opciones para iniciar sesión o registrarse. Con sesión, consulta los pedidos. |
+| `/` | Público | Landing y catálogo. |
+| `/cuenta/registro` | Público | Crear una cuenta; después se solicita confirmar el correo. |
+| `/cuenta/iniciar-sesion` | Público | Iniciar sesión. `?continuar=checkout` conserva la intención de compra. |
+| `/cuenta/recuperar-contrasena` | Público | Solicitar un enlace de recuperación. |
+| `/cuenta/restablecer-contrasena?token=…` | Con enlace | Cambiar la contraseña con un token vigente. |
+| `/cuenta/confirmar-correo?token=…` | Con enlace | Confirmar una cuenta o un cambio de correo. Un registro iniciado desde Checkout continúa al resumen de compra; en otro caso vuelve a la tienda. |
+| `/cuenta` | Sesión opcional | Sin sesión, ofrece acceso; con sesión, muestra información personal. |
+| `/cuenta/seguridad` | Sesión opcional | Sin sesión, ofrece acceso; con sesión, muestra el formulario de contraseña. |
+| `/cuenta/pedidos` | Sesión opcional | Sin sesión, ofrece acceso; con sesión, muestra pedidos pagados propios. |
+| `/cuenta/checkout` | Privado | Resumen de compra y acción para abrir Stripe Checkout. |
 
-**Aclaración sobre las páginas de cuenta:** `/cuenta` y `/cuenta/pedidos` se pueden abrir aunque no se haya iniciado sesión. La dirección no revela los datos: la página los solicita al backend, y el backend los entrega sólo si la sesión es válida. Si falta la sesión, la página presenta el acceso correspondiente.
+Aunque algunas páginas de cuenta se pueden abrir sin sesión, los datos privados sólo los entrega la API después de comprobar la cookie.
 
-## Operaciones de API públicas
+## API sin sesión de cliente
 
-Estas operaciones no requieren una sesión iniciada:
-
-| Método y dirección | Para qué sirve |
+| Método y ruta | Uso |
 |---|---|
-| `GET /health` | Comprueba que el backend puede consultar la base de datos. Es una ruta de estado técnico. |
-| `GET /api/catalog/products` | Devuelve los productos activos del catálogo. |
-| `POST /api/auth/register` | Recibe los datos del registro y encola el correo de confirmación. La cuenta queda pendiente hasta confirmar. |
-| `POST /api/auth/login` | Comprueba las credenciales y crea una sesión si la cuenta ya confirmó su correo. |
-| `POST /api/auth/logout` | Cierra la sesión si hay una cookie válida; también se puede llamar sin sesión. |
-| `GET /api/auth/session` | Comprueba si el navegador ya tiene una sesión. Devuelve la cuenta si es válida o `401` si no existe o venció. |
-| `POST /api/auth/password-reset-requests` | Solicita un correo para recuperar la contraseña. La respuesta no revela si el correo está registrado. |
-| `GET /api/visits` | Devuelve el contador público de visitas. |
-| `POST /api/visits` | Registra una visita después de validar su identificador. |
+| `GET /health` | Estado de la API y conexión a la base de datos. |
+| `GET /api/catalog/products` | Productos activos del catálogo. |
+| `POST /api/auth/register`, `POST /api/auth/login` | Registro pendiente e inicio de sesión de cuentas confirmadas. |
+| `GET /api/auth/session` | Comprobar la sesión actual; responde `401` si no existe o venció. |
+| `POST /api/auth/logout` | Cerrar la sesión actual si existe. |
+| `POST /api/auth/password-reset-requests`, `POST /api/auth/password-resets` | Solicitar y consumir la recuperación de contraseña. |
+| `POST /api/auth/email-confirmations` | Consumir un token de confirmación de cuenta o correo. |
+| `GET /api/visits`, `POST /api/visits` | Consultar y registrar el contador de sesiones de la landing. |
+| `POST /api/webhooks/stripe` | Recibir eventos con firma Stripe válida; no se autentica con cookie. |
 
-Las solicitudes de recuperación y confirmación de correo no usan sesión, pero sí requieren el token de un solo uso que llega en el mensaje:
+## API privada
 
-| Método y dirección | Para qué sirve |
+Estas operaciones requieren sesión válida. El backend deriva la cuenta de la cookie, nunca de un `accountId` del navegador.
+
+| Método y ruta | Uso |
 |---|---|
-| `POST /api/auth/password-resets` | Cambia la contraseña con un token válido. |
-| `POST /api/auth/email-confirmations` | Consume el token. Si confirma una cuenta nueva, el backend la activa y crea la sesión; si confirma un cambio de correo, conserva la sesión que ya existía. |
+| `GET /api/profile`, `PATCH /api/profile` | Consultar y actualizar información personal. El cambio de correo requiere contraseña y confirmación del nuevo correo. |
+| `PATCH /api/profile/password` | Cambiar la contraseña desde la cuenta. |
+| `GET /api/cart/account` | Consultar carrito persistido. |
+| `POST /api/cart/account/merge` | Fusionar el carrito de invitado de forma idempotente. |
+| `PUT /api/cart/account/items`, `DELETE /api/cart/account/items/:slug` | Establecer cantidad o retirar un producto. |
+| `GET /api/checkout/payment-methods` | Consultar los datos seguros de tarjetas guardadas en Stripe. |
+| `POST /api/checkout/sessions` | Crear una sesión de Stripe a partir de los datos vigentes del servidor. |
+| `GET /api/orders` | Consultar sólo pedidos pagados del titular de la sesión. |
 
-## Operaciones privadas de API
+## Flujo de cuenta nueva durante la compra
 
-Estas operaciones requieren la cookie de una sesión válida:
+1. Desde Checkout, una persona invitada inicia sesión o crea una cuenta. La intención de compra se conserva mientras confirma el correo.
+2. Al confirmar el correo, el backend activa la cuenta y crea la sesión.
+3. El carrito de invitado se transfiere al carrito de cuenta y la interfaz abre `/cuenta/checkout`.
+4. El resumen permite confirmar destinatario y artículos; la tienda crea una sesión de pago y navega a Stripe Checkout.
+5. El webhook firmado confirma la orden. El retorno del navegador sólo muestra el estado informativo.
 
-| Método y dirección | Para qué sirve |
-|---|---|
-| `GET /api/profile` | Consulta el perfil de la persona conectada. |
-| `PATCH /api/profile` | Actualiza el perfil de la persona conectada. Cambiar el correo también requiere su contraseña actual y confirmar el nuevo correo. |
-| `GET /api/orders` | Consulta los pedidos de la persona conectada. Hasta la fase 06 devuelve una lista vacía. |
-| `GET /api/cart/account` | Consulta el carrito persistido de la persona conectada, con precios y subtotal actuales del catálogo. |
-| `POST /api/cart/account/merge` | Suma los productos del navegador al carrito de la cuenta una sola vez por identificador de transferencia. |
-| `PUT /api/cart/account/items` | Crea o actualiza la cantidad de un producto en el carrito de la cuenta. El backend toma el precio del catálogo. |
-| `DELETE /api/cart/account/items/:slug` | Retira un producto del carrito de la cuenta. |
+## Dónde verificar el contrato
 
-## Cómo se conectan las rutas al confirmar una cuenta
-
-1. La persona envía el formulario de `/cuenta/registro`.
-2. La página envía los datos a `POST /api/auth/register`; el backend guarda la cuenta pendiente y prepara el correo.
-3. Al abrir el enlace del correo, el navegador llega a `/cuenta/confirmar-correo?token=…`.
-4. Esa página envía el token a `POST /api/auth/email-confirmations`.
-5. Si el token es válido, el backend activa la cuenta y entrega una cookie de sesión. La página vuelve a `/`.
-6. La landing comprueba la sesión con `GET /api/auth/session` y muestra el saludo con el nombre.
-
-Para ver el perfil o los pedidos, el navegador envía la cookie automáticamente. Si no hay una sesión válida, la API responde `401` y no entrega esos datos.
-
-## Qué todavía no tiene rutas
-
-El carrito de invitado se guarda en el navegador y se transfiere al autenticarse. Aún no hay operaciones para iniciar Checkout ni crear pedidos; ese flujo llega en la fase 06. El catálogo se muestra dentro de la landing, sin rutas de categoría ni de detalle.
-
-## Dónde se mantienen estas rutas
-
-La lista debe mantenerse de acuerdo con el código, no sólo con este documento:
-
-- Las páginas web están en `frontend/src/app/`.
-- Las operaciones del backend están declaradas en `backend/src/server.js`.
-- Las operaciones de carrito se conectan en `backend/src/carts/cart-handler.js`; los cambios de cantidad y consultas se implementan en `backend/src/carts/cart-service.js` y `backend/src/carts/cart-repository.js`.
-- La comprobación de sesión y el acceso a perfil y pedidos se conectan en `backend/src/accounts/account-handler.js`.
-- El endpoint del frontend `POST /api/visits` está en `frontend/src/app/api/visits/route.js` y reenvía la solicitud al backend.
+- Páginas: `frontend/src/app/`.
+- API: registro de rutas en `backend/src/server.js` y handlers de cada módulo bajo `backend/src/`.
+- El contador también tiene un endpoint Next.js en `frontend/src/app/api/visits/route.js`, que reenvía la solicitud a la API.

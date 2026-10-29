@@ -80,13 +80,25 @@ test('successful login returns to the landing page and exposes account actions',
   await page.getByLabel('Nombre(s)').fill('Ana');
   await page.getByRole('button', { name: 'Guardar cambios' }).click();
   await expect(page.getByRole('button', { name: 'Hola, Ana' })).toBeVisible();
+  await expect(page.getByText('Guardamos tus cambios.', { exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: 'Hola, Ana' }).click();
   const options = page.getByRole('navigation', { name: 'Opciones de cuenta' });
   await expect(options.getByRole('link', { name: 'Mis pedidos' })).toBeVisible();
   await expect(options.getByRole('link', { name: 'Cuenta' })).toBeVisible();
   await expect(options.getByRole('link', { name: 'Mis pedidos' })).toHaveAttribute('href', '/cuenta/pedidos');
-  await options.getByRole('button', { name: 'Cerrar sesión' }).click();
+  await options.getByRole('link', { name: 'Mis pedidos' }).click();
+  await expect(page).toHaveURL('/cuenta/pedidos');
+  await page.getByRole('button', { name: 'Hola, Ana' }).click();
+  await page.getByRole('navigation', { name: 'Opciones de cuenta' }).getByRole('link', { name: 'Cuenta' }).click();
+  await expect(page).toHaveURL('/cuenta');
+  await expect(page.getByText('Guardamos tus cambios.', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('Correo confirmado: ana@example.com', { exact: true })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Hola, Ana' }).click();
+  const reopenedOptions = page.getByRole('navigation', { name: 'Opciones de cuenta' });
+  await expect(reopenedOptions.getByRole('link', { name: 'Mis pedidos' })).toBeVisible();
+  await reopenedOptions.getByRole('button', { name: 'Cerrar sesión' }).click();
 
   await expect(page.getByRole('link', { name: 'Iniciar sesión' })).toBeVisible();
 });
@@ -261,6 +273,157 @@ test('authenticated orders show the empty state and point back to the collection
   await expect(page.getByText('Todavía no tienes pedidos', { exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Explorar la colección' })).toHaveAttribute('href', '/#coleccion');
   await expect(page.getByRole('navigation', { name: 'Secciones de tu cuenta' }).getByRole('link', { name: 'Mis pedidos' })).toHaveAttribute('aria-current', 'page');
+});
+
+test('Stripe return shows the pending confirmation state and refreshes into a paid order', async ({ page }) => {
+  const order = {
+    id: 'c4d7d051-1234-4234-8234-123456789012',
+    createdAt: '2026-10-29T12:00:00.000Z',
+    total: { amount: 25000, currency: 'MXN' },
+    items: [{
+      slug: 'calios',
+      name: 'Calios · Destilado de pulque',
+      quantity: 1,
+      unitPrice: { amount: 25000, currency: 'MXN' },
+      lineTotal: { amount: 25000, currency: 'MXN' },
+    }],
+  };
+  let orderRequests = 0;
+  let showOrderAfterRefresh = false;
+  await page.route('**/api/auth/session', (route) => route.fulfill({
+    status: 200,
+    json: { account: { id: 'account-id', firstName: 'Ana', lastName: 'Martínez' } },
+  }));
+  await page.route('**/api/cart/account**', (route) => route.fulfill({
+    status: 200,
+    json: { cart: { items: [], subtotal: { amount: 0, currency: 'MXN' } } },
+  }));
+  await page.route('**/api/orders', (route) => {
+    orderRequests += 1;
+    return route.fulfill({ status: 200, json: { orders: showOrderAfterRefresh ? [order] : [] } });
+  });
+  await page.route('**/api/catalog/products', (route) => route.fulfill({
+    status: 200,
+    json: { products: [{ slug: 'calios', name: order.items[0].name, image: { url: '/orders-test-bottle.svg', alt: 'Botella de Calios' } }] },
+  }));
+  await page.route('**/orders-test-bottle.svg', (route) => route.fulfill({
+    status: 200,
+    contentType: 'image/svg+xml',
+    body: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 80"><rect width="64" height="80" fill="#0a0b0a"/></svg>',
+  }));
+
+  await page.goto('/cuenta/pedidos?checkout=return');
+  await expect(page.getByText('Estamos esperando la confirmación', { exact: true })).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: 'Regresaste de Stripe' })).toBeVisible();
+  showOrderAfterRefresh = true;
+  await page.getByRole('button', { name: 'Actualizar pedidos' }).click();
+
+  await expect(page.getByRole('heading', { name: 'Pedido C4D7D051' })).toBeVisible();
+  await expect(page.getByText('Pagado', { exact: true })).toBeVisible();
+  expect(orderRequests).toBeGreaterThan(1);
+});
+
+test('account section navigation remains legible and within the viewport on narrow screens', async ({ page }) => {
+  await page.route('**/api/auth/session', (route) => route.fulfill({
+    status: 200,
+    json: { account: { id: 'account-id', firstName: 'Ana', lastName: 'Martínez' } },
+  }));
+  await page.route('**/api/cart/account**', (route) => route.fulfill({
+    status: 200,
+    json: { cart: { items: [], subtotal: { amount: 0, currency: 'MXN' } } },
+  }));
+  await page.route('**/api/orders', (route) => route.fulfill({ status: 200, json: { orders: [] } }));
+  await page.goto('/cuenta/pedidos');
+
+  const navigation = page.getByRole('navigation', { name: 'Secciones de tu cuenta' });
+  for (const width of [320, 360, 375, 390, 428, 640, 768, 1023, 1024]) {
+    await page.setViewportSize({ width, height: 844 });
+    for (const label of ['Información personal', 'Contraseña', 'Mis pedidos']) {
+      const tab = navigation.getByRole('link', { name: label });
+      await expect(tab).toBeVisible();
+      await expect(tab).toContainText(label);
+      const bounds = await tab.boundingBox();
+      expect(bounds.x).toBeGreaterThanOrEqual(0);
+      expect(bounds.x + bounds.width).toBeLessThanOrEqual(width);
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+  }
+});
+
+test('paid order shows its catalog bottle and repeating it opens checkout directly', async ({ page }) => {
+  const account = {
+    id: 'account-id',
+    firstName: 'Ana',
+    lastName: 'Martínez',
+    email: 'ana@example.test',
+    emailVerified: true,
+    address: {
+      street: 'Calle de prueba',
+      number: '123',
+      neighborhood: 'Centro',
+      locality: 'Morelia',
+      state: 'Michoacán',
+      postalCode: '58000',
+    },
+  };
+  const cart = { items: [], subtotal: { amount: 0, currency: 'MXN' } };
+  let mergePayload;
+  const orderedItem = {
+    slug: 'calios',
+    name: 'Calios · Destilado de pulque',
+    quantity: 1,
+    unitPrice: { amount: 25000, currency: 'MXN' },
+    lineTotal: { amount: 25000, currency: 'MXN' },
+  };
+
+  await page.route('**/api/auth/session', (route) => route.fulfill({ status: 200, json: { account } }));
+  await page.route('**/api/cart/account**', async (route) => {
+    if (route.request().method() === 'POST') {
+      mergePayload = route.request().postDataJSON();
+      cart.items = [{ ...orderedItem, available: true }];
+      cart.subtotal = { amount: 25000, currency: 'MXN' };
+    }
+    await route.fulfill({ status: 200, json: { cart } });
+  });
+  await page.route('**/api/orders', (route) => route.fulfill({
+    status: 200,
+    json: { orders: [{
+      id: 'c4d7d051-1234-4234-8234-123456789012',
+      createdAt: '2026-10-29T12:00:00.000Z',
+      total: { amount: 25000, currency: 'MXN' },
+      items: [orderedItem],
+    }] },
+  }));
+  await page.route('**/api/catalog/products', (route) => route.fulfill({
+    status: 200,
+    json: { products: [{
+      slug: orderedItem.slug,
+      name: orderedItem.name,
+      image: { url: '/orders-test-bottle.svg', alt: 'Botella de Calios' },
+    }] },
+  }));
+  await page.route('**/orders-test-bottle.svg', (route) => route.fulfill({
+    status: 200,
+    contentType: 'image/svg+xml',
+    body: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 80"><rect width="64" height="80" fill="#0a0b0a"/></svg>',
+  }));
+  await page.route('**/api/profile', (route) => route.fulfill({ status: 200, json: { account } }));
+  await page.route('**/api/checkout/payment-methods', (route) => route.fulfill({ status: 200, json: { cards: [] } }));
+
+  await page.goto('/cuenta/pedidos');
+  const repeatButton = page.getByRole('button', { name: 'Volver a pedir los productos del pedido C4D7D051' });
+  await expect(page.getByRole('heading', { name: 'Pedido C4D7D051' })).toBeVisible();
+  await expect(page.getByRole('img', { name: 'Botella de Calios' })).toBeVisible();
+  await expect(page.getByText('Pagado', { exact: true })).toBeVisible();
+  await repeatButton.click();
+
+  await expect(page).toHaveURL('/cuenta/checkout');
+  await expect(page.getByRole('heading', { name: 'Resumen de compra' })).toBeVisible();
+  const selectedItems = page.getByRole('region', { name: 'Piezas seleccionadas' });
+  await expect(selectedItems.getByRole('heading', { name: 'Calios', exact: true })).toBeVisible();
+  await expect(selectedItems).toContainText('Destilado de pulque');
+  expect(mergePayload).toMatchObject({ items: [{ slug: orderedItem.slug, quantity: 1 }] });
+  expect(mergePayload.transferId).toMatch(/^[0-9a-f-]{36}$/i);
 });
 
 test('mobile account menu shows orders, account, and sign out', async ({ page }) => {
