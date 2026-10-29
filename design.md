@@ -31,6 +31,8 @@ colors:
   mictlan-teal-bright: "#2dd4bf"
   mictlan-teal-deep: "#0f5047"
   mictlan-teal-hover: "#15695d"
+  mictlan-stripe-purple: "#5145e5"
+  mictlan-stripe-purple-hover: "#4338ca"
   mictlan-mint: "#d1fae5"
   mictlan-petrol: "#0e7490"
 typography:
@@ -47,6 +49,11 @@ components:
     padding: "12px 20px"
   account-primary-hover:
     backgroundColor: "{colors.mictlan-teal-hover}"
+  checkout-stripe-primary:
+    backgroundColor: "{colors.mictlan-stripe-purple}"
+    textColor: "{colors.mictlan-bone}"
+  checkout-stripe-primary-hover:
+    backgroundColor: "{colors.mictlan-stripe-purple-hover}"
   hero-action:
     backgroundColor: "{colors.mictlan-teal-deep}"
     textColor: "{colors.mictlan-bone}"
@@ -80,6 +87,7 @@ La tipografía display aporta carácter ceremonial, mientras la sans serif manti
 
 - Fondos oscuros en capas y fotografía de producto como protagonista.
 - Verde agua y teal para acciones, enlaces, foco y énfasis interactivo.
+- Morado Stripe para la acción de pago alojado en Stripe dentro del resumen de compra.
 - Dorado únicamente como acento cálido de producto.
 - Formas sobrias, con geometría distintiva sólo en el age-gate y el CTA del hero.
 
@@ -92,6 +100,7 @@ La paleta se organiza por función: teal para interacción, neutrales cálidos p
 - **Verde agua (`mictlan-teal`):** acento de iconos, enlaces, foco visible, bordes activos y subrayado hover de 2 px del navbar.
 - **Teal profundo (`mictlan-teal-deep`):** fondo de las acciones principales del age-gate, cuenta y hero.
 - **Teal de interacción (`mictlan-teal-hover`):** hover de las acciones principales. `mictlan-teal-bright` destaca títulos y estados activos de FAQ y escaparate.
+- **Morado Stripe (`mictlan-stripe-purple`):** fondo del CTA para abrir Stripe desde el resumen; su hover usa `mictlan-stripe-purple-hover`. Es una excepción local al teal de las acciones principales.
 - **Menta (`mictlan-mint`):** texto de navegación en hover.
 
 ### Secondary
@@ -186,6 +195,7 @@ Los campos y controles de cuenta tienen esquinas discretas y bordes finos; las t
 ### Buttons
 
 - **Acciones principales de cuenta, age-gate y hero:** teal profundo con texto hueso y hover teal. El foco visible conserva un contorno teal.
+- **CTA de pago con Stripe en el resumen:** morado Stripe con texto hueso; el foco visible conserva el contorno teal.
 - **CTA del hero:** conserva su corte diagonal y se amplía al 110% en hover; comparte con las acciones principales los colores teal y la transición de color.
 - **Acciones destructivas o de rechazo:** borde y hover en rojo/burdeos; conserva texto que nombre la acción.
 - **Acciones de producto:** el dorado puede aparecer en selectores y datos del destilado; el foco visible usa teal. El dorado no es el estilo predeterminado de CTA de cuenta.

@@ -132,3 +132,82 @@ test('Compose API keeps account carts private and calculates totals from current
     await prisma.$disconnect();
   }
 });
+
+test('Compose API merges the guest Calios cart into a newly authenticated account', async (context) => {
+  if (process.env.CART_DATABASE_TEST !== '1') {
+    context.skip('Activa CART_DATABASE_TEST=1 después de aplicar las migraciones de Compose.');
+    return;
+  }
+
+  const { prisma } = await import('../database/prisma-client.js');
+  const { createApp } = await import('../server.js');
+  const accountId = randomUUID();
+  const email = `cart-calios-${accountId}@example.test`;
+  const password = 'cart-passphrase-2026';
+  const frontendOrigin = 'http://store.example.test';
+  let server;
+
+  try {
+    const product = await prisma.product.findFirst({ where: { slug: 'calios', active: true }, select: { slug: true } });
+    if (!product) {
+      context.skip('El catálogo local no tiene el producto Calios usado en la reproducción.');
+      return;
+    }
+
+    await prisma.account.create({
+      data: {
+        id: accountId,
+        firstName: 'Prueba',
+        lastName: 'Carrito Calios',
+        email,
+        passwordHash: await hashPassword(password),
+        dateOfBirth: new Date('1990-04-12T00:00:00.000Z'),
+        street: 'Calle de prueba',
+        number: '1',
+        neighborhood: 'Centro',
+        locality: 'Morelia',
+        state: 'Michoacán',
+        postalCode: '58000',
+        emailVerifiedAt: new Date(),
+      },
+    });
+
+    const app = createApp({
+      database: prisma,
+      mediaBaseUrl: 'http://localhost:3000',
+      allowInsecureDevHttp: true,
+      frontendOrigin,
+      secureCookies: false,
+    });
+    server = app.listen(0, '127.0.0.1');
+    await once(server, 'listening');
+    const apiUrl = `http://127.0.0.1:${server.address().port}`;
+    const login = await fetch(`${apiUrl}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Origin: frontendOrigin },
+      body: JSON.stringify({ email, password }),
+    });
+    assert.equal(login.status, 200);
+    const cookie = login.headers.get('set-cookie')?.split(';', 1)[0];
+
+    const transfer = { transferId: randomUUID(), items: [{ slug: product.slug, quantity: 1 }] };
+    const merged = await fetch(`${apiUrl}/api/cart/account/merge`, {
+      method: 'POST',
+      headers: { Cookie: cookie, Origin: frontendOrigin, 'Content-Type': 'application/json' },
+      body: JSON.stringify(transfer),
+    });
+    assert.equal(merged.status, 200);
+    const { cart } = await merged.json();
+    assert.equal(cart.items.length, 1);
+    assert.equal(cart.items[0].slug, 'calios');
+    assert.equal(cart.items[0].quantity, 1);
+    assert.equal(cart.items[0].available, true);
+  } finally {
+    if (server) {
+      server.closeAllConnections();
+      await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    }
+    await prisma.account.deleteMany({ where: { id: accountId } });
+    await prisma.$disconnect();
+  }
+});

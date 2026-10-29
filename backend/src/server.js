@@ -1,5 +1,6 @@
 import express from 'express';
 import { pathToFileURL } from 'node:url';
+import Stripe from 'stripe';
 import { prisma } from './database/prisma-client.js';
 import { createCatalogHandler } from './catalog/catalog-handler.js';
 import { createCatalogRepository } from './catalog/catalog-repository.js';
@@ -12,25 +13,41 @@ import { createAccountService } from './accounts/account-service.js';
 import { createCartHandlers } from './carts/cart-handler.js';
 import { createCartRepository } from './carts/cart-repository.js';
 import { createCartService } from './carts/cart-service.js';
+import { createCheckoutHandlers } from './checkout/checkout-handler.js';
+import { createCheckoutRepository } from './checkout/checkout-repository.js';
+import { createCheckoutService } from './checkout/checkout-service.js';
 
 const port = Number(process.env.PORT || 3000);
 
 export function createApp({
   database,
   mediaBaseUrl,
+  stripeMediaBaseUrl = process.env.STRIPE_MEDIA_BASE_URL,
   allowInsecureDevHttp = false,
   frontendOrigin = process.env.FRONTEND_ORIGIN || 'http://localhost:3000',
   secureCookies = process.env.NODE_ENV === 'production',
+  stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null,
+  stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET,
 }) {
   const app = express();
   const catalogRepository = createCatalogRepository(database);
   const visitsHandlers = createVisitsHandlers(createVisitsRepository(database));
-  const accountService = createAccountService({ repository: createAccountRepository(database) });
+  const checkoutRepository = createCheckoutRepository(database);
+  const accountService = createAccountService({
+    repository: createAccountRepository(database),
+    orderRepository: checkoutRepository,
+  });
   const accountHandlers = createAccountHandlers(accountService, { secureCookies });
   const accountRateLimit = createAccountRateLimit();
   const cartHandlers = createCartHandlers({
     accountService,
     cartService: createCartService(createCartRepository(database)),
+  });
+  const checkoutHandlers = createCheckoutHandlers({
+    accountService,
+    checkoutService: createCheckoutService({ repository: checkoutRepository, stripe, frontendOrigin, stripeMediaBaseUrl }),
+    stripe,
+    webhookSecret: stripeWebhookSecret,
   });
 
   app.get('/health', async (_request, response) => {
@@ -46,19 +63,24 @@ export function createApp({
     }
   });
 
-  app.get(
-    '/api/catalog/products',
-    createCatalogHandler({
-      findActiveProducts: () => catalogRepository.findActiveProducts(),
-      mediaBaseUrl,
-      allowInsecureDevHttp,
-    }),
+  // Stripe signs the exact request bytes. Keep this route ahead of every JSON parser.
+  app.post(
+    '/api/webhooks/stripe',
+    express.raw({ type: 'application/json', limit: '1mb' }),
+    checkoutHandlers.webhook,
   );
+  app.use('/api/webhooks/stripe', (error, _request, response, next) => {
+    response.set('Cache-Control', 'no-store');
+    if (error?.type === 'entity.too.large') {
+      return response.status(413).json({ error: { code: 'REQUEST_TOO_LARGE', message: 'La notificación excede el tamaño permitido.' } });
+    }
+    return next(error);
+  });
 
   app.use('/api', (request, response, next) => {
     const path = request.originalUrl.split('?')[0];
-    const isAccountPath = /^\/api\/(?:auth|profile|orders|cart)(?:\/|$)/.test(path);
-    if (!isAccountPath) return next();
+    const isCorsPath = /^\/api\/(?:catalog|auth|profile|orders|cart|checkout)(?:\/|$)/.test(path);
+    if (!isCorsPath) return next();
 
     response.set('Cache-Control', 'no-store');
     response.set('X-Content-Type-Options', 'nosniff');
@@ -80,11 +102,20 @@ export function createApp({
       response.set('Access-Control-Allow-Headers', 'Content-Type');
       return response.status(204).end();
     }
-    if (['POST', 'PATCH'].includes(request.method) && /^\/api\/(?:auth|profile)(?:\/|$)/.test(path)) {
+    if (['POST', 'PATCH'].includes(request.method) && /^\/api\/(?:auth|profile|checkout)(?:\/|$)/.test(path)) {
       return accountRateLimit(request, response, next);
     }
     return next();
   });
+
+  app.get(
+    '/api/catalog/products',
+    createCatalogHandler({
+      findActiveProducts: () => catalogRepository.findActiveProducts(),
+      mediaBaseUrl,
+      allowInsecureDevHttp,
+    }),
+  );
 
   app.use('/api/auth', express.json({ limit: '16kb' }));
   app.post('/api/auth/register', accountHandlers.register);
@@ -108,6 +139,7 @@ export function createApp({
   app.use('/api/profile', express.json({ limit: '16kb' }));
   app.get('/api/profile', accountHandlers.getProfile);
   app.patch('/api/profile', accountHandlers.updateProfile);
+  app.patch('/api/profile/password', accountHandlers.changePassword);
   app.use('/api/profile', (error, _request, response, next) => {
     response.set('Cache-Control', 'no-store');
     if (error?.type === 'entity.too.large') {
@@ -119,6 +151,20 @@ export function createApp({
     return next(error);
   });
   app.get('/api/orders', accountHandlers.orders);
+
+  app.use('/api/checkout', express.json({ limit: '16kb' }));
+  app.get('/api/checkout/payment-methods', checkoutHandlers.savedPaymentMethods);
+  app.post('/api/checkout/sessions', checkoutHandlers.createSession);
+  app.use('/api/checkout', (error, _request, response, next) => {
+    response.set('Cache-Control', 'no-store');
+    if (error?.type === 'entity.too.large') {
+      return response.status(413).json({ error: { code: 'REQUEST_TOO_LARGE', message: 'La solicitud excede el tamaño permitido.' } });
+    }
+    if (error instanceof SyntaxError && 'body' in error) {
+      return response.status(400).json({ error: { code: 'INVALID_JSON', message: 'El contenido de la solicitud no es válido.' } });
+    }
+    return next(error);
+  });
 
   app.use('/api/cart', express.json({ limit: '16kb' }));
   app.get('/api/cart/account', cartHandlers.getAccountCart);

@@ -44,6 +44,7 @@ Publicar una tienda en línea que presente la marca y sus productos, permita a v
 - Un visitante puede agregar productos, cambiar cantidades y quitarlos sin crear una cuenta.
 - El carrito de invitado se conserva en el mismo navegador durante 30 días desde la última actividad. Al registrarse o iniciar sesión, sus cantidades se suman por producto a las que ya tenga la cuenta y se muestra un solo carrito. La transferencia se puede reintentar sin duplicar artículos.
 - El carrito de la cuenta se conserva para futuras visitas. Cada compra confirmada genera un pedido; una cuenta puede tener varios pedidos en su historial.
+- Desde “Mis pedidos”, el cliente puede volver a pedir una compra confirmada. Sus productos y cantidades se agregan al carrito actual; las cantidades respetan el límite de 99 por producto.
 - Antes de iniciar el pago, el sistema vuelve a validar el estado activo y el precio vigente de cada producto. No reserva ni comprueba existencias.
 
 ### Pago, pedidos y correo

@@ -1,5 +1,10 @@
 import { createOpaqueToken, hashPassword, hashToken, verifyPassword } from './crypto.js';
-import { normalizeEmail, validateProfileInput, validateRegistrationInput } from './validation.js';
+import {
+  normalizeEmail,
+  validatePasswordChangeInput,
+  validateProfileInput,
+  validateRegistrationInput,
+} from './validation.js';
 
 const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
 const PASSWORD_PATTERN = /^.{12,128}$/s;
@@ -36,6 +41,25 @@ export function toPublicAccount(account) {
   };
 }
 
+function toPublicOrder(order) {
+  const money = (amount) => ({ amount, currency: order.currency });
+  return {
+    id: order.id,
+    status: order.status,
+    createdAt: order.createdAt,
+    paidAt: order.paidAt,
+    subtotal: money(order.subtotalCents),
+    total: money(order.totalCents),
+    items: order.items.map((item) => ({
+      slug: item.slug,
+      name: item.name,
+      quantity: item.quantity,
+      unitPrice: money(item.unitPriceCents),
+      lineTotal: money(item.lineTotalCents),
+    })),
+  };
+}
+
 function dateOnly(value) {
   if (value instanceof Date) return value.toISOString().slice(0, 10);
   return value;
@@ -53,6 +77,7 @@ function ensureSessionToken(token) {
 
 export function createAccountService({
   repository,
+  orderRepository = repository,
   now = () => new Date(),
   tokenFactory = createOpaqueToken,
   hashTokenValue = hashToken,
@@ -175,6 +200,40 @@ export function createAccountService({
       return { message: 'Tu contraseña se actualizó. Ya puedes iniciar sesión.' };
     },
 
+    async changePassword(accountId, input) {
+      const validated = validatePasswordChangeInput(input);
+      ensureInput(validated.success, validated.errors);
+      const current = await repository.findAccountById(accountId);
+      if (!current) throw new AccountError(401, 'AUTHENTICATION_REQUIRED', 'Inicia sesión para continuar.');
+
+      if (!(await verifyPasswordValue(validated.data.currentPassword, current.passwordHash))) {
+        throw new AccountError(401, 'INVALID_CREDENTIALS', 'La contraseña actual no es correcta.', {
+          currentPassword: 'La contraseña actual no es correcta.',
+        });
+      }
+      if (await verifyPasswordValue(validated.data.newPassword, current.passwordHash)) {
+        throw new AccountError(422, 'PASSWORD_UNCHANGED', 'Elige una contraseña distinta a la actual.', {
+          newPassword: 'Elige una contraseña distinta a la actual.',
+        });
+      }
+
+      const timestamp = now();
+      const sessionToken = tokenFactory();
+      const expiresAt = new Date(timestamp.getTime() + sessionDurationMs);
+      await repository.changePassword({
+        accountId,
+        passwordHash: await hashPasswordValue(validated.data.newPassword),
+        tokenHash: hashTokenValue(sessionToken),
+        expiresAt,
+        now: timestamp,
+      });
+      return {
+        message: 'Actualizamos tu contraseña y cerramos las demás sesiones.',
+        sessionToken,
+        expiresAt,
+      };
+    },
+
     async confirmEmail(input) {
       const token = input?.token;
       if (typeof token !== 'string' || !/^[A-Za-z0-9_-]{40,}$/.test(token)) {
@@ -249,8 +308,9 @@ export function createAccountService({
       }
     },
 
-    async listOrders() {
-      return [];
+    async listOrders(accountId) {
+      const orders = await orderRepository.listPaidOrders(accountId);
+      return orders.map(toPublicOrder);
     },
   };
 }

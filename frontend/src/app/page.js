@@ -39,9 +39,11 @@ async function loadCatalog() {
   }
 }
 
-async function CatalogContent({ mediaBaseUrl }) {
+async function CatalogContent({ mediaBaseUrl, searchParams }) {
+  const params = await searchParams;
   const products = await loadCatalog();
-  return <MezcalShowcase products={products} mediaBaseUrl={mediaBaseUrl} />;
+  const checkoutCancelled = params?.checkout === 'cancelled';
+  return <MezcalShowcase products={products} mediaBaseUrl={mediaBaseUrl} checkoutCancelled={checkoutCancelled} />;
 }
 
 async function CurrentYear() {
@@ -49,7 +51,7 @@ async function CurrentYear() {
   return new Date().getFullYear();
 }
 
-export default function Home() {
+export default function Home({ searchParams }) {
   const mediaBaseUrl = process.env.MEDIA_BASE_URL || '';
 
   return (
@@ -61,7 +63,7 @@ export default function Home() {
           <LandingHero mediaBaseUrl={mediaBaseUrl} />
 
           <Suspense fallback={<section id="coleccion" className="bg-mictlan-night px-6 py-24 text-center text-mictlan-bone" role="status">Cargando la colección…</section>}>
-            <CatalogContent mediaBaseUrl={mediaBaseUrl} />
+            <CatalogContent mediaBaseUrl={mediaBaseUrl} searchParams={searchParams} />
           </Suspense>
 
           <LandingRitual />

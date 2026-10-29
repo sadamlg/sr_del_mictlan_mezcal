@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { accountRequest } from '../../lib/account-api';
@@ -52,6 +53,21 @@ export function AccountField({
   );
 }
 
+export function PasswordVisibilityToggle({ id, visible, onToggle }) {
+  return (
+    <button
+      className="flex size-10 items-center justify-center rounded-sm text-mictlan-teal transition-colors hover:text-mictlan-teal-bright"
+      type="button"
+      aria-label={visible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+      aria-pressed={visible}
+      aria-controls={id}
+      onClick={onToggle}
+    >
+      {visible ? <EyeOff className="size-4" aria-hidden="true" /> : <Eye className="size-4" aria-hidden="true" />}
+    </button>
+  );
+}
+
 export function AccountNotice({ children, kind = 'info' }) {
   const styles = kind === 'error'
     ? 'border-mictlan-red/45 bg-mictlan-burgundy/20 text-mictlan-error-text-muted'
@@ -61,12 +77,12 @@ export function AccountNotice({ children, kind = 'info' }) {
   return <div className={`border px-4 py-3 text-sm leading-6 ${styles}`} role={kind === 'error' ? 'alert' : 'status'}>{children}</div>;
 }
 
-export function AccountSubmit({ children, busy = false }) {
+export function AccountSubmit({ children, busy = false, disabled = false }) {
   return (
     <button
-      className="flex min-h-12 w-full items-center justify-center border border-mictlan-teal/35 bg-mictlan-teal-deep px-5 py-3 font-ui text-xs font-semibold uppercase tracking-[0.16em] text-mictlan-bone shadow-[0_8px_24px_color-mix(in_srgb,var(--mictlan-teal-deep)_30%,transparent)] transition-colors hover:bg-mictlan-teal-hover disabled:cursor-wait disabled:opacity-60"
+      className={`flex min-h-12 w-full items-center justify-center border border-mictlan-teal/35 bg-mictlan-teal-deep px-5 py-3 font-ui text-xs font-semibold uppercase tracking-[0.16em] text-mictlan-bone shadow-[0_8px_24px_color-mix(in_srgb,var(--mictlan-teal-deep)_30%,transparent)] transition-colors hover:bg-mictlan-teal-hover ${busy ? 'cursor-wait disabled:cursor-wait' : 'disabled:cursor-not-allowed'} disabled:border-mictlan-earth/35 disabled:bg-mictlan-earth/15 disabled:text-mictlan-sage-muted/55 disabled:shadow-none disabled:hover:bg-mictlan-earth/15`}
       type="submit"
-      disabled={busy}
+      disabled={busy || disabled}
     >
       {busy ? 'Un momento…' : children}
     </button>
@@ -109,15 +125,16 @@ export function FormGrid({ children }) {
 export function AccountNavigation({ active }) {
   const items = [
     { href: '/cuenta', label: 'Información personal', key: 'profile' },
+    { href: '/cuenta/seguridad', label: 'Contraseña', key: 'security' },
     { href: '/cuenta/pedidos', label: 'Mis pedidos', key: 'orders' },
   ];
   return (
-    <nav className="mb-6 flex border-b border-mictlan-sand/15" aria-label="Secciones de tu cuenta">
+    <nav className="mb-6 grid grid-cols-3 border-b border-mictlan-sand/15 sm:flex" aria-label="Secciones de tu cuenta">
       {items.map((item) => (
         <Link
           key={item.key}
           aria-current={active === item.key ? 'page' : undefined}
-          className={`border-b-2 px-4 py-3 font-ui text-[0.65rem] font-semibold uppercase tracking-[0.12em] transition-colors sm:px-6 sm:text-xs ${active === item.key ? 'border-mictlan-teal text-mictlan-teal' : 'border-transparent text-mictlan-sage-muted hover:text-mictlan-ivory'}`}
+          className={`flex min-h-12 min-w-0 items-center justify-center border-b-2 px-1 py-2 text-center font-ui text-[0.6rem] font-semibold uppercase leading-tight tracking-[0.08em] transition-colors sm:min-h-0 sm:shrink-0 sm:justify-start sm:whitespace-nowrap sm:px-6 sm:py-3 sm:text-xs sm:leading-normal sm:tracking-[0.12em] ${active === item.key ? 'border-mictlan-teal text-mictlan-teal' : 'border-transparent text-mictlan-sage-muted hover:text-mictlan-ivory'}`}
           href={item.href}
         >
           {item.label}

@@ -89,6 +89,21 @@ export function createAccountRepository(database) {
       });
     },
 
+    changePassword({ accountId, passwordHash, tokenHash, expiresAt, now }) {
+      return database.$transaction(async (transaction) => {
+        await transaction.account.update({ where: { id: accountId }, data: { passwordHash } });
+        await transaction.accountToken.updateMany({
+          where: { accountId, purpose: 'PASSWORD_RESET', consumedAt: null },
+          data: { consumedAt: now },
+        });
+        await transaction.accountSession.updateMany({
+          where: { accountId, revokedAt: null },
+          data: { revokedAt: now },
+        });
+        await transaction.accountSession.create({ data: { accountId, tokenHash, expiresAt } });
+      });
+    },
+
     confirmEmail(tokenHash, now) {
       return database.$transaction(async (transaction) => {
         const token = await transaction.accountToken.findUnique({

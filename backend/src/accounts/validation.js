@@ -10,6 +10,7 @@ const REGISTRATION_FIELDS = new Set([
   'dateOfBirth',
   'address',
 ]);
+const PASSWORD_CHANGE_FIELDS = new Set(['currentPassword', 'newPassword']);
 const ADDRESS_FIELDS = ['street', 'number', 'neighborhood', 'locality', 'state', 'postalCode'];
 
 function isRecord(value) {
@@ -176,4 +177,22 @@ export function validateProfileInput(input, today = new Date()) {
 
   if (Object.keys(errors).length > 0) return { success: false, errors };
   return { success: true, data };
+}
+
+export function validatePasswordChangeInput(input) {
+  if (!isRecord(input)) return { success: false, errors: { input: 'La solicitud no es válida.' } };
+  const errors = {};
+  if (hasUnexpectedFields(input, PASSWORD_CHANGE_FIELDS)) {
+    errors.input = 'La solicitud contiene campos no permitidos.';
+  }
+
+  const currentPassword = typeof input.currentPassword === 'string' ? input.currentPassword : '';
+  const newPassword = typeof input.newPassword === 'string' ? input.newPassword : '';
+  if (currentPassword.length === 0) errors.currentPassword = 'Escribe tu contraseña actual.';
+  else if (currentPassword.length > 128) errors.currentPassword = 'La contraseña actual no es válida.';
+  if (newPassword.length < 12) errors.newPassword = 'La contraseña debe tener al menos 12 caracteres.';
+  else if (newPassword.length > 128) errors.newPassword = 'La contraseña no puede superar 128 caracteres.';
+
+  if (Object.keys(errors).length > 0) return { success: false, errors };
+  return { success: true, data: { currentPassword, newPassword } };
 }

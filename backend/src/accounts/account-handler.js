@@ -65,6 +65,10 @@ export function createAccountHandlers(service, { secureCookies = false, logger =
     updateProfile: wrap(async (request) => ({
       account: await service.updateProfile((await currentAccount(request)).id, request.body),
     })),
+    changePassword: wrap(async (request) => {
+      const account = await currentAccount(request);
+      return service.changePassword(account.id, request.body);
+    }, { cookie: (result) => Boolean(result?.sessionToken) }),
     orders: wrap(async (request) => ({ orders: await service.listOrders((await currentAccount(request)).id) })),
   };
 }

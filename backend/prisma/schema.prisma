@@ -31,6 +31,13 @@ enum EmailJobStatus {
   FAILED
 }
 
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+  EXPIRED
+}
+
 model Account {
   id              String           @id @default(uuid()) @db.Uuid
   firstName       String           @map("first_name") @db.VarChar(120)
@@ -45,6 +52,7 @@ model Account {
   locality        String           @db.VarChar(120)
   state           String           @db.VarChar(120)
   postalCode      String           @map("postal_code") @db.VarChar(5)
+  stripeCustomerId String?         @unique @map("stripe_customer_id") @db.VarChar(255)
   emailVerifiedAt DateTime?        @map("email_verified_at") @db.Timestamptz(6)
   createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt       DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
@@ -53,6 +61,7 @@ model Account {
   emailJobs       EmailJob[]
   cartItems       AccountCartItem[]
   cartMerges      AccountCartMerge[]
+  orders          Order[]
 
   @@map("accounts")
 }
@@ -130,8 +139,9 @@ model AccountCartItem {
   accountId String   @map("account_id") @db.Uuid
   productId String   @map("product_id") @db.Uuid
   quantity  Int
+  version   String   @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
   account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
@@ -148,6 +158,45 @@ model AccountCartMerge {
 
   @@id([accountId, transferId])
   @@map("account_cart_merges")
+}
+
+model Order {
+  id                      String      @id @default(uuid()) @db.Uuid
+  accountId               String      @map("account_id") @db.Uuid
+  status                  OrderStatus @default(PENDING)
+  stripeCheckoutSessionId String?     @unique @map("stripe_checkout_session_id") @db.VarChar(255)
+  stripePaymentIntentId   String?     @unique @map("stripe_payment_intent_id") @db.VarChar(255)
+  recipientName          String      @map("recipient_name") @db.VarChar(255)
+  recipientEmail         String      @map("recipient_email") @db.VarChar(254)
+  shippingAddress        Json        @map("shipping_address") @db.JsonB
+  currency                String      @default("MXN") @db.Char(3)
+  subtotalCents           Int         @map("subtotal_cents")
+  totalCents              Int         @map("total_cents")
+  createdAt               DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  paidAt                  DateTime?   @map("paid_at") @db.Timestamptz(6)
+  account                 Account     @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  items                   OrderItem[]
+
+  @@index([accountId, status, paidAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id                 String   @id @default(uuid()) @db.Uuid
+  orderId            String   @map("order_id") @db.Uuid
+  productId          String   @map("product_id") @db.Uuid
+  slug               String   @db.VarChar(80)
+  name               String   @db.VarChar(120)
+  quantity           Int
+  unitPriceCents     Int      @map("unit_price_cents")
+  lineTotalCents     Int      @map("line_total_cents")
+  cartItemUpdatedAt  DateTime @map("cart_item_updated_at") @db.Timestamptz(3)
+  cartItemVersion    String   @default(dbgenerated("gen_random_uuid()")) @map("cart_item_version") @db.Uuid
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  order              Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, createdAt])
+  @@map("order_items")
 }
 
 model SiteVisit {

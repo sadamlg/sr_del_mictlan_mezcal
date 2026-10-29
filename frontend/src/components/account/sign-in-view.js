@@ -1,19 +1,26 @@
 'use client';
 
 import { Eye, EyeOff, Mail } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { accountRequest } from '../../lib/account-api';
+import { useCart } from '../cart/cart-provider';
 import { AccountCard, AccountField, AccountNotice, AccountSubmit, AccountTextLink } from './account-ui';
 
-export default function SignInView() {
+export default function SignInView({ continueToCheckout = false }) {
   const router = useRouter();
+  const { error: cartError, retryCart, sessionState } = useCart();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [waitingForCart, setWaitingForCart] = useState(false);
   const [error, setError] = useState('');
   const [errorKind, setErrorKind] = useState('error');
+
+  useEffect(() => {
+    if (waitingForCart && sessionState === 'account') router.replace('/cuenta/checkout');
+  }, [router, sessionState, waitingForCart]);
 
   async function submit(event) {
     event.preventDefault();
@@ -22,7 +29,8 @@ export default function SignInView() {
     setErrorKind('error');
     try {
       await accountRequest('auth/login', { method: 'POST', body: { email, password } });
-      router.replace('/');
+      if (continueToCheckout) setWaitingForCart(true);
+      else router.replace('/');
     } catch (requestError) {
       setError(requestError.message);
       if (requestError.code === 'EMAIL_NOT_VERIFIED') setErrorKind('info');
@@ -38,6 +46,21 @@ export default function SignInView() {
     >
       <form className="space-y-5" onSubmit={submit}>
         {error && <AccountNotice kind={errorKind}>{error}</AccountNotice>}
+        {waitingForCart && sessionState === 'loading' && (
+          <AccountNotice>Estamos agregando tu carrito y preparando el resumen de compra…</AccountNotice>
+        )}
+        {waitingForCart && sessionState === 'error' && (
+          <div className="space-y-3">
+            <AccountNotice kind="error">{cartError || 'No se pudo cargar tu carrito. Inténtalo de nuevo.'}</AccountNotice>
+            <button
+              type="button"
+              onClick={retryCart}
+              className="min-h-10 border border-mictlan-teal/35 px-4 font-ui text-xs font-semibold uppercase tracking-[0.1em] text-mictlan-teal transition-colors hover:bg-mictlan-teal-deep/20 focus-visible:outline-2 focus-visible:outline-mictlan-teal"
+            >
+              Reintentar carga del carrito
+            </button>
+          </div>
+        )}
         <AccountField
           id="email"
           label="Correo electrónico"
@@ -73,10 +96,10 @@ export default function SignInView() {
             </button>
           )}
         />
-        <AccountSubmit busy={busy}>Entrar a mi cuenta</AccountSubmit>
+        <AccountSubmit busy={busy || waitingForCart}>Entrar a mi cuenta</AccountSubmit>
       </form>
       <div className="mt-7 border-t border-mictlan-sand/10 pt-5 text-center text-sm text-mictlan-sage-muted">
-        ¿Aún no tienes cuenta? <AccountTextLink href="/cuenta/registro">Crear una cuenta</AccountTextLink>
+        ¿Aún no tienes cuenta? <AccountTextLink href={continueToCheckout ? '/cuenta/registro?continuar=checkout' : '/cuenta/registro'}>Crear una cuenta</AccountTextLink>
       </div>
     </AccountCard>
   );

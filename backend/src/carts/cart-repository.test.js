@@ -32,10 +32,12 @@ test('adding an account item resolves only an active product and upserts its qua
 
   assert.deepEqual(product, { id: productId, slug: 'mezcal-reposado' });
   assert.deepEqual(calls[0][1], { where: { slug: 'mezcal-reposado', active: true }, select: { id: true, slug: true } });
+  const version = calls[1][1].create.version;
+  assert.match(version, /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
   assert.deepEqual(calls[1][1], {
     where: { accountId_productId: { accountId, productId } },
-    create: { accountId, productId, quantity: 4 },
-    update: { quantity: 4 },
+    create: { accountId, productId, quantity: 4, version },
+    update: { quantity: 4, version },
   });
 });
 
@@ -80,7 +82,9 @@ test('guest transfer records its id and adds quantities in one transaction', asy
   assert.equal(calls[0], 'transaction');
   assert.deepEqual(calls[1][1], { data: [{ accountId, transferId: 'd65ea75e-f24b-407b-8dba-c8c778950667' }], skipDuplicates: true });
   assert.deepEqual(calls[2][1], { where: { slug: { in: ['mezcal-reposado'] } }, select: { id: true, slug: true } });
-  assert.deepEqual(calls[3][1], [accountId, productId, 2]);
+  const version = calls[3][1][3];
+  assert.deepEqual(calls[3][1], [accountId, productId, 2, version, version]);
+  assert.match(version, /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
 });
 
 test('replaying a guest transfer does not add its items again', async () => {

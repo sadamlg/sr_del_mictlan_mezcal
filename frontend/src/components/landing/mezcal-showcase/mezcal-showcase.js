@@ -2,6 +2,7 @@ import ProductInsights from './product-insights';
 import { mediaObjectUrl } from '../../../lib/media-url';
 import AddToCartButton from '../../cart/add-to-cart-button';
 import CartCatalogRegistry from '../../cart/cart-catalog-registry';
+import CheckoutReturnNotice from '../../cart/checkout-return-notice';
 
 const priceFormatter = new Intl.NumberFormat('es-MX', {
   style: 'currency',
@@ -53,7 +54,7 @@ function MezcalCard({ product, className = '' }) {
   );
 }
 
-export default function MezcalShowcase({ products, mediaBaseUrl }) {
+export default function MezcalShowcase({ products, mediaBaseUrl, checkoutCancelled = false }) {
   return (
     <>
       {Array.isArray(products) && <CartCatalogRegistry products={products} />}
@@ -70,6 +71,8 @@ export default function MezcalShowcase({ products, mediaBaseUrl }) {
           <h2 id="mezcal-showcase-title" className="font-display text-[clamp(2rem,5vw,2.3rem)] font-medium uppercase leading-[1.12] text-mictlan-teal-bright lg:text-[clamp(2.3rem,2.8vw,2.75rem)]">Totonalhuan</h2>
           <p className="mx-auto mt-2 max-w-none font-serif text-base font-extralight uppercase leading-normal tracking-[0.1em] text-mictlan-bone sm:whitespace-nowrap">Destilados que cruzan el umbral del tiempo</p>
         </header>
+
+        <CheckoutReturnNotice cancelled={checkoutCancelled} />
 
         {products === null ? (
           <div className="mx-auto mt-16 max-w-lg text-center" role="status">
