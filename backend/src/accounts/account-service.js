@@ -36,6 +36,25 @@ export function toPublicAccount(account) {
   };
 }
 
+function toPublicOrder(order) {
+  const money = (amount) => ({ amount, currency: order.currency });
+  return {
+    id: order.id,
+    status: order.status,
+    createdAt: order.createdAt,
+    paidAt: order.paidAt,
+    subtotal: money(order.subtotalCents),
+    total: money(order.totalCents),
+    items: order.items.map((item) => ({
+      slug: item.slug,
+      name: item.name,
+      quantity: item.quantity,
+      unitPrice: money(item.unitPriceCents),
+      lineTotal: money(item.lineTotalCents),
+    })),
+  };
+}
+
 function dateOnly(value) {
   if (value instanceof Date) return value.toISOString().slice(0, 10);
   return value;
@@ -53,6 +72,7 @@ function ensureSessionToken(token) {
 
 export function createAccountService({
   repository,
+  orderRepository = repository,
   now = () => new Date(),
   tokenFactory = createOpaqueToken,
   hashTokenValue = hashToken,
@@ -249,8 +269,9 @@ export function createAccountService({
       }
     },
 
-    async listOrders() {
-      return [];
+    async listOrders(accountId) {
+      const orders = await orderRepository.listPaidOrders(accountId);
+      return orders.map(toPublicOrder);
     },
   };
 }

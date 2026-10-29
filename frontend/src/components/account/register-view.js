@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import { accountRequest } from '../../lib/account-api';
+import { rememberCheckoutContinuation } from '../../lib/checkout-continuation.js';
 import AccountDatePicker from './account-date-picker';
 import { AccountCard, AccountField, AccountNotice, AccountSubmit, AccountTextLink, AddressFields, FormGrid } from './account-ui';
 
 const EMPTY_ADDRESS = { street: '', number: '', neighborhood: '', locality: '', state: '', postalCode: '' };
 
-export default function RegisterView() {
+export default function RegisterView({ continueToCheckout = false }) {
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', dateOfBirth: '', password: '' });
   const [address, setAddress] = useState(EMPTY_ADDRESS);
   const [busy, setBusy] = useState(false);
@@ -27,6 +28,7 @@ export default function RegisterView() {
     setRegistered(false);
     try {
       const result = await accountRequest('auth/register', { method: 'POST', body: { ...form, address } });
+      if (continueToCheckout) rememberCheckoutContinuation();
       setMessage(result.message);
       setRegistered(true);
     } catch (requestError) {
@@ -42,7 +44,11 @@ export default function RegisterView() {
       <AccountCard eyebrow="Activa tu cuenta" title="Revisa tu correo" description="La cuenta quedará activa cuando confirmes la dirección que registraste.">
         <div className="space-y-5">
           <AccountNotice>{message}</AccountNotice>
-          <p className="text-center text-sm leading-6 text-mictlan-sage-muted">Al confirmar el enlace, iniciaremos tu sesión y volverás a la tienda.</p>
+          <p className="text-center text-sm leading-6 text-mictlan-sage-muted">
+            {continueToCheckout
+              ? 'Al confirmar el enlace, iniciaremos tu sesión y te llevaremos al resumen de compra.'
+              : 'Al confirmar el enlace, iniciaremos tu sesión y volverás a la tienda.'}
+          </p>
           <div className="text-center"><AccountTextLink href="/">Volver al inicio</AccountTextLink></div>
         </div>
       </AccountCard>
@@ -71,7 +77,7 @@ export default function RegisterView() {
         <AccountSubmit busy={busy}>Crear mi cuenta</AccountSubmit>
       </form>
       <div className="mt-7 border-t border-mictlan-sand/10 pt-5 text-center text-sm text-mictlan-sage-muted">
-        ¿Ya tienes cuenta? <AccountTextLink href="/cuenta/iniciar-sesion">Iniciar sesión</AccountTextLink>
+        ¿Ya tienes cuenta? <AccountTextLink href={continueToCheckout ? '/cuenta/iniciar-sesion?continuar=checkout' : '/cuenta/iniciar-sesion'}>Iniciar sesión</AccountTextLink>
       </div>
     </AccountCard>
   );

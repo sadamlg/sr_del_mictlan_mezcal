@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { CartError } from './cart-service.js';
 
 export function createCartRepository(database) {
@@ -20,11 +21,13 @@ export function createCartRepository(database) {
         }
 
         for (const { slug, quantity } of items) {
+          const version = randomUUID();
           await transaction.$executeRaw`
-            INSERT INTO "account_cart_items" ("account_id", "product_id", "quantity", "updated_at")
-            VALUES (${accountId}::uuid, ${bySlug.get(slug)}::uuid, ${quantity}, NOW())
+            INSERT INTO "account_cart_items" ("account_id", "product_id", "quantity", "version", "updated_at")
+            VALUES (${accountId}::uuid, ${bySlug.get(slug)}::uuid, ${quantity}, ${version}::uuid, NOW())
             ON CONFLICT ("account_id", "product_id") DO UPDATE
             SET "quantity" = LEAST(99, "account_cart_items"."quantity" + EXCLUDED."quantity"),
+                "version" = ${version}::uuid,
                 "updated_at" = NOW()
           `;
         }
@@ -47,10 +50,11 @@ export function createCartRepository(database) {
     },
 
     setAccountCartItem({ accountId, productId, quantity }) {
+      const version = randomUUID();
       return database.accountCartItem.upsert({
         where: { accountId_productId: { accountId, productId } },
-        create: { accountId, productId, quantity },
-        update: { quantity },
+        create: { accountId, productId, quantity, version },
+        update: { quantity, version },
       });
     },
 

@@ -31,6 +31,8 @@
   --mictlan-teal-bright: #2dd4bf;
   --mictlan-teal-deep: #0f5047;
   --mictlan-teal-hover: #15695d;
+  --mictlan-stripe-purple: #5145e5;
+  --mictlan-stripe-purple-hover: #4338ca;
   --mictlan-mint: #d1fae5;
   --mictlan-petrol: #0e7490;
   --background: var(--mictlan-background);
@@ -72,6 +74,8 @@
   --color-mictlan-teal-bright: var(--mictlan-teal-bright);
   --color-mictlan-teal-deep: var(--mictlan-teal-deep);
   --color-mictlan-teal-hover: var(--mictlan-teal-hover);
+  --color-mictlan-stripe-purple: var(--mictlan-stripe-purple);
+  --color-mictlan-stripe-purple-hover: var(--mictlan-stripe-purple-hover);
   --color-mictlan-mint: var(--mictlan-mint);
   --color-mictlan-petrol: var(--mictlan-petrol);
   --font-display: var(--mictlan-font-display);

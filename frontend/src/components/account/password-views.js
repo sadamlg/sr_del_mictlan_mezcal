@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { accountRequest } from '../../lib/account-api';
+import { clearCheckoutContinuation, hasCheckoutContinuation } from '../../lib/checkout-continuation.js';
+import { useCart } from '../cart/cart-provider.js';
 import { AccountCard, AccountField, AccountNotice, AccountSubmit, AccountTextLink } from './account-ui';
 
 export function PasswordResetRequestView() {
@@ -83,13 +85,18 @@ export function PasswordResetView({ token }) {
 }
 
 export function EmailConfirmationView({ token }) {
+  const { error: cartError, retryCart, sessionState } = useCart();
   const [error, setError] = useState('');
+  const [waitingForCart, setWaitingForCart] = useState(false);
   const router = useRouter();
   const confirmationRequest = useRef({ token: null, promise: null });
+  const checkoutContinuation = useRef(null);
 
   useEffect(() => {
     if (!token) return undefined;
 
+    if (checkoutContinuation.current === null) checkoutContinuation.current = hasCheckoutContinuation();
+    const returnToCheckout = checkoutContinuation.current;
     let active = true;
     if (confirmationRequest.current.token !== token) {
       confirmationRequest.current = {
@@ -106,20 +113,45 @@ export function EmailConfirmationView({ token }) {
         setError(requestError.message);
         return;
       }
+      if (result.accountActivated && returnToCheckout) {
+        setWaitingForCart(true);
+        return;
+      }
+      clearCheckoutContinuation();
       router.replace(result.accountActivated ? '/' : '/cuenta');
     });
 
     return () => { active = false; };
   }, [token, router]);
 
+  useEffect(() => {
+    if (waitingForCart && sessionState === 'account') {
+      clearCheckoutContinuation();
+      router.replace('/cuenta/checkout');
+    }
+  }, [router, sessionState, waitingForCart]);
+
   return (
-    <AccountCard title={error ? 'No se pudo confirmar el correo' : token ? 'Confirmando tu correo' : 'Enlace no válido'} description="Estamos verificando el enlace de tu correo.">
+    <AccountCard title={waitingForCart && sessionState === 'error' ? 'No se pudo preparar tu compra' : error ? 'No se pudo confirmar el correo' : token ? 'Confirmando tu correo' : 'Enlace no válido'} description="Estamos verificando el enlace de tu correo.">
       <div className="space-y-5 text-center">
         {error
           ? <AccountNotice kind="error">{error}</AccountNotice>
+          : waitingForCart && sessionState === 'error'
+            ? <AccountNotice kind="error">{cartError || 'No se pudo cargar el carrito. Inténtalo de nuevo.'}</AccountNotice>
+            : waitingForCart
+              ? <AccountNotice>Cuenta activa. Estamos agregando tu carrito y preparando el resumen de compra…</AccountNotice>
           : token
             ? <AccountNotice>Al terminar, volverás a la tienda. Si es una cuenta nueva, tu sesión quedará iniciada.</AccountNotice>
             : <AccountNotice kind="error">El enlace no es válido o está incompleto.</AccountNotice>}
+        {waitingForCart && sessionState === 'error' && (
+          <button
+            type="button"
+            onClick={retryCart}
+            className="min-h-10 border border-mictlan-teal/35 px-4 font-ui text-xs font-semibold uppercase tracking-[0.1em] text-mictlan-teal transition-colors hover:bg-mictlan-teal-deep/20 focus-visible:outline-2 focus-visible:outline-mictlan-teal"
+          >
+            Reintentar carga del carrito
+          </button>
+        )}
         {(error || !token) && <AccountTextLink href="/">Volver al inicio</AccountTextLink>}
       </div>
     </AccountCard>

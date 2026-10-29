@@ -7,24 +7,45 @@ import { useCart } from './cart-provider.js';
 import CartSet, { formatMoney } from './cart-set.js';
 import { useDesktopViewport } from '../../hooks/use-desktop-viewport.js';
 
-function CartFooter({ subtotal, isGuest, authenticated }) {
+function CartFooter({ subtotal, items, sessionState, closeDrawer }) {
+  const authenticated = sessionState === 'account';
+  const hasUnavailableItems = sessionState === 'account' && items.some((item) => !item.available);
+
   return (
     <footer className="shrink-0 border-t border-mictlan-sand/15 bg-mictlan-carbon px-5 py-4 sm:px-7">
       <div className="flex items-center justify-between gap-4 font-ui text-base">
         <span className="font-semibold uppercase text-mictlan-sage-muted">Subtotal</span>
         <span className="text-lg font-semibold tabular-nums text-mictlan-gold">{formatMoney(subtotal.amount)}</span>
       </div>
-      <button
-        type="button"
-        disabled
-        className="mt-4 flex min-h-11 w-full items-center justify-center border border-mictlan-teal/30 bg-mictlan-teal-deep/60 px-5 font-ui text-xs font-semibold uppercase tracking-[0.12em] text-mictlan-bone/80 disabled:cursor-not-allowed"
-      >
-        Continuar al pago
-      </button>
-      {isGuest && !authenticated && (
-        <Link href="/cuenta/iniciar-sesion" className="mt-2 inline-flex min-h-10 w-full items-center justify-center text-sm text-mictlan-teal underline underline-offset-4 hover:text-mictlan-teal-bright">
-          Inicia sesión para preparar el pago
+      {hasUnavailableItems && (
+        <p className="mt-3 text-sm leading-5 text-mictlan-error-text" role="status">
+          Quita los productos no disponibles para continuar.
+        </p>
+      )}
+      {sessionState === 'guest' ? (
+        <Link
+          href="/cuenta/iniciar-sesion?continuar=checkout"
+          onClick={closeDrawer}
+          className="mt-4 inline-flex min-h-11 w-full items-center justify-center border border-mictlan-teal/35 bg-mictlan-teal-deep px-5 font-ui text-xs font-semibold uppercase tracking-[0.12em] text-mictlan-bone transition-colors hover:bg-mictlan-teal-hover focus-visible:outline-2 focus-visible:outline-mictlan-teal"
+        >
+          Inicia sesión para pagar
         </Link>
+      ) : authenticated && !hasUnavailableItems ? (
+        <Link
+          href="/cuenta/checkout"
+          onClick={closeDrawer}
+          className="mt-4 inline-flex min-h-11 w-full items-center justify-center border border-mictlan-teal/35 bg-mictlan-teal-deep px-5 font-ui text-xs font-semibold uppercase tracking-[0.12em] text-mictlan-bone transition-colors hover:bg-mictlan-teal-hover focus-visible:outline-2 focus-visible:outline-mictlan-teal"
+        >
+          Finalizar compra
+        </Link>
+      ) : (
+        <button
+          type="button"
+          disabled={!authenticated || hasUnavailableItems}
+          className="mt-4 flex min-h-11 w-full items-center justify-center border border-mictlan-teal/35 bg-mictlan-teal-deep px-5 font-ui text-xs font-semibold uppercase tracking-[0.12em] text-mictlan-bone transition-colors hover:bg-mictlan-teal-hover focus-visible:outline-2 focus-visible:outline-mictlan-teal disabled:cursor-not-allowed disabled:border-mictlan-teal/15 disabled:bg-mictlan-teal-deep/50 disabled:text-mictlan-bone/60"
+        >
+          {sessionState === 'loading' ? 'Verificando tu cuenta…' : 'Continuar al pago'}
+        </button>
       )}
     </footer>
   );
@@ -36,6 +57,7 @@ function CartContents({ titleId, closeButtonRef, onDismiss, showCloseButton, ...
     accountCart,
     accountLines,
     busy,
+    closeDrawer,
     error,
     guestLines,
     guestSubtotal,
@@ -117,9 +139,7 @@ function CartContents({ titleId, closeButtonRef, onDismiss, showCloseButton, ...
               </p>
             )}
           </div>
-          {items.length > 0 && (
-            <CartFooter subtotal={subtotal} isGuest={cartType === 'guest'} authenticated={Boolean(account)} />
-          )}
+          {items.length > 0 && <CartFooter subtotal={subtotal} items={items} sessionState={sessionState} closeDrawer={closeDrawer} />}
         </>
       )}
     </div>
@@ -247,6 +267,7 @@ export default function CartDrawer() {
     accountCart,
     accountLines,
     busy,
+    closeDrawer,
     error,
     guestLines,
     guestSubtotal,

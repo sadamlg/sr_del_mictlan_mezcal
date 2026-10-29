@@ -1,5 +1,15 @@
+import { Suspense } from 'react';
 import OrdersView from '../../../components/account/orders-view';
 
-export default function OrdersPage() {
-  return <OrdersView />;
+async function OrdersContent({ searchParams }) {
+  const params = await searchParams;
+  return <OrdersView checkoutReturned={params?.checkout === 'return'} />;
+}
+
+export default function OrdersPage({ searchParams }) {
+  return (
+    <Suspense fallback={<p className="text-center text-sm text-mictlan-sage-muted" role="status">Cargando tus pedidos…</p>}>
+      <OrdersContent searchParams={searchParams} />
+    </Suspense>
+  );
 }

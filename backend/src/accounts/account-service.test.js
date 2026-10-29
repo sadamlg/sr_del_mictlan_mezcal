@@ -135,6 +135,46 @@ test('login reports one generic error for an unknown account and an incorrect pa
   assert.ok(unknown.calls.passwordVerifications[0].storedHash);
 });
 
+test('My orders returns only the signed-in account order snapshots with historical MXN amounts', async () => {
+  let requestedAccountId;
+  const createdAt = new Date('2026-10-20T11:00:00.000Z');
+  const paidAt = new Date('2026-10-20T11:02:00.000Z');
+  const { service } = createHarness({
+    async listPaidOrders(accountId) {
+      requestedAccountId = accountId;
+      return [{
+        id: 'order-1',
+        status: 'PAID',
+        currency: 'MXN',
+        subtotalCents: 24690,
+        totalCents: 24690,
+        createdAt,
+        paidAt,
+        items: [{ slug: 'mezcal-reposado', name: 'Mezcal Reposado', quantity: 2, unitPriceCents: 12345, lineTotalCents: 24690 }],
+      }];
+    },
+  });
+
+  const orders = await service.listOrders('account-1');
+
+  assert.equal(requestedAccountId, 'account-1');
+  assert.deepEqual(orders, [{
+    id: 'order-1',
+    status: 'PAID',
+    createdAt,
+    paidAt,
+    subtotal: { amount: 24690, currency: 'MXN' },
+    total: { amount: 24690, currency: 'MXN' },
+    items: [{
+      slug: 'mezcal-reposado',
+      name: 'Mezcal Reposado',
+      quantity: 2,
+      unitPrice: { amount: 12345, currency: 'MXN' },
+      lineTotal: { amount: 24690, currency: 'MXN' },
+    }],
+  }]);
+});
+
 test('profile email changes require the current password and remain pending', async () => {
   const { calls, service } = createHarness();
 
