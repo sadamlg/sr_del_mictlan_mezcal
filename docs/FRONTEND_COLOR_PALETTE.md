@@ -1,3 +1,3 @@
 # Paleta de colores del frontend
 
-La fuente maestra de la paleta y sus reglas de aplicación es [`design.md`](../design.md). Este enlace se conserva para referencias existentes; no dupliques aquí los tokens ni sus usos.
+Consulta el [sistema visual](../design.md), fuente única de los tokens de color y sus reglas de uso.

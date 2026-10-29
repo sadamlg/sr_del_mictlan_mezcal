@@ -32,7 +32,7 @@ La landing muestra únicamente productos activos. El catálogo no incluye catego
 
 La tabla `products` conserva un `slug`, nombre, descripción, precio en centavos, claves de ambas imágenes, texto alternativo de la botella, dos etiquetas descriptivas, perfil sensorial, porcentajes mínimo y máximo de alcohol, volumen en mililitros, posición y estado activo. Los campos opcionales de información sensorial, alcohol y volumen pueden quedar sin documentar y se publican como `null`. Los campos requeridos pueden permanecer vacíos mientras la ficha está inactiva; PostgreSQL impide activar un producto incompleto. La imagen de ambiente es decorativa, por lo que su texto alternativo público está vacío.
 
-`backend/prisma/dev-showcase.sql` carga tres fichas únicamente para la vista previa local. Sus $250, $350 y $500 MXN por 750 ml son bases provisionales proporcionadas por el proyecto; faltan envase, etiquetas, impuestos, comisiones y otros costos. El cliente definirá precios de venta en una sesión futura. Este archivo no se ejecuta como migración ni se aplica en staging o producción. El botón de compra permanece deshabilitado hasta implementar el carrito y aprobar precios de venta.
+`backend/prisma/dev-showcase.sql` carga tres fichas únicamente para una vista previa local. Sus precios de $250, $350 y $500 MXN por 750 ml son provisionales; no incluyen todos los costos y no constituyen precios comerciales aprobados. El archivo no es una migración ni se ejecuta automáticamente. Sólo úsalo en una base local vacía; no lo apliques en staging o producción. El carrito y el checkout ya están implementados, así que estos registros de demostración pueden avanzar al pago: define precios de venta reales antes de habilitar ventas públicas.
 
 ## Medios
 

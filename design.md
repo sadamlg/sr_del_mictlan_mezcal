@@ -73,49 +73,49 @@ components:
     textColor: "{colors.mictlan-brown-ink}"
 ---
 
-# Design System: Señor del Mictlán
+# Sistema visual: Señor del Mictlán
 
-## Overview
+## Dirección visual
 
-**Creative North Star: "Ritual artesanal en penumbra"**
+**Concepto rector: «Ritual artesanal en penumbra»**
 
 La tienda presenta destilados de agave con un lenguaje editorial, oscuro y sobrio. La fotografía del producto y los titulares de alto contraste llevan el peso visual; los acentos de color orientan la navegación y comunican estados sin competir con las imágenes.
 
-La tipografía display aporta carácter ceremonial, mientras la sans serif mantiene legibles la información y las acciones. El color verde agua identifica la interacción; el dorado queda ligado a la lectura del producto; el rojo y el burdeos se reservan para error, rechazo y detalles de la marca.
+La tipografía de títulos aporta carácter ceremonial, mientras las sans serif mantienen legibles la información y las acciones. El verde agua identifica la interacción; el dorado acompaña la lectura del producto; el rojo y el burdeos se reservan para errores, rechazo y detalles de marca.
 
-**Key Characteristics:**
+**Rasgos principales:**
 
 - Fondos oscuros en capas y fotografía de producto como protagonista.
-- Verde agua y teal para acciones, enlaces, foco y énfasis interactivo.
+- Verde agua para acciones, enlaces, foco y énfasis interactivo.
 - Morado Stripe para la acción de pago alojado en Stripe dentro del resumen de compra.
 - Dorado únicamente como acento cálido de producto.
-- Formas sobrias, con geometría distintiva sólo en el age-gate y el CTA del hero.
+- Formas sobrias, con geometría distintiva sólo en el aviso de edad y la acción del hero.
 
-## Colors
+## Color
 
-La paleta se organiza por función: teal para interacción, neutrales cálidos para lectura, dorado para detalles del destilado y tonos rojizos para estados destructivos.
+La paleta se organiza por función: verde agua para interacción, neutrales cálidos para lectura, dorado para detalles del destilado y tonos rojizos para estados destructivos.
 
-### Primary
+### Principales
 
-- **Verde agua (`mictlan-teal`):** acento de iconos, enlaces, foco visible, bordes activos y subrayado hover de 2 px del navbar.
-- **Teal profundo (`mictlan-teal-deep`):** fondo de las acciones principales del age-gate, cuenta y hero.
-- **Teal de interacción (`mictlan-teal-hover`):** hover de las acciones principales. `mictlan-teal-bright` destaca títulos y estados activos de FAQ y escaparate.
-- **Morado Stripe (`mictlan-stripe-purple`):** fondo del CTA para abrir Stripe desde el resumen; su hover usa `mictlan-stripe-purple-hover`. Es una excepción local al teal de las acciones principales.
-- **Menta (`mictlan-mint`):** texto de navegación en hover.
+- **Verde agua (`mictlan-teal`):** iconos, enlaces, foco visible, bordes activos y subrayado de 2 px en la barra de navegación.
+- **Verde agua profundo (`mictlan-teal-deep`):** fondo de las acciones principales de cuenta, aviso de edad y hero.
+- **Verde agua de interacción (`mictlan-teal-hover`):** estado hover de las acciones principales. `mictlan-teal-bright` destaca títulos y estados activos de FAQ y escaparate.
+- **Morado Stripe (`mictlan-stripe-purple`):** fondo de la acción para abrir Stripe desde el resumen; el hover usa `mictlan-stripe-purple-hover`. Es una excepción local al verde agua de las acciones principales.
+- **Menta (`mictlan-mint`):** texto de navegación al pasar el cursor.
 
-### Secondary
+### Secundarios
 
 - **Dorado (`mictlan-gold`):** precio, selectores y detalles del producto. No es el color por defecto de las acciones de cuenta ni de los indicadores de foco.
 - **Petróleo (`mictlan-petrol`):** bordes decorativos de hero, ritual y CTA del pie de página.
 
-### Tertiary
+### Estados y acentos
 
-- **Rojo y burdeos (`mictlan-red`, `mictlan-burgundy`):** rechazo del age-gate, errores, barra de desplazamiento y detalles rojizos existentes.
-- **Rojo de interacción (`mictlan-red-hover`):** hover de la opción de rechazo.
+- **Rojo y burdeos (`mictlan-red`, `mictlan-burgundy`):** rechazo del aviso de edad, errores, barra de desplazamiento y detalles rojizos existentes.
+- **Rojo de interacción (`mictlan-red-hover`):** estado hover de la opción de rechazo.
 - **Burdeos profundo (`mictlan-burgundy-deep`):** corazón decorativo del pie de página.
 - **Texto de error (`mictlan-error-text`, `mictlan-error-text-muted`):** mensajes y avisos de error.
 
-### Neutral
+### Neutrales
 
 | Token | Uso |
 |---|---|
@@ -124,21 +124,19 @@ La paleta se organiza por función: teal para interacción, neutrales cálidos p
 | `mictlan-night-green` | Extremos de gradientes de FAQ y Ritual. |
 | `mictlan-dark-forest` | Superficie de las tarjetas de Ritual y fondos de FAQ. |
 | `mictlan-red-black` | Gradientes del pie de página y contador de visitas. |
-| `mictlan-blood-shadow` | Sombras rojizas del age-gate, fondo de cuenta y pie de página. |
+| `mictlan-blood-shadow` | Sombras rojizas del aviso de edad, fondo de cuenta y pie de página. |
 | `mictlan-carbon` | Menú móvil, encabezado, opciones de cuenta y superficie translúcida de campos. |
-| `mictlan-ink` | Oscuros profundos del age-gate; fondo de capas sobre producto y texto de selección sobre aqua. |
+| `mictlan-ink` | Oscuros profundos del aviso de edad; fondo de capas sobre producto y texto de selección sobre aqua. |
 | `mictlan-brown-ink` | Texto oscuro sobre acentos dorados del escaparate. |
 | `mictlan-ivory` | Texto de lectura y títulos de cuenta. |
 | `mictlan-cream` | Texto de paneles y detalles del producto. |
-| `mictlan-bone` | Texto de alto contraste en age-gate, navegación y landing. |
+| `mictlan-bone` | Texto de alto contraste en el aviso de edad, navegación y landing. |
 | `mictlan-sage` | Párrafos de apoyo de landing y navegación móvil. |
 | `mictlan-sage-muted` | Descripciones, texto secundario y metadatos de cuenta. |
 | `mictlan-muted` | Copia secundaria de pie de página, Ritual y FAQ. |
 | `mictlan-sand` | Etiquetas de campos y texto de navegación. |
 | `mictlan-earth` | Divisores y detalles discretos. |
 | `mictlan-earth-muted` | Texto pequeño secundario y estado cerrado del icono de menú móvil. |
-
-**The One Palette Rule.** Usa primero un token existente y ajusta su opacidad según el contexto; añade un color nuevo sólo cuando cumpla un rol visual distinto que la paleta no cubra.
 
 ### Excepciones visuales locales
 
@@ -150,88 +148,75 @@ Estos tonos siguen siendo parte de composiciones puntuales, no colores para reut
 | `#14201a` | Luz ambiental de la sección Ritual. |
 | `#1a1c1b` | Superficie hover de las tarjetas de Ritual. |
 | `#cda575`, `#14120f` | Borde y fondo del panel específico de detalles del destilado. |
-| `rgba(20,8,10,0.54)`, `rgba(20,8,10,0.30)`, `rgba(20,8,10,0.96)` | Pasos casi negros de los velos radiales del age-gate y pie de página. |
+| `rgba(20,8,10,0.54)`, `rgba(20,8,10,0.30)`, `rgba(20,8,10,0.96)` | Pasos casi negros de los velos radiales del aviso de edad y pie de página. |
 | `#240b10`, `#14090b`, `#16090d` | Pista y controles de la barra de desplazamiento. |
 
-Los gradientes del age-gate y del pie de página combinan sombras rojizas y casi negras para integrarse con su composición. Las capas negras o blancas con opacidad sobre fotografía son recursos de contraste, no acentos. Conserva esos tratamientos donde ya existen; no los copies como colores de marca para otros componentes.
+Los gradientes del aviso de edad y del pie combinan sombras rojizas y casi negras. Las capas negras o blancas con opacidad sobre fotografía sirven para dar contraste, no son acentos de color. Conserva esos tratamientos donde ya existen; no los copies como colores de marca para otros componentes.
 
-## Typography
+## Tipografía
 
-**Display Font:** Cinzel Decorative con Georgia y serifas del sistema como respaldo.
+**Títulos:** Cinzel Decorative con Georgia y serifas del sistema como respaldo.
 
-**Body Font:** Open Sans Variable con Open Sans y Arial como respaldo.
+**Texto:** Open Sans Variable con Open Sans y Arial como respaldo.
 
-**Label Font:** Montserrat Variable con Montserrat como respaldo.
+**Interfaz:** Montserrat Variable con Montserrat como respaldo.
 
-**Character:** La serif display da presencia a títulos de marca y producto. Open Sans prioriza la lectura de párrafos y formularios; Montserrat distingue navegación, etiquetas y acciones breves.
+**Carácter:** Cinzel Decorative da presencia a títulos de marca y producto. Open Sans prioriza la lectura de párrafos y formularios; Montserrat distingue navegación, etiquetas y acciones breves.
 
-### Hierarchy
+### Jerarquía
 
-- **Display:** titulares de marca y de secciones, con escala adaptable al espacio disponible.
-- **Headline:** títulos de página y producto en la serif display.
-- **Body:** descripciones, avisos y contenido de cuenta en Open Sans.
-- **Label:** nombres de campos, precios y controles en Montserrat; las etiquetas breves suelen ir en mayúsculas con tracking amplio.
+- **Títulos de marca:** titulares y secciones en Cinzel Decorative, con escala adaptable al espacio.
+- **Títulos de página y producto:** serif decorativa.
+- **Texto:** descripciones, avisos y contenido de cuenta en Open Sans.
+- **Etiquetas:** campos, precios y controles en Montserrat; las breves suelen ir en mayúsculas y con espaciado amplio entre letras.
 
-**The Role Separation Rule.** Reserva la serif decorativa para títulos; no la uses para párrafos, mensajes de estado ni instrucciones largas.
-
-## Layout
+## Composición
 
 La landing alterna escenas de ancho amplio con secciones de lectura contenidas. El hero aprovecha la fotografía en pantalla completa en escritorio y reorganiza el contenido sobre la imagen en móvil. Las superficies de cuenta mantienen un ancho de lectura limitado y se apilan en pantallas estrechas.
 
-Los breakpoints son los de Tailwind CSS 4 más ajustes puntuales que responden a la composición existente. Mantén el contenido centrado y adapta la escala tipográfica y los espacios fluidamente; no conviertas esos ajustes de una sección en una nueva escala global.
+Los puntos de quiebre son los de Tailwind CSS 4 más ajustes puntuales para la composición existente. Mantén el contenido centrado y adapta tipografía y espacios al ancho; no conviertas ajustes de una sección en una nueva escala global.
 
-## Elevation & Depth
+## Profundidad
 
 La profundidad se construye principalmente con capas tonales, gradientes y velos sobre fotografía. Las sombras más pronunciadas pertenecen al diálogo de edad y a elementos superpuestos; las tarjetas de contenido usan bordes discretos y superficies próximas al fondo.
 
-**The Scene-Specific Layer Rule.** Conserva la posición y el carácter de los velos y gradientes existentes: son parte de la iluminación de cada escena, no un efecto genérico para tarjetas.
+Conserva la posición y el carácter de los velos y gradientes existentes: forman parte de la iluminación de cada escena y no son un efecto genérico para tarjetas.
 
-## Shapes
+## Formas
 
-Los campos y controles de cuenta tienen esquinas discretas y bordes finos; las tarjetas son mayormente rectangulares. El CTA del hero conserva su recorte angular. Las etiquetas tipo chip usan píldora y el age-gate mantiene su diálogo circular como pieza distintiva.
+Los campos y controles de cuenta tienen esquinas discretas y bordes finos; las tarjetas son mayormente rectangulares. La acción del hero conserva su recorte angular. Las etiquetas usan forma de píldora y el aviso de edad mantiene su diálogo circular como pieza distintiva.
 
-## Components
+## Componentes
 
-### Buttons
+### Botones
 
-- **Acciones principales de cuenta, age-gate y hero:** teal profundo con texto hueso y hover teal. El foco visible conserva un contorno teal.
-- **CTA de pago con Stripe en el resumen:** morado Stripe con texto hueso; el foco visible conserva el contorno teal.
-- **CTA del hero:** conserva su corte diagonal y se amplía al 110% en hover; comparte con las acciones principales los colores teal y la transición de color.
-- **Acciones destructivas o de rechazo:** borde y hover en rojo/burdeos; conserva texto que nombre la acción.
-- **Acciones de producto:** el dorado puede aparecer en selectores y datos del destilado; el foco visible usa teal. El dorado no es el estilo predeterminado de CTA de cuenta.
+- **Acciones principales de cuenta, aviso de edad y hero:** verde agua profundo, texto hueso y hover verde agua. El foco conserva un contorno verde agua.
+- **Acción de pago con Stripe en el resumen:** morado Stripe con texto hueso; el foco conserva el contorno verde agua.
+- **Acción del hero:** conserva su corte diagonal y crece al 110% al pasar el cursor; comparte color y transición con las acciones principales.
+- **Acciones destructivas o de rechazo:** borde y hover rojos o burdeos, con texto que identifique la acción.
+- **Acciones de producto:** el dorado puede aparecer en selectores y datos del destilado; el foco usa verde agua. El dorado no es el estilo predeterminado de las acciones de cuenta.
 
-### Cards / Containers
+### Tarjetas y superficies
 
-- **Cuenta:** superficie basada en el fondo general, borde teal tenue, sombra oscura contenida y padding adaptable.
+- **Cuenta:** superficie basada en el fondo general, borde verde agua tenue, sombra oscura contenida y relleno adaptable.
 - **Ritual y FAQ:** fondos y bordes pertenecen a la escena; conserva las excepciones locales enumeradas arriba.
 - **Detalles del producto:** el panel dorado es una excepción localizada del escaparate.
 
-### Inputs / Fields
+### Campos
 
-Los campos usan una superficie carbón translúcida, texto marfil y una etiqueta arena. El foco cambia el borde y el indicador visible a teal. Los errores se distinguen con texto rojo, no sólo con color de borde.
+Los campos usan una superficie carbón translúcida, texto marfil y una etiqueta arena. El foco cambia el borde y el indicador visible a verde agua. Los errores se distinguen con texto rojo, no sólo con el borde.
 
-### Navigation
+### Navegación
 
-El navbar usa texto arena y un subrayado verde agua de 2 px en hover, con texto menta. El cambio dura 150 ms y también se muestra al enfocar un enlace con teclado. En el menú móvil, las opciones de navegación y cuenta mantienen el texto sage por defecto; al pasar el cursor o recibir foco cambian el texto a verde agua (`mictlan-teal`), sin añadir subrayado. El menú conserva su fondo carbón.
+La barra de navegación usa texto arena y un subrayado verde agua de 2 px al pasar el cursor, con texto menta. El cambio dura 150 ms y también aparece al enfocar con teclado. En el menú móvil, las opciones de navegación y cuenta mantienen texto salvia por defecto; al pasar el cursor o recibir foco cambian a verde agua (`mictlan-teal`), sin subrayado. El menú conserva su fondo carbón.
 
-### Signature Component: Age Gate
+### Componente distintivo: aviso de edad
 
-El diálogo circular combina el emblema del sitio, sombras rojizas y controles contrastados. Su silueta, iluminación y tratamientos de fondo son específicos; no generalices su gradiente a tarjetas corrientes.
+El aviso circular combina el emblema del sitio, sombras rojizas y controles contrastados. Su silueta, iluminación y fondo son específicos; no generalices su gradiente a tarjetas comunes.
 
-## Do's and Don'ts
+## Aplicación
 
-### Do:
-
-- **Do** consultar este contrato antes de cambiar color, contraste o estado visual.
-- **Do** implementar los tokens de color aquí definidos en `frontend/src/app/globals.css` y exponerlos en `@theme inline` para Tailwind.
-- **Do** reutilizar un token con opacidad cuando sólo se necesita una variante más tenue.
-- **Do** actualizar este documento y `globals.css` en el mismo cambio cuando se incorpore un nuevo color semántico.
-- **Do** revisar el resultado en navegador cuando cambie un color o una composición de capas.
-
-### Don't:
-
-- **Don't** usar colores de Tailwind como `text-slate-300`, `bg-blue-*` o `text-green-*` para elementos de marca o texto de interfaz.
-- **Don't** usar dorado como color predeterminado de botones, enlaces o navegación de cuenta.
-- **Don't** inventar un tono para imitar teal o verde; busca primero el token visualmente más cercano.
-- **Don't** reutilizar en pantallas nuevas los tonos locales listados como excepciones de landing o producto.
-- **Don't** homogeneizar los gradientes y velos de la landing si su color depende de la fotografía y la escena.
+- Usa primero los tokens de esta guía; ajusta opacidad cuando sólo necesites atenuar un color. Añade un token semántico sólo si la paleta no cubre el rol.
+- `frontend/src/app/globals.css` implementa los tokens y los expone a Tailwind. Actualiza ambos archivos en el mismo cambio si agregas un token.
+- No uses colores cromáticos genéricos de Tailwind para sustituir los tonos de marca ni reutilices los colores locales de excepción fuera de su escena.
+- Revisa en navegador cualquier cambio de color, contraste o composición de capas.

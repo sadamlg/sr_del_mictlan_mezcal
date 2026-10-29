@@ -2,7 +2,7 @@
 
 ## Propósito y límites
 
-El módulo permite preparar una compra con un único carrito visible. No crea sesiones de Stripe, órdenes, reservas ni verificaciones de existencias; esos comportamientos pertenecen a la fase de Checkout.
+El carrito permite preparar una compra como invitado o con cuenta. El módulo no crea sesiones de Stripe ni órdenes; el checkout implementado se describe en [Contrato de Checkout y pedidos](checkout-y-pedidos.md). No hay reserva ni verificación de existencias.
 
 El carrito de invitado se conserva en `localStorage` del mismo navegador durante 30 días desde su última actividad. El carrito de cuenta se guarda en PostgreSQL. Al iniciar sesión, el backend suma por producto las cantidades del navegador y de la cuenta en una transacción; el resultado se muestra como un solo carrito. Cada cantidad final tiene un máximo de 99. El navegador borra únicamente las cantidades transferidas después de recibir confirmación. Si la petición falla, conserva los artículos y ofrece reintentar. Cerrar sesión oculta el carrito de cuenta y deja disponible un carrito local nuevo.
 
@@ -13,7 +13,7 @@ El carrito de invitado se conserva en `localStorage` del mismo navegador durante
 - El carrito de cuenta obtiene nombre, disponibilidad y precio actual de `products`. PostgreSQL conserva sólo la relación producto-cuenta y cantidad, nunca una copia del precio.
 - Los artículos inactivos que ya estaban guardados permanecen visibles para que la persona pueda quitarlos. Se muestran como no disponibles, sin precio ni subtotal de línea; se excluyen del subtotal.
 - El subtotal del carrito de cuenta se calcula en backend usando los precios actuales en centavos de MXN. En un carrito de invitado, la interfaz calcula el subtotal a partir del catálogo público actual; si se abre desde una página que no lo cargó, lo solicita al backend.
-- Antes de Checkout, la fase 06 debe comprobar de nuevo que cada producto siga activo y tomar su precio vigente. Los importes mostrados en esta fase no son una cotización ni fijan un precio de compra.
+- Al iniciar Checkout, el backend vuelve a comprobar que cada producto siga activo y toma su precio vigente. Los importes del carrito no fijan el precio de compra.
 
 ## API del carrito de cuenta
 
@@ -52,16 +52,10 @@ Para un producto inactivo, `available` es `false`, `unitPrice` y `lineTotal` son
 
 ## Interfaz
 
-El encabezado abre una sección lateral accesible desde teclado. Las acciones de producto agregan una unidad; el carrito muestra artículos, cantidades, eliminación y subtotal. Si está vacío, indica que no hay artículos y ofrece volver a la tienda. También expone estados de carga, error y producto no disponible. El contador corresponde al carrito visible. Sin prototipo disponible, se aprobó seguir los tokens, la tipografía y los patrones accesibles actuales de `design.md`.
+El encabezado abre un panel lateral accesible desde teclado. El carrito muestra imágenes de producto, cantidades, eliminación y subtotal; también tiene estados de carga, error, vacío y producto no disponible. Si está vacío, **Seguir comprando** lleva a la sección de mezcales. Al continuar al pago, la persona invitada inicia sesión o crea una cuenta; después llega al resumen de compra. El resumen permite editar cantidades y destinatario y abre Stripe Checkout al confirmar.
 
-La fase 05 no inicia Checkout ni vacía el carrito tras una compra. La acción de pagar el carrito se conecta con Stripe y la autenticación requerida en la fase 06.
+El webhook firmado de Stripe elimina sólo las líneas que coinciden con la instantánea pagada. Los cambios hechos en el carrito mientras el Checkout está abierto se conservan.
 
-## Persistencia y pruebas
+## Persistencia
 
-La tabla `account_cart_items` tiene una relación única por cuenta y producto; las eliminaciones de cuenta o producto limpian sus filas relacionadas. `account_cart_merges` registra los identificadores de transferencia por cuenta para evitar sumas repetidas. PostgreSQL restringe las cantidades al rango 1–99. El navegador guarda sólo `slug`, `quantity` y la fecha de última actividad del carrito, además de un identificador técnico para reintentos; nunca guarda precios.
-
-Las pruebas cubren validación de cantidades y slugs, aislamiento de cuentas, suma e idempotencia de transferencias, totales con precio actual, artículos inactivos, operaciones privadas, persistencia Prisma y vencimiento móvil de 30 días del carrito de invitado. Los recorridos de navegador comprueban agregar, actualizar, quitar, recargar, unir el carrito al iniciar sesión, recuperar el catálogo desde páginas de cuenta y mostrar el panel en 320, 768 y 1440 px.
-
-## Referencia revisada
-
-Se revisó el repositorio hermano requerido para esta fase. No contiene módulo, contrato, flujo ni pruebas de carrito reutilizables, por lo que no se porta código; se implementan las reglas desde este contrato sobre Prisma/PostgreSQL y la sesión existente. La retención del carrito de invitado por 30 días sigue el alcance aprobado del MVP.
+`account_cart_items` guarda una fila por cuenta y producto; las eliminaciones relacionadas limpian sus filas. `account_cart_merges` registra cada `transferId` para hacer idempotente la fusión. PostgreSQL limita cantidades a 1–99. El navegador conserva sólo `slug`, cantidad, última actividad y un identificador técnico para reintentos; nunca guarda precios.

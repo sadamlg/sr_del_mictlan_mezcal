@@ -1,77 +1,53 @@
-# Contrato de alcance funcional del MVP
+# Alcance funcional del MVP
 
-**Estado:** alcance funcional aprobado. Este documento define qué debe ofrecer la primera versión de la tienda y sirve como base del roadmap y de los contratos de cada módulo. El README describe el stack y la arquitectura; aquí se fija el comportamiento del producto.
+**Estado:** alcance objetivo aprobado. Este documento define qué debe incluir la primera versión; el estado de implementación se mantiene en [ROADMAP.md](ROADMAP.md) y los detalles técnicos, en los [contratos de módulo](contracts/).
 
 ## Objetivo
 
-Publicar una tienda en línea que presente la marca y sus productos, permita a visitantes y clientes preparar compras, cobre mediante Stripe Checkout y permita a cada cliente consultar sus pedidos.
+Presentar la marca y su catálogo, permitir preparar compras como invitado o cliente, cobrar con Stripe Checkout y consultar pedidos desde una cuenta.
 
-## Incluido en el MVP
+## Incluido
 
 ### Landing y catálogo
 
-- La landing incluye encabezado, navegación, sección principal y escaparate de productos con la identidad visual de la marca.
-- La landing muestra un contador persistente de sesiones que la visitaron. Una recarga en la misma pestaña no suma otra visita; una sesión nueva sí. El contador no guarda IP ni identifica personas.
-- Agregar, sustituir o ajustar imágenes, video y otros medios destinados a la landing o al escaparate es trabajo de contenido y presentación dentro de este alcance; por sí solo no requiere modificar este contrato. Se revisa el alcance si el cambio añade una página, un flujo o una capacidad nueva para el usuario.
-- El alcance de contenido se limita a la landing. Una página sencilla de “Nosotros” o información de la empresa podrá definirse durante el diseño del módulo de landing.
-- Los productos, precios, descripciones, estado activo y referencias de sus medios se mantienen manualmente en la base de datos. No habrá una interfaz administrativa para editarlos ni para cargar archivos.
-- La tienda presenta productos activos. El sistema valida que el producto siga activo y usa su precio vigente al iniciar el pago.
-- No hay inventario ni comprobación de existencias. Mantener activo un producto significa que se ofrece para compra; corresponde al responsable del catálogo decidir si puede venderse.
+- Landing con navegación, escaparate, aviso de mayoría de edad y contador de sesiones de navegador. El contador no identifica personas ni guarda IP.
+- El aviso aparece cuando la sección de mezcales entra en pantalla. “Entrar al Mictlán” recuerda la respuesta en `sessionStorage` de esa pestaña; “No, salir del sitio” abre Google en otra pestaña y deja la original abierta sin conceder acceso al escaparate. Es una declaración, no una verificación de identidad ni un consentimiento de cookies.
+- Productos, precios, disponibilidad y referencias de medios se administran manualmente en PostgreSQL; no hay panel administrativo, inventario ni carga de archivos.
+- La tienda sólo vende productos activos. Antes de cobrar, el backend vuelve a comprobar que sigan activos y toma el precio vigente.
+- El alcance de contenido comprende la landing y el catálogo. Agregar medios por sí solo no amplía el alcance funcional.
 
-### Aviso de mayoría de edad
+### Cuentas
 
-- Al entrar, la tienda muestra un modal que solo pregunta “¿Eres mayor de edad?” y ofrece “Sí” y “No”.
-- Al elegir “Sí”, la persona puede continuar. La respuesta afirmativa se recuerda para que el modal no reaparezca con cada recarga.
-- Al elegir “No”, se abre Google en una pestaña nueva y la tienda permanece abierta en la pestaña original; esa respuesta no concede acceso a la tienda.
-- El aviso de edad es independiente de cualquier consentimiento de cookies. Rechazar cookies no bloquea la navegación.
-- El aviso es una declaración de edad, no una verificación de identidad. El registro realiza la validación de edad indicada en la sección de cuentas.
+- Registro, confirmación de correo, inicio/cierre de sesión, recuperación y cambio de contraseña, actualización de perfil y cambio de correo confirmado.
+- El registro solicita nombre, apellidos, correo, fecha de nacimiento y dirección en México. La fecha debe acreditar al menos 18 años; el código postal debe tener cinco dígitos. No se consulta un servicio externo de direcciones.
+- La cuenta sólo se activa al confirmar el correo. Si el registro nació durante el checkout, confirmar el correo inicia sesión y continúa al resumen de compra; en los demás casos vuelve a la tienda.
+- La cuenta contiene las secciones **Información personal**, **Contraseña** y **Mis pedidos**. Sólo la información personal permite editar los datos del perfil; la contraseña tiene su propio formulario.
+- Registro e inicio de sesión deberán protegerse con Cloudflare Turnstile validado también por el backend. **Pendiente:** actualmente Turnstile no está integrado; se incluye en la fase 08 del roadmap.
 
-### Cuentas y perfil
+### Carrito y checkout
 
-- Una persona puede registrarse, iniciar y cerrar sesión, y recuperar su contraseña mediante correo. La cuenta queda pendiente hasta confirmar su dirección; al confirmarla, se inicia la sesión y vuelve a la landing.
-- El registro solicita nombre(s), apellidos, correo electrónico, fecha de nacimiento y dirección en México. La fecha debe ser válida y acreditar que la persona tiene al menos 18 años.
-- La dirección incluye calle, número, colonia, ciudad o delegación, estado y código postal. Se validan los campos y el formato básico del código postal; no se consulta una base externa de direcciones.
-- La información personal editable incluye nombre(s), apellidos, correo electrónico, fecha de nacimiento y todos los campos de dirección. La fecha de nacimiento nueva debe seguir acreditando que la persona tiene al menos 18 años.
-- Al registrarse se envía un correo de confirmación de cuenta. La cuenta permanece pendiente y no concede sesión ni acceso a sus datos hasta consumir el enlace de confirmación, que vence en 24 horas. La vista posterior al registro sólo ofrece volver a la landing; confirmar el enlace inicia la sesión y redirige ahí.
-- Los formularios públicos de registro e inicio de sesión usan Cloudflare Turnstile en modo administrado para reducir envíos automatizados. El backend valida cada token con Siteverify antes de crear una cuenta o iniciar sesión; mostrar el widget en el navegador no basta para proteger la API ([validación oficial](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/)).
-- Para cambiar el correo, la persona debe confirmar el nuevo correo mediante un enlace enviado a esa dirección. El correo vigente permanece activo hasta que se confirme el cambio.
-- La cuenta contiene dos vistas: información personal editable y “Mis pedidos”. La vista aparece en esta fase; los pedidos reales se conectan cuando se implementen pagos y órdenes.
-- Con la sesión iniciada, el encabezado muestra “Hola” y el primer nombre. El menú ofrece “Mis pedidos”, “Cuenta” y “Cerrar sesión”.
-- Se requiere iniciar sesión para pagar, no para visitar la tienda ni para usar el carrito.
+- El carrito de invitado se guarda en el mismo navegador durante 30 días desde su última actividad. Al iniciar sesión o registrarse, sus cantidades se suman de forma idempotente al carrito de la cuenta; el máximo es 99 por producto.
+- El checkout requiere sesión. Su resumen permite editar destinatario y cantidades, muestra imágenes del catálogo y tarjetas guardadas por Stripe (sólo marca, últimos cuatro y vencimiento; el nombre se muestra si Stripe lo devuelve).
+- Los datos de envío del resumen pertenecen a esa compra y no cambian el perfil. La tarjeta se introduce o selecciona en Stripe Checkout; la aplicación no almacena número completo, CVC ni identificadores de método de pago.
+- Stripe Checkout aloja el pago. Sólo un webhook con firma válida confirma el pago; volver al sitio no basta.
+- “Mis pedidos” muestra compras pagadas. “Volver a pedir” agrega sus artículos al carrito y abre directamente el resumen de compra.
 
-### Carrito y compra
+### Correo de compra
 
-- Un visitante puede agregar productos, cambiar cantidades y quitarlos sin crear una cuenta.
-- El carrito de invitado se conserva en el mismo navegador durante 30 días desde la última actividad. Al registrarse o iniciar sesión, sus cantidades se suman por producto a las que ya tenga la cuenta y se muestra un solo carrito. La transferencia se puede reintentar sin duplicar artículos.
-- El carrito de la cuenta se conserva para futuras visitas. Cada compra confirmada genera un pedido; una cuenta puede tener varios pedidos en su historial.
-- Desde “Mis pedidos”, el cliente puede volver a pedir una compra confirmada. Sus productos y cantidades se agregan al carrito actual; las cantidades respetan el límite de 99 por producto.
-- Antes de iniciar el pago, el sistema vuelve a validar el estado activo y el precio vigente de cada producto. No reserva ni comprueba existencias.
-
-### Pago, pedidos y correo
-
-- El pago se realiza en Stripe Checkout alojado.
-- Si el cliente da su consentimiento, Stripe puede guardar el método de pago para reutilizarlo en futuras compras. El perfil no incluye gestión de tarjetas: para usar otra tarjeta, el cliente la introduce en Stripe al pagar una nueva orden. La aplicación no almacena el número completo ni el código de seguridad.
-- El backend confirma el pago con la notificación firmada de Stripe; el regreso del navegador no confirma por sí mismo una compra.
-- Tras confirmarse el pago, se guarda la orden y aparece en “Mis pedidos”. Cada compra confirmada produce su propia orden.
-- Para cada compra confirmada se envía un correo con exactamente dos PDF adjuntos: comprobante de pago y copia de la orden.
-- Los correos de recuperación de contraseña, confirmación de registro y confirmación de cambio de correo también están incluidos. No se incluyen correos promocionales ni de recuperación de carritos.
+- El alcance final prevé un correo por compra confirmada con dos PDF: comprobante de pago y copia de la orden. **Pendiente:** el correo de compra y los PDF aún no están implementados; corresponden a la fase 07.
+- También se incluyen los correos de confirmación de registro/cambio de correo y recuperación de contraseña. En desarrollo se capturan con Mailpit.
 
 ## Fuera del MVP
 
-- Panel administrativo para administrar cuentas, productos, inventario o archivos.
-- Conteo, reserva, ajuste o verificación de existencias.
-- Módulo de logística o integración con proveedores de entrega.
-- Mantener varios carritos o borradores de compra simultáneos por cuenta.
-- Páginas independientes de catálogo, categorías o detalle de producto.
-- Administración de tarjetas desde el perfil o un flujo separado para guardarlas sin realizar una compra.
-- Documentos fiscales; los únicos PDF de compra son el comprobante de pago y la copia de la orden.
-- Correos de marketing y de recuperación de carrito.
+- Panel administrativo, inventario, reserva de existencias, logística e integración con proveedores de entrega.
+- Páginas independientes de categorías o detalle de producto.
+- Administración de tarjetas desde el perfil o guardar una tarjeta fuera de una compra.
+- Documentos fiscales, marketing y recuperación de carritos.
 
-## Criterios para considerar terminado el MVP
+## Criterios de aceptación
 
-- La landing presenta los productos activos y el aviso de edad cumple el flujo definido, sin depender del consentimiento de cookies.
-- El registro valida fecha de nacimiento y mayoría de edad; la cuenta sólo permite iniciar sesión tras confirmar el correo. Cierre de sesión, recuperación de contraseña, confirmación de registro, cambio confirmado de correo y edición de información personal funcionan de extremo a extremo.
-- Un visitante puede preparar un carrito; al autenticarse, sus artículos se suman a los del carrito de cuenta y se presenta un solo total. Cada compra confirmada produce un pedido independiente.
-- Los productos activos se pueden comprar usando su precio vigente, sin control de existencias ni reserva de inventario.
-- Stripe confirma cada pago mediante su notificación firmada; la orden aparece en “Mis pedidos” y se envía el correo con exactamente los dos PDF acordados.
-- Los criterios anteriores están cubiertos por los contratos de módulo y validados con las pruebas y verificaciones de aceptación correspondientes. No quedan flujos incluidos representados solo por pantallas incompletas o respuestas simuladas.
+- El registro, autenticación y sus enlaces de correo funcionan de extremo a extremo y protegen los datos privados.
+- Un visitante puede preparar un carrito; al autenticarse se combina sin duplicar transferencias.
+- Los artículos activos se cobran al precio vigente y cada pago confirmado genera un pedido independiente, visible sólo para su titular.
+- Ninguna compra se confirma por el retorno del navegador; no se almacena el número completo de tarjeta, CVC ni datos de inventario.
+- El correo de compra y sus dos PDF completan el MVP tras la fase 07. Los criterios de integración en staging y preparación de producción se detallan en las fases 08 y 09.
