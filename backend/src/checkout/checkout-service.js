@@ -21,10 +21,21 @@ function savedPaymentMethodsUnavailable() {
   return new CheckoutError(503, 'SAVED_PAYMENT_METHODS_UNAVAILABLE', 'No se pudieron consultar las tarjetas guardadas.');
 }
 
+function normalizeCardholderName(value) {
+  if (typeof value !== 'string') return null;
+  const name = value
+    .replace(/[\u0000-\u001f\u007f-\u009f]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 255);
+  return name || null;
+}
+
 function publicSavedCard(paymentMethod) {
   if (paymentMethod?.type !== 'card' || paymentMethod.allow_redisplay !== 'always') return null;
   const card = paymentMethod.card;
   const brand = card?.display_brand || card?.brand;
+  const cardholderName = normalizeCardholderName(paymentMethod.billing_details?.name);
   if (
     typeof brand !== 'string' || !/^[a-z0-9_]{1,32}$/i.test(brand) ||
     typeof card.last4 !== 'string' || !/^\d{4}$/.test(card.last4) ||
@@ -37,6 +48,7 @@ function publicSavedCard(paymentMethod) {
     last4: card.last4,
     expMonth: card.exp_month,
     expYear: card.exp_year,
+    ...(cardholderName ? { cardholderName } : {}),
   };
 }
 

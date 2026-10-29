@@ -385,19 +385,23 @@ export default function CheckoutView() {
               {currentSavedCards.cards.map((card, index) => {
                 const brand = card.brand.replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
                 const expiration = `${String(card.expMonth).padStart(2, '0')}/${card.expYear}`;
+                const cardholderName = typeof card.cardholderName === 'string' ? card.cardholderName.trim() : '';
                 return (
                   <li
                     key={`${card.brand}-${card.last4}-${card.expMonth}-${card.expYear}-${index}`}
-                    aria-label={`Tarjeta ${brand} terminada en ${card.last4}, vence ${expiration}`}
+                    aria-label={`Tarjeta ${brand} terminada en ${card.last4}${cardholderName ? `, titular ${cardholderName}` : ''}, vence ${expiration}`}
                     className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="flex min-w-0 items-center gap-3">
                       <span className="grid size-10 shrink-0 place-items-center border border-mictlan-sand/15 bg-mictlan-carbon/60">
                         <CreditCard aria-hidden="true" className="size-4 text-mictlan-teal" />
                       </span>
-                      <span className="min-w-0 break-words text-sm font-medium text-mictlan-ivory">
-                        {brand} ···· {card.last4}
-                      </span>
+                      <div className="min-w-0 break-words">
+                        <p className="text-sm font-medium text-mictlan-ivory">{brand} ···· {card.last4}</p>
+                        {cardholderName && (
+                          <p className="mt-1 text-xs text-mictlan-sage-muted">Titular: {cardholderName}</p>
+                        )}
+                      </div>
                     </div>
                     <span className="pl-[52px] font-ui text-xs text-mictlan-sage-muted sm:pl-0">
                       <span className="uppercase tracking-[0.1em]">Vence</span>{' '}
