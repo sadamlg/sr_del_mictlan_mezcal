@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { accountRequest } from '../../lib/account-api';
 import AccountDatePicker from './account-date-picker';
 import { AccountCard, AccountField, AccountNavigation, AccountNotice, AccountSubmit, AccountTextLink, AddressFields, FormGrid, PasswordVisibilityToggle, SignOutButton } from './account-ui';
@@ -37,6 +38,7 @@ function profileHasChanges(form, account) {
 }
 
 export default function ProfileView() {
+  const pathname = usePathname();
   const [account, setAccount] = useState(null);
   const [form, setForm] = useState(null);
   const [errors, setErrors] = useState({});
@@ -46,6 +48,24 @@ export default function ProfileView() {
   const [saving, setSaving] = useState(false);
   const [emailPasswordVisible, setEmailPasswordVisible] = useState(false);
   const [signedOut, setSignedOut] = useState(false);
+
+  useEffect(() => {
+    setMessage('');
+    setMessageKind('success');
+    setErrors({});
+  }, [pathname]);
+
+  useEffect(() => {
+    function clearNoticeOnPageRestore(event) {
+      if (!event.persisted) return;
+      setMessage('');
+      setMessageKind('success');
+      setErrors({});
+    }
+
+    window.addEventListener('pageshow', clearNoticeOnPageRestore);
+    return () => window.removeEventListener('pageshow', clearNoticeOnPageRestore);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
