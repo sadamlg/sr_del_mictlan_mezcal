@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import HeaderActions from './header-actions';
 import MobileMenu, { MobileMenuToggle } from './mobile-menu';
@@ -17,22 +17,25 @@ import {
 import { useDesktopViewport } from '../../hooks/use-desktop-viewport';
 
 export default function SiteHeader({ mediaBaseUrl }) {
+  const pathname = usePathname();
   const router = useRouter();
   const { activePanel, closeMobileMenu, closeMobilePanel, toggleMobileMenu } = useCart();
   const [account, setAccount] = useState(null);
   const [signOutPending, setSignOutPending] = useState(false);
   const [signOutError, setSignOutError] = useState('');
   const isDesktop = useDesktopViewport(closeMobileMenu);
-  const [headerVisible, setHeaderVisible] = useState(true);
+  const [visibility, setVisibility] = useState({ pathname, visible: true });
   const [brandImageReady, setBrandImageReady] = useState(false);
   const sessionRefreshSequence = useRef(0);
   const brandImageRef = useRef(null);
   const lastScrollY = useRef(0);
+  const navigationScroll = useRef(true);
   const menuOpen = activePanel === 'menu';
+  const headerVisible = visibility.pathname !== pathname || visibility.visible;
   const headerShouldDisplay = shouldDisplayHeader(headerVisible, activePanel !== null);
   const closeMenu = closeMobilePanel;
   const toggleMenu = () => {
-    setHeaderVisible(true);
+    setVisibility({ pathname, visible: true });
     toggleMobileMenu();
   };
   const refreshAccount = useCallback(async () => {
@@ -74,15 +77,81 @@ export default function SiteHeader({ mediaBaseUrl }) {
   }, [refreshAccount]);
 
   useEffect(() => {
+    navigationScroll.current = true;
+    lastScrollY.current = window.scrollY;
+
+    const showForNavigation = () => {
+      navigationScroll.current = true;
+      lastScrollY.current = window.scrollY;
+      setVisibility((current) => current.pathname === pathname && current.visible
+        ? current
+        : { pathname, visible: true });
+    };
+
+    const handleNavigationClick = (event) => {
+      if (
+        event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey ||
+        !(event.target instanceof Element)
+      ) return;
+
+      const link = event.target.closest('a[href]');
+      if (!link) return;
+      let destination;
+      try {
+        destination = new URL(link.href);
+      } catch {
+        return;
+      }
+      if (destination.origin !== window.location.origin) return;
+      if (
+        destination.pathname === window.location.pathname &&
+        destination.search === window.location.search &&
+        !destination.hash
+      ) return;
+      showForNavigation();
+    };
+
+    const resumeScrollTracking = () => {
+      navigationScroll.current = false;
+    };
+
+    const handleScrollKey = (event) => {
+      if (event.altKey || event.ctrlKey || event.metaKey) return;
+      if (!['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '].includes(event.key)) return;
+      if (event.target instanceof HTMLElement && (
+        event.target.isContentEditable || event.target.closest('input, textarea, select, [contenteditable="true"]')
+      )) return;
+      resumeScrollTracking();
+    };
+
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      setHeaderVisible(!shouldHideHeaderOnScroll(currentScrollY, lastScrollY.current));
+      if (!navigationScroll.current) {
+        const visible = !shouldHideHeaderOnScroll(currentScrollY, lastScrollY.current);
+        setVisibility((current) => current.pathname === pathname && current.visible === visible
+          ? current
+          : { pathname, visible });
+      }
       lastScrollY.current = currentScrollY;
     };
 
+    document.addEventListener('click', handleNavigationClick, true);
+    window.addEventListener('popstate', showForNavigation);
+    window.addEventListener('hashchange', showForNavigation);
+    window.addEventListener('wheel', resumeScrollTracking, { passive: true });
+    window.addEventListener('touchmove', resumeScrollTracking, { passive: true });
+    window.addEventListener('keydown', handleScrollKey);
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    return () => {
+      document.removeEventListener('click', handleNavigationClick, true);
+      window.removeEventListener('popstate', showForNavigation);
+      window.removeEventListener('hashchange', showForNavigation);
+      window.removeEventListener('wheel', resumeScrollTracking);
+      window.removeEventListener('touchmove', resumeScrollTracking);
+      window.removeEventListener('keydown', handleScrollKey);
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [pathname]);
 
   useEffect(() => {
     if (isDesktop || activePanel === null) return undefined;
