@@ -63,7 +63,7 @@ test('cart drawer keeps its layout, design tokens, and escape behavior across re
     expect(drawerBounds.x).toBeGreaterThanOrEqual(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
     await expect(drawer.getByRole('status')).toHaveText('El carrito está vacío');
-    await expect(drawer.getByRole('button', { name: 'Seguir comprando' })).toBeVisible();
+    await expect(drawer.getByRole('link', { name: 'Seguir comprando' })).toHaveAttribute('href', '/#coleccion');
     await expect(drawer.getByText('Subtotal', { exact: true })).toHaveCount(0);
     await expect(drawer.getByRole('button', { name: 'Continuar al pago' })).toHaveCount(0);
     await expect(drawer.getByRole('region', { name: 'Artículos del carrito' })).toHaveCount(0);
@@ -72,6 +72,18 @@ test('cart drawer keeps its layout, design tokens, and escape behavior across re
     await expect(trigger).toBeFocused();
   }
   expect(hydrationErrors).toEqual([]);
+});
+
+test('empty cart continue link returns to the mezcal collection and closes the drawer', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: /Abrir carrito/ }).click();
+  const drawer = page.getByRole('dialog', { name: 'Tu carrito' });
+  await expect(drawer.getByRole('link', { name: 'Seguir comprando' })).toBeVisible();
+  await drawer.getByRole('link', { name: 'Seguir comprando' }).click();
+
+  await expect(page).toHaveURL(/\/#coleccion$/);
+  await expect(drawer).not.toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Totonalhuan' })).toBeVisible();
 });
 
 test('menu and cart exchange the active mobile panel and restore an empty cart cleanly', async ({ page }) => {
@@ -343,15 +355,29 @@ test('guest checkout closes the drawer, merges after login, and shows a purchase
   let authenticated = false;
   let mergeCount = 0;
   let checkoutCount = 0;
+  const account = {
+    id: 'account-a',
+    firstName: 'Ana',
+    lastName: 'Prueba',
+    email: 'ana@example.test',
+    address: {
+      street: 'Calle de prueba',
+      number: '123',
+      neighborhood: 'Centro',
+      locality: 'Morelia',
+      state: 'Michoacán',
+      postalCode: '58000',
+    },
+  };
   const cart = { items: [], subtotal: { amount: 0, currency: 'MXN' } };
 
   await page.unroute('**/api/auth/session');
   await page.route('**/api/auth/session', (route) => route.fulfill(authenticated
-    ? { status: 200, json: { account: { id: 'account-a', firstName: 'Ana' } } }
+    ? { status: 200, json: { account } }
     : { status: 401, json: { error: { code: 'AUTHENTICATION_REQUIRED', message: 'Inicia sesión.' } } }));
   await page.route('**/api/auth/login', async (route) => {
     authenticated = true;
-    await route.fulfill({ status: 200, json: { account: { id: 'account-a', firstName: 'Ana' } } });
+    await route.fulfill({ status: 200, json: { account } });
   });
   await page.unroute('**/api/cart/account**');
   await page.route('**/api/cart/account**', async (route) => {
@@ -376,6 +402,20 @@ test('guest checkout closes the drawer, merges after login, and shows a purchase
     checkoutCount += 1;
     await route.fulfill({ status: 201, json: { checkoutUrl: 'https://checkout.stripe.com/c/pay/test-summary-flow' } });
   });
+  await page.route('**/api/checkout/payment-methods', (route) => route.fulfill({ status: 200, json: { cards: [] } }));
+  await page.route('**/api/catalog/products', (route) => route.fulfill({
+    status: 200,
+    json: { products: [{
+      slug: product.slug,
+      name: product.name,
+      image: { url: '/checkout-test-bottle.svg', alt: 'Botella de Calios' },
+    }] },
+  }));
+  await page.route('**/checkout-test-bottle.svg', (route) => route.fulfill({
+    status: 200,
+    contentType: 'image/svg+xml',
+    body: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 80"><rect width="64" height="80" fill="#0a0b0a"/></svg>',
+  }));
   await page.route('https://checkout.stripe.com/**', (route) => route.fulfill({ status: 200, contentType: 'text/html', body: '<title>Stripe test checkout</title>' }));
 
   await page.goto('/');
@@ -391,8 +431,11 @@ test('guest checkout closes the drawer, merges after login, and shows a purchase
 
   await expect(page).toHaveURL(/\/cuenta\/checkout$/);
   await expect(page.getByRole('heading', { name: 'Resumen de compra' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: product.name, exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Pagar con Stripe' })).toBeVisible();
+  const selectedItems = page.getByRole('region', { name: 'Piezas seleccionadas' });
+  await expect(selectedItems.getByRole('heading', { name: product.primaryName, exact: true })).toBeVisible();
+  await expect(selectedItems).toContainText(product.descriptor);
+  await expect(page.getByRole('img', { name: 'Botella de Calios' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Pagar con Stripe' })).toBeEnabled();
   expect(mergeCount).toBe(1);
   expect(checkoutCount).toBe(0);
 
@@ -476,6 +519,11 @@ test('checkout summary shows customer delivery details, consented masked cards, 
   await expect(page.getByText(/El pago se procesa en Stripe/)).toHaveCount(0);
   await expect(page.getByRole('link', { name: 'Seguir comprando' })).toHaveAttribute('href', '/#coleccion');
 
+  await page.reload();
+  const refreshedItems = page.getByRole('region', { name: 'Piezas seleccionadas' });
+  await expect(refreshedItems.getByRole('heading', { name: product.primaryName, exact: true })).toBeVisible();
+  await expect(page.getByRole('img', { name: 'Botella de Calios' })).toBeVisible();
+
   const items = page.getByRole('region', { name: 'Artículos del carrito' });
   const item = items.getByRole('listitem').filter({ hasText: product.primaryName });
   await expect(item.getByLabel('Cantidad: 1')).toBeVisible();
@@ -494,6 +542,83 @@ test('checkout summary shows customer delivery details, consented masked cards, 
   }
 });
 
+test('checkout keeps edited recipient data per order and sends it to Stripe', async ({ page }) => {
+  const account = {
+    id: 'account-a',
+    firstName: 'Ana',
+    lastName: 'Prueba',
+    email: 'ana@example.test',
+    address: {
+      street: 'Calle de prueba',
+      number: '123',
+      neighborhood: 'Centro',
+      locality: 'Morelia',
+      state: 'Michoacán',
+      postalCode: '58000',
+    },
+  };
+  const cart = {
+    items: [{
+      slug: product.slug,
+      name: product.name,
+      quantity: 1,
+      available: true,
+      unitPrice: { amount: 25000, currency: 'MXN' },
+      lineTotal: { amount: 25000, currency: 'MXN' },
+    }],
+    subtotal: { amount: 25000, currency: 'MXN' },
+  };
+  let checkoutPayload;
+  await page.route('**/api/auth/session', (route) => route.fulfill({ status: 200, json: { account } }));
+  await page.route('**/api/cart/account**', (route) => route.fulfill({ status: 200, json: { cart } }));
+  await page.route('**/api/catalog/products', (route) => route.fulfill({
+    status: 200,
+    json: { products: [{ slug: product.slug, name: product.name, image: { url: '/checkout-test-bottle.svg', alt: 'Botella de Calios' } }] },
+  }));
+  await page.route('**/checkout-test-bottle.svg', (route) => route.fulfill({
+    status: 200,
+    contentType: 'image/svg+xml',
+    body: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 80"><rect width="64" height="80" fill="#0a0b0a"/></svg>',
+  }));
+  await page.route('**/api/checkout/payment-methods', (route) => route.fulfill({ status: 200, json: { cards: [] } }));
+  await page.route('**/api/checkout/sessions', async (route) => {
+    checkoutPayload = route.request().postDataJSON();
+    await route.fulfill({ status: 201, json: { checkoutUrl: 'https://checkout.stripe.com/c/pay/recipient-edit-test' } });
+  });
+  await page.route('https://checkout.stripe.com/**', (route) => route.fulfill({ status: 200, contentType: 'text/html', body: '<title>Stripe test checkout</title>' }));
+
+  await page.goto('/cuenta/checkout');
+  await expect(page.getByRole('button', { name: 'Pagar con Stripe' })).toBeEnabled();
+  await page.getByRole('button', { name: 'Editar datos de entrega para este pedido' }).click();
+  await expect(page.getByRole('button', { name: 'Pagar con Stripe' })).toBeDisabled();
+  await page.getByLabel('Nombre de quien recibe').fill('María Destinataria');
+  await page.getByLabel('Correo de contacto').fill('maria@example.test');
+  await page.getByLabel('Calle', { exact: true }).fill('Avenida del Agave');
+  await page.getByRole('button', { name: 'Guardar para este pedido' }).click();
+
+  await expect(page.getByText('María Destinataria', { exact: true })).toBeVisible();
+  await expect(page.getByText('maria@example.test', { exact: true })).toBeVisible();
+  await expect(page.getByText(/Avenida del Agave 123/)).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Pagar con Stripe' })).toBeEnabled();
+  await page.getByRole('button', { name: 'Pagar con Stripe' }).click();
+
+  await expect(page).toHaveURL(/checkout\.stripe\.com\/c\/pay\/recipient-edit-test$/);
+  expect(checkoutPayload).toEqual({
+    recipient: {
+      name: 'María Destinataria',
+      email: 'maria@example.test',
+      address: {
+        street: 'Avenida del Agave',
+        number: '123',
+        neighborhood: 'Centro',
+        locality: 'Morelia',
+        state: 'Michoacán',
+        postalCode: '58000',
+      },
+    },
+  });
+});
+
 test('new accounts keep the checkout intent through email confirmation and guest cart merge', async ({ page }) => {
   await page.addInitScript(({ storageKey, slug }) => {
     window.localStorage.setItem(storageKey, JSON.stringify({
@@ -504,6 +629,20 @@ test('new accounts keep the checkout intent through email confirmation and guest
 
   let authenticated = false;
   let mergeCount = 0;
+  const account = {
+    id: 'account-a',
+    firstName: 'Ana',
+    lastName: 'Prueba',
+    email: 'ana@example.test',
+    address: {
+      street: 'Calle de prueba',
+      number: '123',
+      neighborhood: 'Centro',
+      locality: 'Morelia',
+      state: 'Michoacán',
+      postalCode: '58000',
+    },
+  };
   const cart = {
     items: [{
       slug: product.slug,
@@ -518,7 +657,7 @@ test('new accounts keep the checkout intent through email confirmation and guest
 
   await page.unroute('**/api/auth/session');
   await page.route('**/api/auth/session', (route) => route.fulfill(authenticated
-    ? { status: 200, json: { account: { id: 'account-a', firstName: 'Ana' } } }
+    ? { status: 200, json: { account } }
     : { status: 401, json: { error: { code: 'AUTHENTICATION_REQUIRED', message: 'Inicia sesión.' } } }));
   await page.route('**/api/auth/register', (route) => route.fulfill({
     status: 201,
@@ -534,6 +673,20 @@ test('new accounts keep the checkout intent through email confirmation and guest
     if (route.request().method() === 'POST') mergeCount += 1;
     await route.fulfill({ status: 200, json: { cart } });
   });
+  await page.route('**/api/catalog/products', (route) => route.fulfill({
+    status: 200,
+    json: { products: [{
+      slug: product.slug,
+      name: product.name,
+      image: { url: '/checkout-test-bottle.svg', alt: 'Botella de Calios' },
+    }] },
+  }));
+  await page.route('**/checkout-test-bottle.svg', (route) => route.fulfill({
+    status: 200,
+    contentType: 'image/svg+xml',
+    body: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 80"><rect width="64" height="80" fill="#0a0b0a"/></svg>',
+  }));
+  await page.route('**/api/checkout/payment-methods', (route) => route.fulfill({ status: 200, json: { cards: [] } }));
 
   await page.goto('/cuenta/registro?continuar=checkout');
   await page.locator('#firstName').fill('Ana');
@@ -557,6 +710,9 @@ test('new accounts keep the checkout intent through email confirmation and guest
   await page.goto('/cuenta/confirmar-correo?token=abcdefghijklmnopqrstuvXYZ01234567890123456789');
   await expect(page).toHaveURL(/\/cuenta\/checkout$/);
   await expect(page.getByRole('heading', { name: 'Resumen de compra' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: product.name, exact: true })).toBeVisible();
+  const selectedItems = page.getByRole('region', { name: 'Piezas seleccionadas' });
+  await expect(selectedItems.getByRole('heading', { name: product.primaryName, exact: true })).toBeVisible();
+  await expect(selectedItems).toContainText(product.descriptor);
+  await expect(page.getByRole('img', { name: 'Botella de Calios' })).toBeVisible();
   expect(mergeCount).toBe(1);
 });
