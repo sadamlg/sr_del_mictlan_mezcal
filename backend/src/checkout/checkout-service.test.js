@@ -108,6 +108,26 @@ test('lists only consented saved cards for the signed-in customer without return
   assert.equal(JSON.stringify(cards).includes('private-fingerprint'), false);
 });
 
+test('normalizes control characters from consented cardholder names', async () => {
+  const { service } = setup({
+    stripeCustomerId: 'cus_test_123',
+    savedPaymentMethods: { data: [{
+      type: 'card',
+      allow_redisplay: 'always',
+      card: { brand: 'visa', last4: '4242', exp_month: 8, exp_year: 2030 },
+      billing_details: { name: ' Ana\tMaría\nLópez\u0085 ' },
+    }] },
+  });
+
+  assert.deepEqual(await service.listSavedPaymentMethods(account), [{
+    brand: 'visa',
+    last4: '4242',
+    expMonth: 8,
+    expYear: 2030,
+    cardholderName: 'Ana María López',
+  }]);
+});
+
 test('returns no saved cards when the signed-in account has no Stripe customer', async () => {
   const { calls, service } = setup();
 
