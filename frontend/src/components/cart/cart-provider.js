@@ -130,6 +130,26 @@ export function CartProvider({ children }) {
     return true;
   }, [account, accountCart.items, guestCart, sessionState]);
 
+  const addOrderItemsToCart = useCallback(async ({ transferId, items }) => {
+    if (!account || sessionState !== 'account') {
+      throw new Error('Inicia sesión para volver a pedir.');
+    }
+    if (busy) throw new Error('Espera a que termine la actualización del carrito.');
+
+    setError('');
+    setBusy(true);
+    try {
+      const nextCart = await mergeGuestCart({ transferId, items });
+      setAccountCart(nextCart);
+      return nextCart;
+    } catch (requestError) {
+      setError(requestError.message || 'No se pudo agregar el pedido al carrito.');
+      throw requestError;
+    } finally {
+      setBusy(false);
+    }
+  }, [account, busy, sessionState]);
+
   const setQuantity = useCallback(async (cartType, slug, quantity) => {
     if (busy || (cartType === 'account' && sessionState !== 'account') || (cartType === 'guest' && !(sessionState === 'guest' || (sessionState === 'error' && (!account || mergeConflict))))) return;
     setError('');
@@ -178,6 +198,7 @@ export function CartProvider({ children }) {
     account,
     accountCart,
     addProduct,
+    addOrderItemsToCart,
     activePanel,
     busy,
     catalog,
@@ -199,7 +220,7 @@ export function CartProvider({ children }) {
     setError,
     setQuantity,
     sessionState,
-  }), [account, accountCart, activePanel, addProduct, busy, catalog, closeDrawer, closeMobileMenu, closeMobilePanel, error, guestCart, itemCount, mergeConflict, openDrawer, refreshSession, registerCatalog, removeItem, sessionState, setQuantity, toggleDrawer, toggleMobileMenu]);
+  }), [account, accountCart, activePanel, addOrderItemsToCart, addProduct, busy, catalog, closeDrawer, closeMobileMenu, closeMobilePanel, error, guestCart, itemCount, mergeConflict, openDrawer, refreshSession, registerCatalog, removeItem, sessionState, setQuantity, toggleDrawer, toggleMobileMenu]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

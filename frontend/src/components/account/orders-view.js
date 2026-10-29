@@ -1,10 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, CalendarDays, Wine } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { CalendarDays, Repeat2, Wine } from 'lucide-react';
 import { accountRequest } from '../../lib/account-api';
+import { getPublicCatalog } from '../../lib/cart-api';
+import { createVisitId } from '../../lib/visitor-count';
 import { AccountCard, AccountNavigation, AccountNotice, AccountTextLink, SignOutButton } from './account-ui';
+import { useCart } from '../cart/cart-provider';
 
 function formatMoney(value) {
   if (!value || !Number.isSafeInteger(value.amount) || typeof value.currency !== 'string') return '—';
@@ -21,9 +25,11 @@ function formatOrderDate(value) {
   return new Intl.DateTimeFormat('es-MX', { dateStyle: 'long' }).format(date);
 }
 
-function OrderSummary({ order }) {
+function OrderSummary({ order, productImages, onRepeatOrder, reorderState, canRepeat }) {
   const items = Array.isArray(order.items) ? order.items : [];
   const reference = typeof order.id === 'string' ? order.id.slice(0, 8).toUpperCase() : '—';
+  const currentReorder = reorderState.orderId === order.id ? reorderState : null;
+  const isRepeating = currentReorder?.status === 'loading';
 
   return (
     <article className="overflow-hidden border border-mictlan-sand/15 bg-mictlan-carbon/25">
@@ -41,29 +47,55 @@ function OrderSummary({ order }) {
       </header>
 
       <ul className="m-0 list-none divide-y divide-mictlan-sand/10 px-4 sm:px-5">
-        {items.map((item, index) => (
-          <li className="flex items-center gap-3 py-4 sm:gap-4" key={`${item.slug}-${index}`}>
-            <span className="flex size-11 shrink-0 items-center justify-center border border-mictlan-sand/10 bg-mictlan-background text-mictlan-gold/80 sm:size-12">
-              <Wine className="size-[1.125rem]" strokeWidth={1.5} aria-hidden="true" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="break-words text-sm font-medium text-mictlan-ivory sm:text-base">{item.name}</p>
-              <p className="mt-1 text-xs tabular-nums text-mictlan-sage-muted">{item.quantity} × {formatMoney(item.unitPrice)}</p>
-            </div>
-            <span className="shrink-0 text-right font-ui text-sm tabular-nums text-mictlan-cream sm:text-base">{formatMoney(item.lineTotal)}</span>
-          </li>
-        ))}
+        {items.map((item, index) => {
+          const image = productImages.get(item.slug);
+          return (
+            <li className="flex items-center gap-3 py-4 sm:gap-4" key={`${item.slug}-${index}`}>
+              <span className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden border border-mictlan-sand/10 bg-mictlan-background text-mictlan-gold/80 sm:size-12">
+                {image?.url ? (
+                  <img
+                    src={image.url}
+                    alt={image.alt || item.name || 'Botella de mezcal'}
+                    width="48"
+                    height="48"
+                    loading="lazy"
+                    decoding="async"
+                    referrerPolicy="no-referrer"
+                    className="absolute inset-0 size-full object-contain p-1"
+                  />
+                ) : (
+                  <Wine className="size-[1.125rem]" strokeWidth={1.5} aria-hidden="true" />
+                )}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="break-words text-sm font-medium text-mictlan-ivory sm:text-base">{item.name}</p>
+                <p className="mt-1 text-xs tabular-nums text-mictlan-sage-muted">{item.quantity} × {formatMoney(item.unitPrice)}</p>
+              </div>
+              <span className="shrink-0 text-right font-ui text-sm tabular-nums text-mictlan-cream sm:text-base">{formatMoney(item.lineTotal)}</span>
+            </li>
+          );
+        })}
       </ul>
 
       <footer className="flex flex-col-reverse gap-4 border-t border-mictlan-sand/10 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-        <Link
-          className="inline-flex min-h-11 items-center gap-2 self-start font-ui text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-mictlan-sage-muted transition-colors hover:text-mictlan-teal focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-mictlan-teal"
-          href="/#coleccion"
-          aria-label={`Ver la colección después del pedido ${reference}`}
-        >
-          <ArrowLeft className="size-4" aria-hidden="true" />
-          Ver colección
-        </Link>
+        <div className="flex flex-col items-start gap-1">
+          <button
+            className="inline-flex min-h-11 items-center gap-2 self-start font-ui text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-mictlan-sage-muted transition-colors hover:text-mictlan-teal focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-mictlan-teal disabled:cursor-not-allowed disabled:opacity-60"
+            type="button"
+            disabled={!canRepeat || reorderState.status === 'loading'}
+            onClick={() => onRepeatOrder(order)}
+            aria-label={`Volver a pedir los productos del pedido ${reference}`}
+            aria-busy={isRepeating}
+          >
+            <Repeat2 className="size-4" aria-hidden="true" />
+            {isRepeating ? 'Agregando al carrito…' : 'Volver a pedir'}
+          </button>
+          {currentReorder?.message && (
+            <p className={`text-xs leading-5 ${currentReorder.status === 'error' ? 'text-mictlan-error-text' : 'text-mictlan-teal'}`} role={currentReorder.status === 'error' ? 'alert' : 'status'}>
+              {currentReorder.message}
+            </p>
+          )}
+        </div>
         <div className="flex items-baseline justify-between gap-4 sm:justify-end sm:gap-5">
           <span className="font-ui text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-mictlan-sage-muted">Total</span>
           <span className="font-display text-xl tabular-nums text-mictlan-gold sm:text-2xl">{formatMoney(order.total)}</span>
@@ -74,10 +106,16 @@ function OrderSummary({ order }) {
 }
 
 export default function OrdersView({ checkoutReturned }) {
+  const router = useRouter();
+  const { addOrderItemsToCart, busy: cartBusy, catalog, closeMobilePanel, registerCatalog, sessionState } = useCart();
   const [orders, setOrders] = useState(null);
   const [error, setError] = useState('');
   const [signedOut, setSignedOut] = useState(false);
   const [reloadCount, setReloadCount] = useState(0);
+  const [reorderState, setReorderState] = useState({ orderId: null, status: 'idle', message: '' });
+  const transferIds = useRef(new Map());
+  const reorderLock = useRef(false);
+  const productImages = useMemo(() => new Map(catalog.map((product) => [product.slug, product.image])), [catalog]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -94,11 +132,55 @@ export default function OrdersView({ checkoutReturned }) {
     return () => controller.abort();
   }, [reloadCount]);
 
+  useEffect(() => {
+    if (catalog.length > 0 || !orders?.length) return undefined;
+    let active = true;
+    getPublicCatalog()
+      .then((products) => { if (active) registerCatalog(products); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [catalog.length, orders, registerCatalog]);
+
   function retryOrders() {
     setOrders(null);
     setError('');
     setSignedOut(false);
     setReloadCount((count) => count + 1);
+  }
+
+  async function repeatOrder(order) {
+    if (reorderLock.current || sessionState !== 'account') return;
+    reorderLock.current = true;
+    setReorderState({ orderId: order.id, status: 'loading', message: '' });
+
+    try {
+      const items = Array.isArray(order.items)
+        ? order.items.map(({ slug, quantity }) => ({ slug, quantity }))
+        : [];
+      if (items.length === 0) throw new Error('Este pedido no tiene productos para agregar.');
+
+      let transferId = transferIds.current.get(order.id);
+      if (!transferId) {
+        transferId = createVisitId(globalThis.crypto);
+        transferIds.current.set(order.id, transferId);
+      }
+      await addOrderItemsToCart({
+        transferId,
+        items,
+      });
+      transferIds.current.delete(order.id);
+      setReorderState({ orderId: order.id, status: 'success', message: 'Agregamos el pedido a tu carrito.' });
+      closeMobilePanel();
+      router.push('/cuenta/checkout');
+    } catch (requestError) {
+      setReorderState({
+        orderId: order.id,
+        status: 'error',
+        message: requestError.message || 'No se pudo repetir el pedido. Inténtalo de nuevo.',
+      });
+    } finally {
+      reorderLock.current = false;
+    }
   }
 
   if (signedOut) {
@@ -176,7 +258,7 @@ export default function OrdersView({ checkoutReturned }) {
       )}
       {orders?.length > 0 && (
         <div className="mt-4 space-y-4">
-          {orders.map((order) => <OrderSummary key={order.id} order={order} />)}
+          {orders.map((order) => <OrderSummary key={order.id} order={order} productImages={productImages} onRepeatOrder={repeatOrder} reorderState={reorderState} canRepeat={sessionState === 'account' && !cartBusy} />)}
         </div>
       )}
       {orders !== null && !error && <div className="mt-8 border-t border-mictlan-sand/10 pt-5"><SignOutButton /></div>}
