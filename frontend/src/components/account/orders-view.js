@@ -90,15 +90,15 @@ function OrderSummary({ order, productImages, onRepeatOrder, reorderState, canRe
             <Repeat2 className="size-4" aria-hidden="true" />
             {isRepeating ? 'Agregando al carrito…' : 'Volver a pedir'}
           </button>
-          {currentReorder?.message && (
-            <p className={`text-xs leading-5 ${currentReorder.status === 'error' ? 'text-mictlan-error-text' : 'text-mictlan-teal'}`} role={currentReorder.status === 'error' ? 'alert' : 'status'}>
+          {currentReorder?.status === 'error' && currentReorder.message && (
+            <p className="text-xs leading-5 text-mictlan-error-text" role="alert">
               {currentReorder.message}
             </p>
           )}
         </div>
         <div className="flex items-baseline justify-between gap-4 sm:justify-end sm:gap-5">
           <span className="font-ui text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-mictlan-sage-muted">Total</span>
-          <span className="font-display text-xl tabular-nums text-mictlan-gold sm:text-2xl">{formatMoney(order.total)}</span>
+          <span className="font-ui text-xl font-semibold tabular-nums text-mictlan-gold">{formatMoney(order.total)}</span>
         </div>
       </footer>
     </article>
@@ -169,7 +169,6 @@ export default function OrdersView({ checkoutReturned }) {
         items,
       });
       transferIds.current.delete(order.id);
-      setReorderState({ orderId: order.id, status: 'success', message: 'Agregamos el pedido a tu carrito.' });
       closeMobilePanel();
       router.push('/cuenta/checkout');
     } catch (requestError) {
