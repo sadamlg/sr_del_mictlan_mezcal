@@ -1,3 +1,5 @@
+import Image from 'next/image';
+import Link from 'next/link';
 import ProductInsights from './product-insights';
 import { mediaObjectUrl } from '../../../lib/media-url';
 import AddToCartButton from '../../cart/add-to-cart-button';
@@ -17,25 +19,27 @@ function MezcalCard({ product, className = '' }) {
   return (
     <article className={`relative mx-auto flex w-full max-w-[340px] flex-col items-center text-center text-mictlan-bone lg:max-w-[360px] ${className}`}>
       <div className="group/visual relative aspect-[4/5] w-full overflow-hidden outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-mictlan-teal lg:w-[min(100%,clamp(15rem,calc(90dvh_-_23rem),20.4rem))]" tabIndex={0} aria-label={`${product.name}. Enfoca para ver una segunda fotografía`}>
-        <img
+        <Image
           src={product.image.url}
           alt={product.image.alt}
-          width="1122"
-          height="1402"
+          width={1122}
+          height={1402}
           loading="lazy"
           decoding="async"
           referrerPolicy="no-referrer"
+          sizes="(min-width: 1024px) 360px, (min-width: 640px) 45vw, min(100vw, 340px)"
           className="absolute inset-0 h-full w-full object-contain"
         />
-        <img
+        <Image
           src={product.lifestyleImage.url}
           alt=""
           aria-hidden="true"
-          width="1122"
-          height="1402"
+          width={1122}
+          height={1402}
           loading="lazy"
           decoding="async"
           referrerPolicy="no-referrer"
+          sizes="(min-width: 1024px) 360px, (min-width: 640px) 45vw, min(100vw, 340px)"
           className="absolute inset-0 h-full w-full object-cover opacity-0 [clip-path:inset(0_50%_0_50%)] transition-[clip-path,opacity] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none group-hover/visual:opacity-100 group-hover/visual:[clip-path:inset(0_0_0_0)] group-focus/visual:opacity-100 group-focus/visual:[clip-path:inset(0_0_0_0)]"
         />
       </div>
@@ -77,7 +81,7 @@ export default function MezcalShowcase({ products, mediaBaseUrl, checkoutCancell
         {products === null ? (
           <div className="mx-auto mt-16 max-w-lg text-center" role="status">
             <p className="font-display text-xl">No pudimos cargar la colección.</p>
-            <a href="/" className="mt-5 inline-flex min-h-11 items-center text-sm text-mictlan-teal underline underline-offset-4 hover:text-mictlan-teal-bright">Reintentar</a>
+            <Link href="/" className="mt-5 inline-flex min-h-11 items-center text-sm text-mictlan-teal underline underline-offset-4 hover:text-mictlan-teal-bright">Reintentar</Link>
           </div>
         ) : products.length === 0 ? (
           <p className="mx-auto mt-16 max-w-lg text-center leading-7 text-mictlan-bone/80">La colección está tomando forma. Pronto podrás descubrir nuestros destilados.</p>

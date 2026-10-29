@@ -13,34 +13,30 @@ import {
 
 const AGE_CONFIRMATION_KEY = 'mictlan-age-confirmed-v1';
 
+function readAgeConfirmation() {
+  if (typeof window === 'undefined') return false;
+  try {
+    return window.sessionStorage.getItem(AGE_CONFIRMATION_KEY) === 'yes';
+  } catch {
+    return false;
+  }
+}
+
 export default function AgeGate({ children, mediaBaseUrl }) {
   const { account, sessionState } = useCart();
-  const [phase, setPhase] = useState(AGE_GATE_PHASES.CHECKING);
+  const [hasConfirmedAge, setHasConfirmedAge] = useState(readAgeConfirmation);
+  const [showcaseEntered, setShowcaseEntered] = useState(false);
   const hasOpenedRef = useRef(false);
   const previousFocusRef = useRef(null);
   const yesButtonRef = useRef(null);
   const noLinkRef = useRef(null);
+  const isVerified = hasConfirmedAge || Boolean(account) || sessionState === 'account';
+  const phase = isVerified
+    ? AGE_GATE_PHASES.VERIFIED
+    : sessionState === 'loading'
+      ? AGE_GATE_PHASES.CHECKING
+      : nextAgeGatePhase(AGE_GATE_PHASES.ARMED, showcaseEntered ? 'showcase-entered' : 'waiting');
   const isVisible = phase === AGE_GATE_PHASES.VISIBLE;
-  const isVerified = phase === AGE_GATE_PHASES.VERIFIED;
-
-  useEffect(() => {
-    try {
-      if (window.sessionStorage.getItem(AGE_CONFIRMATION_KEY) === 'yes') {
-        setPhase(AGE_GATE_PHASES.VERIFIED);
-        return;
-      }
-    } catch {
-      // The page remains usable when browser storage is unavailable; the prompt will return on reload.
-    }
-
-    if (account || sessionState === 'account') {
-      setPhase(AGE_GATE_PHASES.VERIFIED);
-      return;
-    }
-
-    if (sessionState === 'loading') return;
-    setPhase(AGE_GATE_PHASES.ARMED);
-  }, [account, sessionState]);
 
   useEffect(() => {
     if (phase !== AGE_GATE_PHASES.ARMED) return undefined;
@@ -48,14 +44,14 @@ export default function AgeGate({ children, mediaBaseUrl }) {
     const showcase = document.getElementById('coleccion');
     if (!showcase || typeof IntersectionObserver === 'undefined') {
       const fallback = window.setTimeout(() => {
-        setPhase((current) => nextAgeGatePhase(current, 'showcase-entered'));
+        setShowcaseEntered(true);
       }, 1400);
       return () => window.clearTimeout(fallback);
     }
 
     const observer = new IntersectionObserver((entries) => {
       if (entries.some((entry) => entry.isIntersecting)) {
-        setPhase((current) => nextAgeGatePhase(current, 'showcase-entered'));
+        setShowcaseEntered(true);
       }
     }, getShowcaseObserverOptions());
 
@@ -98,7 +94,7 @@ export default function AgeGate({ children, mediaBaseUrl }) {
     } catch {
       // Confirmation still applies for this page view if storage is unavailable.
     }
-    setPhase((current) => nextAgeGatePhase(current, 'confirm'));
+    setHasConfirmedAge(true);
   }
 
   function keepFocusInside(event) {

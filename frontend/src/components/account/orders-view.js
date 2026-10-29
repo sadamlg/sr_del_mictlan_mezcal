@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { CalendarDays, Repeat2, Wine } from 'lucide-react';
@@ -53,11 +54,11 @@ function OrderSummary({ order, productImages, onRepeatOrder, reorderState, canRe
             <li className="flex items-center gap-3 py-4 sm:gap-4" key={`${item.slug}-${index}`}>
               <span className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden border border-mictlan-sand/10 bg-mictlan-background text-mictlan-gold/80 sm:size-12">
                 {image?.url ? (
-                  <img
+                  <Image
                     src={image.url}
                     alt={image.alt || item.name || 'Botella de mezcal'}
-                    width="48"
-                    height="48"
+                    width={48}
+                    height={48}
                     loading="lazy"
                     decoding="async"
                     referrerPolicy="no-referrer"
