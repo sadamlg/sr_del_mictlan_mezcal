@@ -1,5 +1,6 @@
 'use client';
 
+import { Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 import { accountRequest } from '../../lib/account-api';
 import { rememberCheckoutContinuation } from '../../lib/checkout-continuation.js';
@@ -15,6 +16,7 @@ export default function RegisterView({ continueToCheckout = false }) {
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState('');
   const [registered, setRegistered] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
 
   function update(field, value) {
     setForm((previous) => ({ ...previous, [field]: value }));
@@ -66,7 +68,30 @@ export default function RegisterView({ continueToCheckout = false }) {
             <AccountField id="lastName" label="Apellidos" type="text" autoComplete="family-name" required maxLength={120} value={form.lastName} onChange={(event) => update('lastName', event.target.value)} error={errors.lastName} />
             <AccountField id="email" label="Correo electrónico" type="email" autoComplete="email" required maxLength={254} value={form.email} onChange={(event) => update('email', event.target.value)} error={errors.email} />
             <AccountDatePicker id="dateOfBirth" label="Fecha de nacimiento" value={form.dateOfBirth} onChange={(value) => update('dateOfBirth', value)} error={errors.dateOfBirth} />
-            <AccountField id="password" label="Contraseña · mínimo 12 caracteres" type="password" autoComplete="new-password" required minLength={12} maxLength={128} value={form.password} onChange={(event) => update('password', event.target.value)} error={errors.password} />
+            <AccountField
+              id="password"
+              label="Contraseña · mínimo 12 caracteres"
+              type={passwordVisible ? 'text' : 'password'}
+              autoComplete="new-password"
+              required
+              minLength={12}
+              maxLength={128}
+              value={form.password}
+              onChange={(event) => update('password', event.target.value)}
+              error={errors.password}
+              inputAction={(
+                <button
+                  className="flex size-10 items-center justify-center rounded-sm text-mictlan-teal transition-colors hover:text-mictlan-teal-bright"
+                  type="button"
+                  aria-label={passwordVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  aria-pressed={passwordVisible}
+                  aria-controls="password"
+                  onClick={() => setPasswordVisible((visible) => !visible)}
+                >
+                  {passwordVisible ? <EyeOff className="size-4" aria-hidden="true" /> : <Eye className="size-4" aria-hidden="true" />}
+                </button>
+              )}
+            />
           </FormGrid>
         </div>
         <div>
