@@ -129,12 +129,12 @@ export function AccountNavigation({ active }) {
     { href: '/cuenta/pedidos', label: 'Mis pedidos', key: 'orders' },
   ];
   return (
-    <nav className="mb-6 flex overflow-x-auto border-b border-mictlan-sand/15" aria-label="Secciones de tu cuenta">
+    <nav className="mb-6 grid grid-cols-3 border-b border-mictlan-sand/15 sm:flex" aria-label="Secciones de tu cuenta">
       {items.map((item) => (
         <Link
           key={item.key}
           aria-current={active === item.key ? 'page' : undefined}
-          className={`shrink-0 whitespace-nowrap border-b-2 px-4 py-3 font-ui text-[0.65rem] font-semibold uppercase tracking-[0.12em] transition-colors sm:px-6 sm:text-xs ${active === item.key ? 'border-mictlan-teal text-mictlan-teal' : 'border-transparent text-mictlan-sage-muted hover:text-mictlan-ivory'}`}
+          className={`flex min-h-12 min-w-0 items-center justify-center border-b-2 px-1 py-2 text-center font-ui text-[0.6rem] font-semibold uppercase leading-tight tracking-[0.08em] transition-colors sm:min-h-0 sm:shrink-0 sm:justify-start sm:whitespace-nowrap sm:px-6 sm:py-3 sm:text-xs sm:leading-normal sm:tracking-[0.12em] ${active === item.key ? 'border-mictlan-teal text-mictlan-teal' : 'border-transparent text-mictlan-sage-muted hover:text-mictlan-ivory'}`}
           href={item.href}
         >
           {item.label}
