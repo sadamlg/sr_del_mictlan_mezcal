@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ShoppingBasket, X } from 'lucide-react';
+import { ArrowLeft, ShoppingBasket, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCart } from './cart-provider.js';
 import CartSet, { formatMoney } from './cart-set.js';
@@ -106,13 +106,14 @@ function CartContents({ titleId, closeButtonRef, onDismiss, showCloseButton, ...
             <p className="font-ui text-sm uppercase tracking-[0.08em] text-mictlan-sage-muted" role="status">El carrito está vacío</p>
           </div>
           <footer className="shrink-0 border-t border-mictlan-sand/15 bg-mictlan-carbon px-5 py-4 sm:px-7">
-            <button
-              type="button"
-              onClick={dismiss}
+            <Link
+              href="/#coleccion"
+              onClick={closeDrawer}
               className="flex min-h-11 w-full items-center justify-center border border-mictlan-teal/30 bg-mictlan-teal-deep px-5 font-ui text-xs font-semibold uppercase tracking-[0.12em] text-mictlan-bone transition-colors hover:bg-mictlan-teal-hover focus-visible:outline-2 focus-visible:outline-mictlan-teal"
             >
+              <ArrowLeft aria-hidden="true" className="mr-2 size-4" />
               Seguir comprando
-            </button>
+            </Link>
           </footer>
         </>
       ) : (
