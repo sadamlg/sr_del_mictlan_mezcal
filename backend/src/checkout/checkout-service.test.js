@@ -8,6 +8,7 @@ const cartItems = [
     productId: 'product-1',
     slug: 'mezcal-reposado',
     name: 'Mezcal Reposado',
+    imageKey: 'catalog/mezcal-reposado/front.webp',
     quantity: 2,
     version: '11111111-1111-4111-8111-111111111111',
     active: true,
@@ -67,7 +68,12 @@ function setup({
   };
   return {
     calls,
-    service: createCheckoutService({ repository, stripe, frontendOrigin: 'http://localhost:3000' }),
+    service: createCheckoutService({
+      repository,
+      stripe,
+      frontendOrigin: 'http://localhost:3000',
+      stripeMediaBaseUrl: 'https://media.example.test',
+    }),
   };
 }
 
@@ -158,7 +164,10 @@ test('creates hosted Checkout from the signed-in account cart using current serv
     price_data: {
       currency: 'mxn',
       unit_amount: 12345,
-      product_data: { name: 'Mezcal Reposado' },
+      product_data: {
+        name: 'Mezcal Reposado',
+        images: ['https://media.example.test/catalog/mezcal-reposado/front.webp'],
+      },
     },
     quantity: 2,
   }]);
@@ -177,6 +186,7 @@ test('creates hosted Checkout from the signed-in account cart using current serv
     productId: 'product-1',
     slug: 'mezcal-reposado',
     name: 'Mezcal Reposado',
+    imageKey: 'catalog/mezcal-reposado/front.webp',
     quantity: 2,
     cartItemVersion: cartItems[0].version,
     unitPriceCents: 12345,
