@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, ShoppingBasket, X } from 'lucide-react';
+import { ArrowLeft, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useCart } from './cart-provider.js';
 import CartSet, { formatMoney } from './cart-set.js';
@@ -132,12 +132,6 @@ function CartContents({ titleId, closeButtonRef, onDismiss, showCloseButton, ...
                 onQuantityChange={setQuantity}
                 onRemove={removeItem}
               />
-            )}
-            {sessionState === 'guest' && items.length > 0 && (
-              <p className="text-sm leading-6 text-mictlan-sage-muted">
-                <ShoppingBasket className="mr-2 inline size-4 text-mictlan-teal" aria-hidden="true" />
-                El carrito se conserva en este navegador durante 30 días. Al iniciar sesión, se agregará a tu cuenta.
-              </p>
             )}
           </div>
           {items.length > 0 && <CartFooter subtotal={subtotal} items={items} sessionState={sessionState} closeDrawer={closeDrawer} />}
