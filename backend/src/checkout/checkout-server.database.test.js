@@ -166,6 +166,10 @@ test('Compose API creates Checkout from current prices and saves one owner-only 
     assert.equal(order.total.amount, 40000);
     assert.equal(order.items[0].name, 'Mezcal de prueba');
     assert.equal(order.items[0].unitPrice.amount, 20000);
+    const purchaseJob = await prisma.emailJob.findUnique({ where: { orderId: pendingOrder.id } });
+    assert.equal(purchaseJob.type, 'PURCHASE_CONFIRMATION');
+    assert.equal(purchaseJob.status, 'PENDING');
+    assert.equal(await prisma.emailJob.count({ where: { orderId: pendingOrder.id } }), 1);
     assert.equal(JSON.stringify(order).includes('cardNumber'), false);
     assert.equal(JSON.stringify(order).includes('cvc'), false);
     assert.equal((await prisma.accountCartItem.findMany({ where: { accountId } })).length, 0);

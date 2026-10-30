@@ -34,7 +34,7 @@ Presentar la marca y su catálogo, permitir preparar compras como invitado o cli
 
 ### Correo de compra
 
-- El alcance final prevé un correo por compra confirmada con dos PDF: comprobante de pago y copia de la orden. **Pendiente:** el correo de compra y los PDF aún no están implementados; corresponden a la fase 07.
+- El alcance final prevé un correo por compra confirmada con un PDF de detalle del pedido, que reúne los datos de envío, productos e importes pagados. La fase 07 implementa este criterio según el estado descrito en el [roadmap](ROADMAP.md).
 - También se incluyen los correos de confirmación de registro/cambio de correo y recuperación de contraseña. En desarrollo se capturan con Mailpit.
 
 ## Fuera del MVP
@@ -50,4 +50,4 @@ Presentar la marca y su catálogo, permitir preparar compras como invitado o cli
 - Un visitante puede preparar un carrito; al autenticarse se combina sin duplicar transferencias.
 - Los artículos activos se cobran al precio vigente y cada pago confirmado genera un pedido independiente, visible sólo para su titular.
 - Ninguna compra se confirma por el retorno del navegador; no se almacena el número completo de tarjeta, CVC ni datos de inventario.
-- El correo de compra y sus dos PDF completan el MVP tras la fase 07. Los criterios de integración en staging y preparación de producción se detallan en las fases 08 y 09.
+- El MVP cumple este criterio cuando la fase 07 cierre con el correo de compra y el PDF de detalle de pedido verificados. Los criterios de integración en staging y preparación de producción se detallan en las fases 08 y 09.

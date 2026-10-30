@@ -87,3 +87,20 @@ test('email change remains pending and its confirmation job is atomic with profi
   assert.equal(calls[0][1].data.pendingEmail, 'new@example.com');
   assert.deepEqual(calls.map(([kind]) => kind), ['account', 'email']);
 });
+
+test('worker email lookup loads the immutable order and product snapshots for purchase jobs', async () => {
+  let query;
+  const repository = createAccountRepository({
+    emailJob: { async findUnique(input) { query = input; return null; } },
+  });
+
+  await repository.getEmailJob('purchase-job-id');
+
+  assert.deepEqual(query, {
+    where: { id: 'purchase-job-id' },
+    include: {
+      account: true,
+      order: { include: { items: { orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] } } },
+    },
+  });
+});

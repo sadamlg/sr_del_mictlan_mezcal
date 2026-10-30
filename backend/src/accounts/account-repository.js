@@ -155,7 +155,13 @@ export function createAccountRepository(database) {
     },
 
     getEmailJob(id) {
-      return database.emailJob.findUnique({ where: { id }, include: { account: true } });
+      return database.emailJob.findUnique({
+        where: { id },
+        include: {
+          account: true,
+          order: { include: { items: { orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] } } },
+        },
+      });
     },
 
     issueEmailToken({ accountId, purpose, tokenHash, expiresAt, now }) {
