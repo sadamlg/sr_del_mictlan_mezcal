@@ -7,19 +7,25 @@ import { createEmailWorker } from './email/email-worker.js';
 
 const smtpTransport = createSmtpTransport();
 const mailFrom = process.env.MAIL_FROM || 'noreply@senordelmictlan.local';
+const resendTransport = createResendTransport();
+const useLocalSmtp = process.env.NODE_ENV === 'development';
 const purchaseEmailDelivery = createPurchaseEmailDelivery({
   nodeEnv: process.env.NODE_ENV,
   smtpTransport,
-  resendTransport: createResendTransport(),
+  resendTransport,
   mailFrom,
   resendFrom: process.env.RESEND_FROM,
 });
+const accountEmailTransport = useLocalSmtp ? smtpTransport : resendTransport;
+const accountEmailFrom = useLocalSmtp
+  ? mailFrom
+  : process.env.MAIL_FROM || process.env.RESEND_FROM || mailFrom;
 
 const emailWorker = createEmailWorker({
   repository: createAccountRepository(prisma),
-  transport: smtpTransport,
+  transport: accountEmailTransport,
   purchaseTransport: purchaseEmailDelivery.transport,
-  from: mailFrom,
+  from: accountEmailFrom,
   purchaseFrom: purchaseEmailDelivery.from,
   appBaseUrl: process.env.APP_BASE_URL || 'http://localhost:3000',
 });

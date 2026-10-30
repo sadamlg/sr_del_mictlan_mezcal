@@ -62,7 +62,7 @@ El correo de confirmación incluye un único PDF de **detalle del pedido**, gene
 
 Los errores de envío usan la cola existente: hasta cinco intentos, reintento de trabajos `PROCESSING` abandonados después de dos minutos y esperas crecientes de 2, 4, 8 y 16 segundos entre intentos. Un fallo definitivo deja el trabajo en `FAILED`. El worker registra el ID del trabajo, tipo, intento y código de error; no escribe destinatarios, domicilios ni contenido del mensaje en logs. Resend recibe una clave estable `purchase-confirmation/<orderId>` para deduplicar la solicitud dentro de su ventana documentada de 24 horas.
 
-El worker necesita `RESEND_API_KEY` y `RESEND_FROM` con un remitente autorizado en Resend. Los mensajes de cuenta siguen usando SMTP y Mailpit en Compose.
+En Railway, el worker envía tanto los correos de cuenta como la confirmación de compra mediante la API de Resend. Necesita `RESEND_API_KEY` y remitentes autorizados en el dominio verificado; `RESEND_FROM` identifica los mensajes de compra y `MAIL_FROM` los mensajes de cuenta. En Compose, Mailpit recibe localmente los correos de cuenta por SMTP.
 
 Para envío y reintentos, consulta la documentación oficial de [Send Email](https://resend.com/docs/api-reference/emails/send-email), [Attachments](https://resend.com/docs/dashboard/emails/attachments) e [Idempotency Keys](https://resend.com/docs/dashboard/emails/idempotency-keys).
 

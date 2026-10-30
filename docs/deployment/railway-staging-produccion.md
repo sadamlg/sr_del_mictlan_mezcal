@@ -70,12 +70,9 @@ Variables necesarias:
 | `APP_BASE_URL` | `https://${{frontend.RAILWAY_PUBLIC_DOMAIN}}` |
 | `RESEND_API_KEY` | Clave Resend del entorno. |
 | `RESEND_FROM` | Remitente en un dominio verificado en Resend, por ejemplo `Señor del Mictlán <pedidos@dominio-verificado>`. |
-| `MAIL_FROM` | Remitente configurado en el proveedor SMTP para mensajes de cuenta. |
-| `SMTP_HOST` | `smtp.resend.com` si usarás Resend para los correos de cuenta; de lo contrario, el host de tu proveedor SMTP. |
-| `SMTP_PORT`, `SMTP_SECURE` | Con Resend: `465` y `true`. Para otro proveedor, usa los valores que indique. |
-| `SMTP_USER`, `SMTP_PASSWORD` | Con Resend: `resend` y una API key de Resend. Para otro proveedor, usa sus credenciales. |
+| `MAIL_FROM` | Remitente autorizado por Resend para mensajes de cuenta, por ejemplo `Señor del Mictlán <cuentas@dominio-verificado>`. |
 
-El código actual envía por la API de Resend las confirmaciones de compra y por SMTP los correos de cuenta (registro, confirmación y recuperación de contraseña). Mailpit no existe en Railway. Puedes configurar el SMTP de Resend para ambos tipos de correo sin cambiar código, usando un remitente del dominio verificado y las credenciales indicadas arriba. Resend también acepta sus API keys como contraseña SMTP; si prefieres otro proveedor, basta con poner sus valores SMTP.
+En Railway, el código envía por la API HTTPS de Resend los correos de compra y los de cuenta (registro, confirmación y recuperación de contraseña). Así funciona también en los planes de Railway que bloquean conexiones SMTP salientes. Mailpit y SMTP sólo se usan en Compose para desarrollo local; no configures variables `SMTP_*` en Railway.
 
 ## 4. Configurar frontend
 
@@ -105,7 +102,7 @@ Staging puede seguir usando el bucket no productivo documentado en [Cloudflare R
 3. Despliega primero API y worker, confirma `/health` y que las migraciones terminaron. Después despliega frontend.
 4. Carga en staging el catálogo y las imágenes no productivas. No uses `backend/prisma/dev-showcase.sql` como catálogo real.
 5. Prueba registro, confirmación de cuenta, recuperación de contraseña, inicio de sesión, imágenes del catálogo y carrito, compra aceptada, compra cancelada, webhook, limpieza del carrito, orden y PDF, entrega/reintento del worker y logs de errores.
-6. Revisa por separado los correos de cuenta vía SMTP y la confirmación de compra vía Resend.
+6. Revisa los correos de cuenta y la confirmación de compra en Resend.
 7. Antes de dar por cerrada la fase 08, implementa y valida Turnstile: aún no está en el código. La integración debe validar el token en servidor con Cloudflare Siteverify.
 
 ## 6. Promover a producción

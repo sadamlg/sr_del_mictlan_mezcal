@@ -20,7 +20,7 @@ Estado de implementación del [MVP aprobado](MVP_SCOPE.md). Las decisiones durad
 - Cuentas, confirmación de correo, cambio de contraseña, perfil y pedidos están conectados a PostgreSQL. En Compose, el worker envía correos de cuenta por SMTP a Mailpit.
 - El carrito se puede usar como invitado o con cuenta. Al iniciar sesión se transfieren las cantidades sin duplicarlas.
 - Stripe Checkout crea sesiones en el servidor. El backend confirma órdenes mediante webhook firmado e idempotente, conserva una instantánea de compra y sólo muestra pedidos pagados a su titular. La interfaz permite cambiar el destinatario de la compra sin modificar el perfil, consultar los datos seguros de tarjetas guardadas y volver a pedir desde el resumen.
-- El webhook crea atómicamente un único trabajo de confirmación por pedido pagado. El worker prepara el envío por Resend con el detalle del pedido en PDF; los correos de cuenta continúan por SMTP.
+- El webhook crea atómicamente un único trabajo de confirmación por pedido pagado. El worker envía por la API de Resend tanto los correos de compra con el detalle del pedido en PDF como los correos de cuenta en Railway; Compose usa Mailpit para las cuentas.
 - La integración con la API de Resend está en el código. Para enviar desde un entorno hace falta configurar una clave y un remitente verificado; el envío real aún no se ha validado con una cuenta externa.
 - Hay Dockerfiles separados de producción y una [guía para configurar staging y producción en Railway](deployment/railway-staging-produccion.md). Los servicios todavía requieren dominios, recursos y secretos configurados en Railway.
 - Turnstile todavía no está implementado; corresponde a la fase 08.
