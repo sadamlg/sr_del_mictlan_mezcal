@@ -1,47 +1,51 @@
-# Roadmap
+# Roadmap reproducible
 
-Estado de implementación del [MVP aprobado](MVP_SCOPE.md). Las decisiones duraderas de desarrollo están en [AGENTS.md](../AGENTS.md); este roadmap evita repetirlas.
+Este orden muestra las dependencias para construir y publicar el proyecto desde cero. Una fase puede tener código terminado sin tener aún una cuenta externa configurada o una prueba real; esos estados se registran por separado. El [alcance del MVP](MVP_SCOPE.md) define qué se entrega y los [contratos](contracts/) describen el comportamiento.
 
-| Fase | Resultado | Estado |
+| Fase | Resultado y requisito para avanzar | Estado observado al 29 oct 2026 |
 |---|---|---|
-| 01 · Stack y entorno local | Next.js, Express, PostgreSQL, Prisma, worker y Compose | Concluida |
-| 02 · Alcance y plan | Contratos funcionales y arquitectura | Concluida |
-| 03 · Landing, catálogo y medios | Landing, contador, aviso de edad e imágenes en R2 | Concluida |
-| 04 · Cuentas y perfil | Registro, correo, sesión, perfil y seguridad | Concluida |
-| 05 · Carritos | Persistencia, carrito invitado y transferencia | Concluida |
-| 06 · Stripe Checkout y pedidos | Pago alojado, webhook firmado e historial | Concluida |
-| 07 · Correo de compra y PDF | Resend y detalle del pedido en PDF por compra pagada | En curso |
-| 08 · Integración en staging | Configuración no productiva, aceptación y Turnstile | Planeada |
-| 09 · Preparación de producción | Servicios, medios, operación y salida autorizada | Planeada |
+| 01 · Base local | Compose, PostgreSQL, API, frontend, worker y Mailpit arrancan desde un clon. | Código listo. |
+| 02 · Alcance | MVP, arquitectura y contratos acordados antes de ampliar flujos. | Documentado. |
+| 03 · Landing, catálogo y medios | Catálogo manual, aviso de edad, visitas y claves de imágenes; medios locales y R2 no productivo comprobados. | Código y medios no productivos listos. |
+| 04 · Cuentas | Registro, sesión, recuperación, perfil y correo en Mailpit; contratos de seguridad definidos. | Código listo; Turnstile queda para fase 12. |
+| 05 · Carritos | Carrito invitado y de cuenta, transferencia y cantidades correctas. | Código listo. |
+| 06 · Stripe local | Checkout, pedidos y webhook firmado probados con Stripe CLI y claves de prueba. | Código listo; guía local en [Stripe](stripe.md). |
+| 07 · Correo de compra | Trabajo persistido, reintentos, mensaje y un PDF de detalle comprobados en Mailpit. | Código listo. |
+| 08 · Dominio y DNS | Identificar zona autoritativa de Neubox/cPanel, inventariar registros y poder añadir los necesarios sin romper el correo existente. | Configuración de envío realizada para staging; guía en [Dominio y DNS](domain-neubox-cpanel.md). |
+| 09 · Resend | Verificar dominio, crear clave limitada, configurar remitentes y probar correos reales. Requiere fase 08. | Envío de staging comprobado manualmente; producción pendiente. |
+| 10 · Imágenes de despliegue | Dockerfiles de producción, Prisma Client, migración pre-deploy y variables de build documentadas. | Código listo y usado en staging. |
+| 11 · Railway staging | Base, API, worker y frontend separados; R2 no productivo y webhook Stripe de prueba públicos. Requiere fases 06, 09 y 10. | Desplegado; compra de prueba con correo y PDF reportada. |
+| 12 · Aceptación de staging | Verificar recorridos, seguridad, sesiones en móvil, errores, restauración y Turnstile antes de cerrar staging. | En curso; Turnstile pendiente. |
+| 13 · Producción | Recursos, dominio, DNS/TLS, medios, Stripe live, remitentes, copias y rollback propios; salida autorizada. | Pendiente. |
 
-## Estado actual
+## Qué confirma el estado
 
-- La landing, las tres fichas del catálogo local y los doce medios públicos de desarrollo están implementados. La base de datos de cada entorno debe tener sus migraciones aplicadas; el catálogo de demostración se carga manualmente con `backend/prisma/dev-showcase.sql`.
-- Cuentas, confirmación de correo, cambio de contraseña, perfil y pedidos están conectados a PostgreSQL. En Compose, el worker envía correos de cuenta por SMTP a Mailpit.
-- El carrito se puede usar como invitado o con cuenta. Al iniciar sesión se transfieren las cantidades sin duplicarlas.
-- Stripe Checkout crea sesiones en el servidor. El backend confirma órdenes mediante webhook firmado e idempotente, conserva una instantánea de compra y sólo muestra pedidos pagados a su titular. La interfaz permite cambiar el destinatario de la compra sin modificar el perfil, consultar los datos seguros de tarjetas guardadas y volver a pedir desde el resumen.
-- El webhook crea atómicamente un único trabajo de confirmación por pedido pagado. El worker envía por la API de Resend tanto los correos de compra con el detalle del pedido en PDF como los correos de cuenta en Railway; Compose usa Mailpit para las cuentas.
-- La integración con la API de Resend está en el código. Para enviar desde un entorno hace falta configurar una clave y un remitente verificado; el envío real aún no se ha validado con una cuenta externa.
-- Hay Dockerfiles separados de producción y una [guía para configurar staging y producción en Railway](deployment/railway-staging-produccion.md). Los servicios todavía requieren dominios, recursos y secretos configurados en Railway.
-- Turnstile todavía no está implementado; corresponde a la fase 08.
-- El repositorio no contiene configuración versionada de despliegue a Railway ni de DNS/TLS. No se puede inferir desde el código si staging o producción están publicados o configurados.
+El repositorio permite comprobar código, migraciones, variables esperadas y contratos. No prueba por sí solo qué claves o dominios están activos en una cuenta externa. El 29 de octubre de 2026 el responsable del proyecto confirmó una compra de prueba en staging y mostró el correo con PDF recibido. Eso acredita ese recorrido manual; no sustituye la aceptación completa de la fase 12 ni prueba producción.
 
-## Próximas fases
+Cada fase debe cerrarse con tres evidencias: **implementación** (código/contrato), **configuración** (servicios y valores del entorno sin publicar secretos) y **resultado** (una prueba observable). Si falta una, el estado debe decirlo. Los pasos de proveedores viven en sus guías para que el roadmap conserve el orden, no instrucciones duplicadas.
 
-### 07. Correo de compra y PDF
+## Puertas de entrada y salida de las fases externas
 
-Crear un trabajo persistido por pedido pagado, enviar por Resend una confirmación con el detalle del pedido en PDF, y definir reintentos y observabilidad sin duplicar correos ante eventos repetidos. El envío se confirma con un remitente verificado en Resend y los recorridos de éxito, reintento e idempotencia verificados.
+### 08 · Dominio y DNS
 
-**Cierre:** contenido y PDF de detalle correctos, envío recuperable ante fallos y pruebas de los casos de éxito, reintento e idempotencia.
+**Entrada:** dominio bajo control y listado de registros vigentes. **Salida:** editor DNS autoritativo identificado, registros de web/correo preservados y cambios de Resend verificables. No cambies *nameservers* por seguir una pantalla equivocada.
 
-### 08. Integración en staging
+### 09 · Resend
 
-Desplegar los servicios no productivos y configurar Stripe en modo de prueba, correo y medios aislados. Configurar Turnstile en registro e inicio de sesión, validando el token en servidor con Siteverify. Cloudflare DNS/TLS para un dominio de staging sólo se configura cuando ese dominio esté disponible.
+**Entrada:** fase 08 y dominio de envío elegido. **Salida:** dominio verificado, clave del worker por entorno, remitentes autorizados y correo de cuenta y compra recibido en una bandeja externa. Revisa cuota y costos antes de aumentar tráfico. [Guía de Resend](resend.md).
 
-**Cierre:** recorridos críticos aceptados en staging, incluidos tokens Turnstile válidos, ausentes e inválidos; secretos y datos separados de producción.
+### 10 · Imágenes de despliegue
 
-### 09. Preparación de producción
+**Entrada:** aplicación local funcional. **Salida:** API y frontend construyen y arrancan en modo producción, worker comparte imagen backend, migración pre-deploy definida y variables de build/runtime identificadas. [Guía de Railway](railway.md).
 
-Preparar cuentas, secretos y recursos de producción, bucket y hostname de medios, dominios, TLS, copias de seguridad, monitoreo y procedimientos de recuperación. Consultar las tarifas vigentes antes de habilitar servicios de pago.
+### 11 · Railway staging
 
-**Cierre:** procedimientos de operación y recuperación verificados, integraciones críticas validadas y autorización explícita antes de la salida efectiva.
+**Entrada:** fases 06, 09 y 10, bucket público no productivo y claves Stripe de prueba. **Salida:** servicios saludables, catálogo visible, webhook público firmado, compra de prueba, pedido, carrito actualizado y correo con PDF. Los precios de demostración sólo se admiten en este entorno aislado.
+
+### 12 · Aceptación de staging
+
+**Entrada:** fase 11 operativa. **Salida:** registro, confirmación, login en otro dispositivo, recuperación, carrito, compras aceptada/cancelada, imágenes, correo, PDF, reintentos y fallos revisados; Turnstile implementado y validado en servidor; procedimiento de copia/restauración revisado. Registra evidencia y pendientes, no una etiqueta general de “sin errores”.
+
+### 13 · Producción
+
+**Entrada:** fase 12 cerrada y autorización de publicación. **Salida:** recursos independientes, precios comerciales aprobados, TLS y DNS correctos, backups y rollback probados, primer pago real controlado y observabilidad activa. Nunca reutilices el SQL de demostración ni los secretos de staging.

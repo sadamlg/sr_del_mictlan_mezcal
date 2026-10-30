@@ -2,10 +2,12 @@
 
 ## Fuentes de verdad
 
-- `README.md`: stack, arquitectura y entorno local.
+- `README.md`: entrada breve e índice de guías.
 - `docs/MVP_SCOPE.md`: alcance objetivo aprobado.
-- `docs/ROADMAP.md`: estado y próximos hitos.
-- `docs/contracts/`: comportamiento actual de cada módulo.
+- `docs/ROADMAP.md`: orden, dependencias y estado de las fases.
+- `docs/development.md`: base local, Compose y variantes LAN o de medios.
+- `docs/stripe.md`, `docs/resend.md`, `docs/domain-neubox-cpanel.md`, `docs/media.md` y `docs/railway.md`: configuración reproducible de proveedores y entornos.
+- `docs/contracts/`: comportamiento actual de cada módulo. Nombra cada contrato `NN-UPPERCASE-ENGLISH.md` con el número de la fase donde nació.
 - `design.md`: sistema visual; `frontend/src/app/globals.css` implementa sus tokens.
 - Mantén cada hecho en su fuente principal. En otros documentos, enlázala en vez de copiar su contenido. Distingue funciones implementadas, pendientes y dependientes de configuración externa.
 

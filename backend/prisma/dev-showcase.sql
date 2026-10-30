@@ -1,5 +1,5 @@
--- Vista previa local únicamente. Los importes son bases provisionales, no precios de venta aprobados.
--- Ejecutar sólo en la base de datos de desarrollo después de prisma migrate deploy.
+-- Catálogo de demostración para desarrollo y staging aislado; precios provisionales.
+-- Nunca ejecutar en producción. Aplicar migraciones antes de cargarlo.
 INSERT INTO products (
   id, slug, name, description, price_cents, image_key, image_alt,
   lifestyle_image_key, label_one, label_two, sensory_profile,
