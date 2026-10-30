@@ -22,6 +22,7 @@ Estado de implementación del [MVP aprobado](MVP_SCOPE.md). Las decisiones durad
 - Stripe Checkout crea sesiones en el servidor. El backend confirma órdenes mediante webhook firmado e idempotente, conserva una instantánea de compra y sólo muestra pedidos pagados a su titular. La interfaz permite cambiar el destinatario de la compra sin modificar el perfil, consultar los datos seguros de tarjetas guardadas y volver a pedir desde el resumen.
 - El webhook crea atómicamente un único trabajo de confirmación por pedido pagado. El worker prepara el envío por Resend con el detalle del pedido en PDF; los correos de cuenta continúan por SMTP.
 - La integración con la API de Resend está en el código. Para enviar desde un entorno hace falta configurar una clave y un remitente verificado; el envío real aún no se ha validado con una cuenta externa.
+- Hay Dockerfiles separados de producción y una [guía para configurar staging y producción en Railway](deployment/railway-staging-produccion.md). Los servicios todavía requieren dominios, recursos y secretos configurados en Railway.
 - Turnstile todavía no está implementado; corresponde a la fase 08.
 - El repositorio no contiene configuración versionada de despliegue a Railway ni de DNS/TLS. No se puede inferir desde el código si staging o producción están publicados o configurados.
 
