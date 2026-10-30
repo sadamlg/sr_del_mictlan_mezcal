@@ -19,18 +19,27 @@ export default function SignInView({ continueToCheckout = false }) {
   const [errorKind, setErrorKind] = useState('error');
 
   useEffect(() => {
-    if (waitingForCart && sessionState === 'account') router.replace('/cuenta/checkout');
-  }, [router, sessionState, waitingForCart]);
+    if (!waitingForCart) return;
+    if (sessionState === 'account') {
+      router.replace(continueToCheckout ? '/cuenta/checkout' : '/');
+      return;
+    }
+    if (sessionState === 'guest') {
+      setError('La contraseña fue aceptada, pero no pudimos conservar tu sesión. Inténtalo de nuevo.');
+      setErrorKind('error');
+      setWaitingForCart(false);
+    }
+  }, [continueToCheckout, router, sessionState, waitingForCart]);
 
   async function submit(event) {
     event.preventDefault();
     setBusy(true);
     setError('');
     setErrorKind('error');
+    setWaitingForCart(false);
     try {
       await accountRequest('auth/login', { method: 'POST', body: { email, password } });
-      if (continueToCheckout) setWaitingForCart(true);
-      else router.replace('/');
+      setWaitingForCart(true);
     } catch (requestError) {
       setError(requestError.message);
       if (requestError.code === 'EMAIL_NOT_VERIFIED') setErrorKind('info');
@@ -47,7 +56,7 @@ export default function SignInView({ continueToCheckout = false }) {
       <form className="space-y-5" onSubmit={submit}>
         {error && <AccountNotice kind={errorKind}>{error}</AccountNotice>}
         {waitingForCart && sessionState === 'loading' && (
-          <AccountNotice>Estamos agregando tu carrito y preparando el resumen de compra…</AccountNotice>
+          <AccountNotice>Estamos comprobando tu sesión…</AccountNotice>
         )}
         {waitingForCart && sessionState === 'error' && (
           <div className="space-y-3">
@@ -96,7 +105,7 @@ export default function SignInView({ continueToCheckout = false }) {
             </button>
           )}
         />
-        <AccountSubmit busy={busy || waitingForCart}>Entrar a mi cuenta</AccountSubmit>
+        <AccountSubmit busy={busy || (waitingForCart && sessionState === 'loading')} disabled={waitingForCart && sessionState === 'account'}>Entrar a mi cuenta</AccountSubmit>
       </form>
       <div className="mt-7 border-t border-mictlan-sand/10 pt-5 text-center text-sm text-mictlan-sage-muted">
         ¿Aún no tienes cuenta? <AccountTextLink href={continueToCheckout ? '/cuenta/registro?continuar=checkout' : '/cuenta/registro'}>Crear una cuenta</AccountTextLink>

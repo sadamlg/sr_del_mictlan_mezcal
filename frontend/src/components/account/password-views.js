@@ -96,7 +96,6 @@ export function EmailConfirmationView({ token }) {
     if (!token) return undefined;
 
     if (checkoutContinuation.current === null) checkoutContinuation.current = hasCheckoutContinuation();
-    const returnToCheckout = checkoutContinuation.current;
     let active = true;
     if (confirmationRequest.current.token !== token) {
       confirmationRequest.current = {
@@ -113,12 +112,12 @@ export function EmailConfirmationView({ token }) {
         setError(requestError.message);
         return;
       }
-      if (result.accountActivated && returnToCheckout) {
+      if (result.accountActivated) {
         setWaitingForCart(true);
         return;
       }
       clearCheckoutContinuation();
-      router.replace(result.accountActivated ? '/' : '/cuenta');
+      router.replace('/cuenta');
     });
 
     return () => { active = false; };
@@ -127,29 +126,34 @@ export function EmailConfirmationView({ token }) {
   useEffect(() => {
     if (waitingForCart && sessionState === 'account') {
       clearCheckoutContinuation();
-      router.replace('/cuenta/checkout');
+      router.replace(checkoutContinuation.current ? '/cuenta/checkout' : '/');
     }
   }, [router, sessionState, waitingForCart]);
 
   return (
-    <AccountCard title={waitingForCart && sessionState === 'error' ? 'No se pudo preparar tu compra' : error ? 'No se pudo confirmar el correo' : token ? 'Confirmando tu correo' : 'Enlace no válido'} description="Estamos verificando el enlace de tu correo.">
+    <AccountCard
+      title={waitingForCart && sessionState === 'error' ? 'No se pudo validar la sesión' : error ? 'No se pudo confirmar el correo' : token ? 'Confirmando tu correo' : 'Enlace no válido'}
+      description={waitingForCart ? 'Tu correo quedó confirmado. Estamos comprobando el inicio de sesión.' : 'Estamos verificando el enlace de tu correo.'}
+    >
       <div className="space-y-5 text-center">
         {error
           ? <AccountNotice kind="error">{error}</AccountNotice>
-          : waitingForCart && sessionState === 'error'
-            ? <AccountNotice kind="error">{cartError || 'No se pudo cargar el carrito. Inténtalo de nuevo.'}</AccountNotice>
+          : waitingForCart && sessionState === 'guest'
+            ? <AccountNotice kind="error">Tu cuenta quedó activa, pero no pudimos iniciar la sesión automáticamente. <AccountTextLink href="/cuenta/iniciar-sesion">Iniciar sesión</AccountTextLink></AccountNotice>
+            : waitingForCart && sessionState === 'error'
+              ? <AccountNotice kind="error">{cartError || 'No se pudo validar tu sesión. Inténtalo de nuevo.'}</AccountNotice>
             : waitingForCart
-              ? <AccountNotice>Cuenta activa. Estamos agregando tu carrito y preparando el resumen de compra…</AccountNotice>
-          : token
-            ? <AccountNotice>Al terminar, volverás a la tienda. Si es una cuenta nueva, tu sesión quedará iniciada.</AccountNotice>
-            : <AccountNotice kind="error">El enlace no es válido o está incompleto.</AccountNotice>}
+              ? <AccountNotice>Cuenta activa. Estamos validando tu sesión…</AccountNotice>
+              : token
+                ? <AccountNotice>Al terminar, volverás a la tienda. Si es una cuenta nueva, tu sesión quedará iniciada.</AccountNotice>
+                : <AccountNotice kind="error">El enlace no es válido o está incompleto.</AccountNotice>}
         {waitingForCart && sessionState === 'error' && (
           <button
             type="button"
             onClick={retryCart}
             className="min-h-10 border border-mictlan-teal/35 px-4 font-ui text-xs font-semibold uppercase tracking-[0.1em] text-mictlan-teal transition-colors hover:bg-mictlan-teal-deep/20 focus-visible:outline-2 focus-visible:outline-mictlan-teal"
           >
-            Reintentar carga del carrito
+            Reintentar comprobación
           </button>
         )}
         {(error || !token) && <AccountTextLink href="/">Volver al inicio</AccountTextLink>}

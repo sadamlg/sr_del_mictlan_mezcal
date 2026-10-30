@@ -93,6 +93,8 @@ Variables:
 
 `INTERNAL_API_URL` se usa en solicitudes del servidor Next.js y debe apuntar a la red privada de Railway. `NEXT_PUBLIC_API_URL` se incluye en el JavaScript que recibe el navegador; el Dockerfile la declara como argumento de build. `MEDIA_BASE_URL` también participa en la configuración de imágenes de Next.js durante el build. Si cambias cualquiera de estas dos variables, vuelve a construir y desplegar el frontend.
 
+Como los dominios públicos de Frontend y API son distintos, las cookies de sesión de producción se envían con `SameSite=None; Secure`. El cliente debe conservar `credentials: 'include'` y la API debe permitir exactamente el origen del Frontend mediante `FRONTEND_ORIGIN`.
+
 Staging puede seguir usando el bucket no productivo documentado en [Cloudflare R2](../cloudflare/r2.md). Antes de producción configura un bucket y hostname separados, y reemplaza ambas URL de medios.
 
 ## 5. Configurar Stripe y validar staging
