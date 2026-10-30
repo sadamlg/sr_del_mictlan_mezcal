@@ -28,7 +28,7 @@ Next.js consulta la API dentro de Compose por `http://backend:3000`. El navegado
 
 ## Correo y pagos
 
-En desarrollo (`NODE_ENV=development`), el worker envía por SMTP a Mailpit tanto los mensajes de cuenta como la confirmación de compra, que incluye el detalle del pedido en PDF. Fuera de desarrollo, las confirmaciones de compra salen por Resend; configura `RESEND_API_KEY` y `RESEND_FROM` en `.env` para habilitar el envío. Sin credenciales válidas, el trabajo persistido se reintenta y termina en `FAILED` según su límite de intentos.
+En desarrollo (`NODE_ENV=development`), el worker envía por SMTP a Mailpit tanto los mensajes de cuenta como la confirmación de compra, que incluye el detalle del pedido en PDF. Fuera de desarrollo, ambos tipos de correo se envían por la API HTTPS de Resend; configura `RESEND_API_KEY`, `RESEND_FROM` y `MAIL_FROM` con remitentes verificados para habilitar los envíos. Sin credenciales válidas, el trabajo persistido se reintenta y termina en `FAILED` según su límite de intentos.
 
 Stripe Checkout y el webhook están implementados. Para probarlos, configura credenciales de prueba en `.env`; nunca guardes claves reales en Git. Un listener de Stripe CLI debe reenviar los webhooks a `http://localhost:4000/api/webhooks/stripe`; ese proceso no forma parte de Compose. `STRIPE_MEDIA_BASE_URL` permite que Stripe descargue las imágenes públicas de R2; sin ella el checkout funciona sin imagen.
 
