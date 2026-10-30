@@ -1,7 +1,7 @@
 'use client';
 
 import { Eye, EyeOff } from 'lucide-react';
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { accountRequest } from '../../lib/account-api';
 import { rememberCheckoutContinuation } from '../../lib/checkout-continuation.js';
 import AccountDatePicker from './account-date-picker';
@@ -17,6 +17,18 @@ export default function RegisterView({ continueToCheckout = false }) {
   const [message, setMessage] = useState('');
   const [registered, setRegistered] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const resetAfterSuccessOnHide = useRef(false);
+
+  useLayoutEffect(() => () => {
+    if (!resetAfterSuccessOnHide.current) return;
+    resetAfterSuccessOnHide.current = false;
+    setForm({ firstName: '', lastName: '', email: '', dateOfBirth: '', password: '' });
+    setAddress(EMPTY_ADDRESS);
+    setErrors({});
+    setMessage('');
+    setRegistered(false);
+    setPasswordVisible(false);
+  }, []);
 
   function update(field, value) {
     setForm((previous) => ({ ...previous, [field]: value }));
@@ -31,6 +43,7 @@ export default function RegisterView({ continueToCheckout = false }) {
     try {
       const result = await accountRequest('auth/register', { method: 'POST', body: { ...form, address } });
       if (continueToCheckout) rememberCheckoutContinuation();
+      resetAfterSuccessOnHide.current = true;
       setMessage(result.message);
       setRegistered(true);
     } catch (requestError) {
@@ -51,7 +64,12 @@ export default function RegisterView({ continueToCheckout = false }) {
               ? 'Al confirmar el enlace, iniciaremos tu sesión y te llevaremos al resumen de compra.'
               : 'Al confirmar el enlace, iniciaremos tu sesión y volverás a la tienda.'}
           </p>
-          <div className="text-center"><AccountTextLink href="/">Volver al inicio</AccountTextLink></div>
+          <div className="flex flex-col items-center gap-3 text-center">
+            <AccountTextLink href={continueToCheckout ? '/cuenta/iniciar-sesion?continuar=checkout' : '/cuenta/iniciar-sesion'} replace>
+              Ir a iniciar sesión
+            </AccountTextLink>
+            <AccountTextLink href="/" replace>Volver al inicio</AccountTextLink>
+          </div>
         </div>
       </AccountCard>
     );
