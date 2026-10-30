@@ -15,7 +15,7 @@ export function createSessionCookie(token, secure) {
     'Path=/',
     `Max-Age=${maxAge}`,
     'HttpOnly',
-    `SameSite=${secure ? 'None' : 'Lax'}`,
+    'SameSite=Lax',
   ];
   if (secure) parts.push('Secure');
   return parts.join('; ');

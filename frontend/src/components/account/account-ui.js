@@ -114,8 +114,8 @@ export function SignOutButton() {
   );
 }
 
-export function AccountTextLink({ href, children }) {
-  return <Link className="font-ui text-xs font-medium tracking-wide text-mictlan-teal decoration-mictlan-teal/40 underline underline-offset-4 transition-colors hover:text-mictlan-teal-bright hover:decoration-mictlan-teal" href={href}>{children}</Link>;
+export function AccountTextLink({ href, children, replace = false }) {
+  return <Link className="font-ui text-xs font-medium tracking-wide text-mictlan-teal decoration-mictlan-teal/40 underline underline-offset-4 transition-colors hover:text-mictlan-teal-bright hover:decoration-mictlan-teal" href={href} replace={replace}>{children}</Link>;
 }
 
 export function FormGrid({ children }) {

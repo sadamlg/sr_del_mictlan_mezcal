@@ -88,12 +88,12 @@ Variables:
 |---|---|
 | `NODE_ENV` | `production` |
 | `INTERNAL_API_URL` | `http://${{api.RAILWAY_PRIVATE_DOMAIN}}:${{api.PORT}}` |
-| `NEXT_PUBLIC_API_URL` | `https://${{api.RAILWAY_PUBLIC_DOMAIN}}` |
+| `NEXT_PUBLIC_API_URL` | `https://${{api.RAILWAY_PUBLIC_DOMAIN}}` (fallback para llamadas directas fuera del Dockerfile de producción) |
 | `MEDIA_BASE_URL` | URL HTTPS pública del bucket de medios de ese entorno. |
 
-`INTERNAL_API_URL` se usa en solicitudes del servidor Next.js y debe apuntar a la red privada de Railway. `NEXT_PUBLIC_API_URL` se incluye en el JavaScript que recibe el navegador; el Dockerfile la declara como argumento de build. `MEDIA_BASE_URL` también participa en la configuración de imágenes de Next.js durante el build. Si cambias cualquiera de estas dos variables, vuelve a construir y desplegar el frontend.
+`INTERNAL_API_URL` se usa en solicitudes del servidor Next.js y en el proxy `/api/backend/*`; debe apuntar a la red privada de Railway. El Dockerfile de producción envía las llamadas del navegador por ese proxy, bajo el mismo dominio del frontend. Así las cookies de sesión son propias del frontend y no dependen de cookies entre dominios. `NEXT_PUBLIC_API_URL` queda como fallback para entornos que no usan el Dockerfile de producción. `MEDIA_BASE_URL` participa en la configuración de imágenes durante el build. Si cambias estas variables, vuelve a construir y desplegar el frontend.
 
-Como los dominios públicos de Frontend y API son distintos, las cookies de sesión de producción se envían con `SameSite=None; Secure`. El cliente debe conservar `credentials: 'include'` y la API debe permitir exactamente el origen del Frontend mediante `FRONTEND_ORIGIN`.
+Las cookies de sesión de producción usan `SameSite=Lax; Secure`. El proxy conserva `Origin` para que la API siga validando `FRONTEND_ORIGIN`, reenvía la cookie HttpOnly y conserva `X-Real-IP` para que el rate limit siga distinguiendo a cada cliente.
 
 Staging puede seguir usando el bucket no productivo documentado en [Cloudflare R2](../cloudflare/r2.md). Antes de producción configura un bucket y hostname separados, y reemplaza ambas URL de medios.
 
