@@ -19,7 +19,20 @@ export function escapeHtml(value) {
   })[character]);
 }
 
-export function renderBrandedEmail(contentHtml) {
+export function emailBrandImageUrl(appBaseUrl) {
+  if (typeof appBaseUrl !== 'string' || !appBaseUrl) return null;
+  try {
+    return new URL('/images/brand/senor-del-mictlan-email.jpg', appBaseUrl).toString();
+  } catch {
+    return null;
+  }
+}
+
+export function renderBrandedEmail(contentHtml, { brandImageUrl } = {}) {
+  const brandHeader = brandImageUrl
+    ? `<img src="${escapeHtml(brandImageUrl)}" alt="Señor del Mictlán" width="180" height="89" style="display:block;width:180px;height:89px;border:0;outline:none;text-decoration:none">`
+    : `<p style="margin:0;color:${EMAIL_COLORS.bone};font-family:Georgia,'Times New Roman',serif;font-size:17px;font-weight:400;letter-spacing:1.5px;line-height:1.5;text-transform:uppercase">Señor del Mictlán</p>`;
+
   return `<!doctype html>
 <html lang="es">
   <head>
@@ -31,11 +44,19 @@ export function renderBrandedEmail(contentHtml) {
         <td align="center" style="padding:36px 16px">
           <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" style="width:100%;max-width:560px;background-color:${EMAIL_COLORS.carbon};border:1px solid rgba(151,210,198,0.24)">
             <tr>
-              <td style="padding:32px 28px">
-                <p style="margin:0;color:${EMAIL_COLORS.bone};font-family:Georgia,'Times New Roman',serif;font-size:17px;font-weight:400;letter-spacing:1.5px;line-height:1.5;text-transform:uppercase">Señor del Mictlán</p>
-                <div style="width:40px;height:1px;margin:18px 0 24px;background-color:${EMAIL_COLORS.teal}"></div>
-                ${contentHtml}
-                <p style="margin:28px 0 0;border-top:1px solid rgba(224,205,184,0.16);padding-top:18px;color:${EMAIL_COLORS.earthMuted};font-size:11px;letter-spacing:1.2px;line-height:1.6;text-transform:uppercase">Señor del Mictlán · Etúcuaro, Michoacán</p>
+              <td style="padding:0">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;border-collapse:collapse">
+                  <tr>
+                    <td style="padding:12px 28px;background-color:${EMAIL_COLORS.background}">${brandHeader}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:24px 28px 32px">
+                      <div style="width:40px;height:1px;margin:18px 0 24px;background-color:${EMAIL_COLORS.teal}"></div>
+                      ${contentHtml}
+                      <p style="margin:28px 0 0;border-top:1px solid rgba(224,205,184,0.16);padding-top:18px;color:${EMAIL_COLORS.earthMuted};font-size:11px;letter-spacing:1.2px;line-height:1.6;text-transform:uppercase">Señor del Mictlán · Etúcuaro, Michoacán</p>
+                    </td>
+                  </tr>
+                </table>
               </td>
             </tr>
           </table>

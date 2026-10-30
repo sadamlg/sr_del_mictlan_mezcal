@@ -39,7 +39,7 @@ export function createEmailWorker({
             throw Object.assign(new Error('El trabajo de compra no incluye el pedido.'), { code: 'PURCHASE_ORDER_MISSING' });
           }
           const order = emailJob.order;
-          const message = createPurchaseEmail({ order });
+          const message = createPurchaseEmail({ order, appBaseUrl });
           await purchaseTransport.sendMail({
             from: purchaseFrom,
             to: order.recipientEmail,

@@ -1,7 +1,7 @@
 import { formatOrderMoney, validatePurchaseOrder } from './purchase-documents.js';
-import { EMAIL_COLORS, escapeHtml, renderBrandedEmail } from './email-layout.js';
+import { EMAIL_COLORS, emailBrandImageUrl, escapeHtml, renderBrandedEmail } from './email-layout.js';
 
-export function createPurchaseEmail({ order: input }) {
+export function createPurchaseEmail({ order: input, appBaseUrl }) {
   const order = validatePurchaseOrder(input);
   const total = formatOrderMoney(order.totalCents, order.currency);
   const paidAt = order.paidAt.toISOString().replace('T', ' ').replace(/\.\d{3}Z$/, ' UTC');
@@ -42,7 +42,9 @@ export function createPurchaseEmail({ order: input }) {
                     <td style="padding:0 0 12px;color:${EMAIL_COLORS.sageMuted};font-size:13px;line-height:1.65">${escapeHtml(paidAt)}</td>
                   </tr>
                 </table>
-                <p style="margin:0;color:${EMAIL_COLORS.sageMuted};font-size:13px;line-height:1.65">Adjuntamos el detalle de tu pedido en PDF.</p>`);
+                <p style="margin:0;color:${EMAIL_COLORS.sageMuted};font-size:13px;line-height:1.65">Adjuntamos el detalle de tu pedido en PDF.</p>`, {
+    brandImageUrl: emailBrandImageUrl(appBaseUrl),
+  });
 
   return { subject, text, html };
 }

@@ -1,4 +1,4 @@
-import { EMAIL_COLORS, escapeHtml, renderBrandedEmail } from './email-layout.js';
+import { EMAIL_COLORS, emailBrandImageUrl, escapeHtml, renderBrandedEmail } from './email-layout.js';
 
 function linkFor(baseUrl, path, token) {
   const url = new URL(path, baseUrl);
@@ -69,7 +69,9 @@ export function createAccountEmail({ type, account, token, appBaseUrl }) {
                   <a href="${escapeHtml(link)}" style="display:inline-block;border:1px solid ${EMAIL_COLORS.teal};background-color:${EMAIL_COLORS.tealDeep};padding:13px 20px;color:${EMAIL_COLORS.bone};font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:600;letter-spacing:1.5px;line-height:1.4;text-decoration:none;text-transform:uppercase">${escapeHtml(action)}</a>
                 </p>
                 <p style="margin:0 0 12px;color:${EMAIL_COLORS.sageMuted};font-size:13px;line-height:1.65">${escapeHtml(expiry)}</p>
-                <p style="margin:0;color:${EMAIL_COLORS.sageMuted};font-size:13px;line-height:1.65">${escapeHtml(securityNote)}</p>`);
+                <p style="margin:0;color:${EMAIL_COLORS.sageMuted};font-size:13px;line-height:1.65">${escapeHtml(securityNote)}</p>`, {
+    brandImageUrl: emailBrandImageUrl(appBaseUrl),
+  });
 
   return { subject, text, html };
 }
