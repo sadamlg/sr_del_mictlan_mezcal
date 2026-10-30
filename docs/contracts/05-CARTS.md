@@ -1,8 +1,8 @@
-# Contrato de carritos
+# Contrato de carritos · fase 05
 
 ## Propósito y límites
 
-El carrito permite preparar una compra como invitado o con cuenta. El módulo no crea sesiones de Stripe ni órdenes; el checkout implementado se describe en [Contrato de Checkout y pedidos](checkout-y-pedidos.md). No hay reserva ni verificación de existencias.
+El carrito permite preparar una compra como invitado o con cuenta. El módulo no crea sesiones de Stripe ni órdenes; el checkout implementado se describe en [Contrato de Checkout y pedidos](06-CHECKOUT-ORDERS.md). No hay reserva ni verificación de existencias.
 
 El carrito de invitado se conserva en `localStorage` del mismo navegador durante 30 días desde su última actividad. El carrito de cuenta se guarda en PostgreSQL. Al iniciar sesión, el backend suma por producto las cantidades del navegador y de la cuenta en una transacción; el resultado se muestra como un solo carrito. Cada cantidad final tiene un máximo de 99. El navegador borra únicamente las cantidades transferidas después de recibir confirmación. Si la petición falla, conserva los artículos y ofrece reintentar. Cerrar sesión oculta el carrito de cuenta y deja disponible un carrito local nuevo.
 

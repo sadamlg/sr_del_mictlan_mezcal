@@ -22,7 +22,7 @@ Presentar la marca y su catálogo, permitir preparar compras como invitado o cli
 - El registro solicita nombre, apellidos, correo, fecha de nacimiento y dirección en México. La fecha debe acreditar al menos 18 años; el código postal debe tener cinco dígitos. No se consulta un servicio externo de direcciones.
 - La cuenta sólo se activa al confirmar el correo. Si el registro nació durante el checkout, confirmar el correo inicia sesión y continúa al resumen de compra; en los demás casos vuelve a la tienda.
 - La cuenta contiene las secciones **Información personal**, **Contraseña** y **Mis pedidos**. Sólo la información personal permite editar los datos del perfil; la contraseña tiene su propio formulario.
-- Registro e inicio de sesión deberán protegerse con Cloudflare Turnstile validado también por el backend. **Pendiente:** actualmente Turnstile no está integrado; se incluye en la fase 08 del roadmap.
+- Registro e inicio de sesión deberán protegerse con Cloudflare Turnstile validado también por el backend. **Pendiente:** actualmente Turnstile no está integrado; se incluye en la fase 12 del [roadmap](ROADMAP.md).
 
 ### Carrito y checkout
 
@@ -34,7 +34,7 @@ Presentar la marca y su catálogo, permitir preparar compras como invitado o cli
 
 ### Correo de compra
 
-- El alcance final prevé un correo por compra confirmada con un PDF de detalle del pedido, que reúne los datos de envío, productos e importes pagados. La fase 07 implementa este criterio según el estado descrito en el [roadmap](ROADMAP.md).
+- Una compra confirmada genera un correo con un PDF de detalle del pedido, que reúne datos de envío, productos e importes pagados. El [contrato de la fase 07](contracts/07-PURCHASE-EMAIL-PDF.md) define el comportamiento; el [roadmap](ROADMAP.md) separa su implementación local de la configuración externa de Resend.
 - También se incluyen los correos de confirmación de registro/cambio de correo y recuperación de contraseña. En desarrollo se capturan con Mailpit.
 
 ## Fuera del MVP
@@ -50,4 +50,4 @@ Presentar la marca y su catálogo, permitir preparar compras como invitado o cli
 - Un visitante puede preparar un carrito; al autenticarse se combina sin duplicar transferencias.
 - Los artículos activos se cobran al precio vigente y cada pago confirmado genera un pedido independiente, visible sólo para su titular.
 - Ninguna compra se confirma por el retorno del navegador; no se almacena el número completo de tarjeta, CVC ni datos de inventario.
-- El MVP cumple este criterio cuando la fase 07 cierre con el correo de compra y el PDF de detalle de pedido verificados. Los criterios de integración en staging y preparación de producción se detallan en las fases 08 y 09.
+- El MVP funcional incluye el correo de compra y el PDF único de detalle de pedido. La aceptación de staging y la preparación de producción se detallan en las fases 12 y 13 del [roadmap](ROADMAP.md).
