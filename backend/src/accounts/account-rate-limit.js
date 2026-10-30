@@ -1,3 +1,5 @@
+import { isIP } from 'node:net';
+
 export function createAccountRateLimit({ limit = 30, windowMs = 15 * 60 * 1000, maxEntries = 5000, now = Date.now } = {}) {
   const attempts = new Map();
   let nextCleanupAt = 0;
@@ -19,7 +21,11 @@ export function createAccountRateLimit({ limit = 30, windowMs = 15 * 60 * 1000, 
       nextCleanupAt = timestamp + Math.min(windowMs, 60_000);
     }
 
-    const key = `${request.ip || request.socket?.remoteAddress || 'unknown'}:${request.path}`;
+    const forwardedClientIp = request.get?.('x-real-ip');
+    const clientIp = typeof forwardedClientIp === 'string' && isIP(forwardedClientIp)
+      ? forwardedClientIp
+      : request.ip || request.socket?.remoteAddress || 'unknown';
+    const key = `${clientIp}:${request.path}`;
     const entry = attempts.get(key);
     if (!entry && attempts.size >= maxEntries) return reject(response, Math.ceil(Math.min(windowMs, 60_000) / 1000));
     if (!entry || entry.startedAt + windowMs <= timestamp) {

@@ -1,4 +1,5 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_PROXY_PATH = process.env.NEXT_PUBLIC_API_PROXY_PATH || '';
 const ACCOUNT_REQUEST_TIMEOUT_MS = 15_000;
 export const ACCOUNT_SESSION_CHANGED_EVENT = 'mictlan:account-session-changed';
 
@@ -28,6 +29,9 @@ export class AccountApiError extends Error {
 
 export async function accountRequest(path, { method = 'GET', body, signal } = {}) {
   const normalizedPath = path.replace(/^\//, '');
+  const url = API_PROXY_PATH
+    ? `${API_PROXY_PATH.replace(/\/$/, '')}/${normalizedPath}`
+    : `${API_BASE_URL}/api/${normalizedPath}`;
   const controller = new AbortController();
   let timedOut = false;
   const timeoutId = setTimeout(() => {
@@ -41,7 +45,7 @@ export async function accountRequest(path, { method = 'GET', body, signal } = {}
   let response;
   let payload;
   try {
-    response = await fetch(`${API_BASE_URL}/api/${normalizedPath}`, {
+    response = await fetch(url, {
       method,
       credentials: 'include',
       cache: 'no-store',
