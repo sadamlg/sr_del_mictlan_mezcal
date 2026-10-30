@@ -71,10 +71,11 @@ Variables necesarias:
 | `RESEND_API_KEY` | Clave Resend del entorno. |
 | `RESEND_FROM` | Remitente en un dominio verificado en Resend, por ejemplo `Señor del Mictlán <pedidos@dominio-verificado>`. |
 | `MAIL_FROM` | Remitente configurado en el proveedor SMTP para mensajes de cuenta. |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE` | Valores SMTP del proveedor para mensajes de cuenta. |
-| `SMTP_USER`, `SMTP_PASSWORD` | Credenciales SMTP, si el proveedor las requiere. |
+| `SMTP_HOST` | `smtp.resend.com` si usarás Resend para los correos de cuenta; de lo contrario, el host de tu proveedor SMTP. |
+| `SMTP_PORT`, `SMTP_SECURE` | Con Resend: `465` y `true`. Para otro proveedor, usa los valores que indique. |
+| `SMTP_USER`, `SMTP_PASSWORD` | Con Resend: `resend` y una API key de Resend. Para otro proveedor, usa sus credenciales. |
 
-El código actual envía por Resend las confirmaciones de compra y mantiene los correos de cuenta (registro, confirmación y recuperación de contraseña) por SMTP. Mailpit no existe en Railway. Para que esos correos funcionen en staging y producción hace falta un SMTP alcanzable desde Railway; si luego decides enviar también los correos de cuenta mediante Resend, eso requiere un cambio explícito del código.
+El código actual envía por la API de Resend las confirmaciones de compra y por SMTP los correos de cuenta (registro, confirmación y recuperación de contraseña). Mailpit no existe en Railway. Puedes configurar el SMTP de Resend para ambos tipos de correo sin cambiar código, usando un remitente del dominio verificado y las credenciales indicadas arriba. Resend también acepta sus API keys como contraseña SMTP; si prefieres otro proveedor, basta con poner sus valores SMTP.
 
 ## 4. Configurar frontend
 
