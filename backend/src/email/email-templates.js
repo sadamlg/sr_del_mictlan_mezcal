@@ -62,11 +62,11 @@ export function createAccountEmail({ type, account, token, appBaseUrl }) {
   ].join('\n');
 
   const html = renderBrandedEmail(`
-                <h1 style="margin:0 0 24px;color:${EMAIL_COLORS.ivory};font-family:'Cinzel Decorative',Georgia,'Times New Roman',serif;font-size:25px;font-weight:400;letter-spacing:0.01em;line-height:1.4">${escapeHtml(heading)}</h1>
+                <h1 style="margin:0 0 24px;color:${EMAIL_COLORS.ivory};font-family:Georgia,'Times New Roman',serif;font-size:25px;font-weight:400;letter-spacing:0.01em;line-height:1.4">${escapeHtml(heading)}</h1>
                 <p style="margin:0 0 16px;color:${EMAIL_COLORS.ivory};font-size:16px;line-height:1.65">Hola ${safeName},</p>
                 <p style="margin:0;color:${EMAIL_COLORS.sageMuted};font-size:15px;line-height:1.75">${escapeHtml(introduction)}</p>
                 <p style="margin:28px 0">
-                  <a href="${escapeHtml(link)}" style="display:inline-block;border:1px solid ${EMAIL_COLORS.teal};background-color:${EMAIL_COLORS.tealDeep};padding:13px 20px;color:${EMAIL_COLORS.bone};font-family:'Montserrat',Arial,sans-serif;font-size:12px;font-weight:600;letter-spacing:1.5px;line-height:1.4;text-decoration:none;text-transform:uppercase">${escapeHtml(action)}</a>
+                  <a href="${escapeHtml(link)}" style="display:inline-block;border:1px solid ${EMAIL_COLORS.teal};background-color:${EMAIL_COLORS.tealDeep};padding:13px 20px;color:${EMAIL_COLORS.bone};font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:600;letter-spacing:1.5px;line-height:1.4;text-decoration:none;text-transform:uppercase">${escapeHtml(action)}</a>
                 </p>
                 <p style="margin:0 0 12px;color:${EMAIL_COLORS.sageMuted};font-size:13px;line-height:1.65">${escapeHtml(expiry)}</p>
                 <p style="margin:0;color:${EMAIL_COLORS.sageMuted};font-size:13px;line-height:1.65">${escapeHtml(securityNote)}</p>`);

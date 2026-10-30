@@ -19,7 +19,7 @@ export function createPurchaseEmail({ order: input }) {
     'Señor del Mictlán · Etúcuaro, Michoacán',
   ].join('\n');
   const html = renderBrandedEmail(`
-                <h1 style="margin:0 0 24px;color:${EMAIL_COLORS.ivory};font-family:'Cinzel Decorative',Georgia,'Times New Roman',serif;font-size:25px;font-weight:400;letter-spacing:0.01em;line-height:1.4">Tu compra está confirmada</h1>
+                <h1 style="margin:0 0 24px;color:${EMAIL_COLORS.ivory};font-family:Georgia,'Times New Roman',serif;font-size:25px;font-weight:400;letter-spacing:0.01em;line-height:1.4">Tu compra está confirmada</h1>
                 <p style="margin:0 0 16px;color:${EMAIL_COLORS.ivory};font-size:16px;line-height:1.65">Hola ${escapeHtml(order.recipientName)},</p>
                 <p style="margin:0;color:${EMAIL_COLORS.sageMuted};font-size:15px;line-height:1.75">Confirmamos el pago de tu pedido. Conserva estos datos como referencia:</p>
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;margin:24px 0;border-collapse:collapse;border-top:1px solid rgba(224,205,184,0.16);border-bottom:1px solid rgba(224,205,184,0.16)">
