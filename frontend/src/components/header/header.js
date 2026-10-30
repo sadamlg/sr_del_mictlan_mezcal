@@ -3,10 +3,10 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import HeaderActions from './header-actions';
 import MobileMenu, { MobileMenuToggle } from './mobile-menu';
-import { ACCOUNT_SESSION_CHANGED_EVENT, accountRequest } from '../../lib/account-api';
+import { accountRequest } from '../../lib/account-api';
 import { mediaObjectUrl } from '../../lib/media-url';
 import { useCart } from '../cart/cart-provider';
 import {
@@ -19,14 +19,12 @@ import { useDesktopViewport } from '../../hooks/use-desktop-viewport';
 export default function SiteHeader({ mediaBaseUrl }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { activePanel, closeMobileMenu, closeMobilePanel, toggleMobileMenu } = useCart();
-  const [account, setAccount] = useState(null);
+  const { account, activePanel, closeMobileMenu, closeMobilePanel, toggleMobileMenu } = useCart();
   const [signOutPending, setSignOutPending] = useState(false);
   const [signOutError, setSignOutError] = useState('');
   const isDesktop = useDesktopViewport(closeMobileMenu);
   const [visibility, setVisibility] = useState({ pathname, visible: true });
   const [brandImageReady, setBrandImageReady] = useState(false);
-  const sessionRefreshSequence = useRef(0);
   const brandImageRef = useRef(null);
   const lastScrollY = useRef(0);
   const navigationScroll = useRef(true);
@@ -38,16 +36,6 @@ export default function SiteHeader({ mediaBaseUrl }) {
     setVisibility({ pathname, visible: true });
     toggleMobileMenu();
   };
-  const refreshAccount = useCallback(async () => {
-    const requestSequence = ++sessionRefreshSequence.current;
-    try {
-      const result = await accountRequest('auth/session');
-      if (requestSequence === sessionRefreshSequence.current) setAccount(result.account);
-    } catch (error) {
-      if (error.status === 401 && requestSequence === sessionRefreshSequence.current) setAccount(null);
-    }
-  }, []);
-
   async function signOut() {
     setSignOutPending(true);
     setSignOutError('');
@@ -65,16 +53,6 @@ export default function SiteHeader({ mediaBaseUrl }) {
   useEffect(() => {
     if (brandImageRef.current?.complete) setBrandImageReady(true);
   }, []);
-
-  useEffect(() => {
-    const initialRefresh = window.setTimeout(refreshAccount, 0);
-    window.addEventListener(ACCOUNT_SESSION_CHANGED_EVENT, refreshAccount);
-    return () => {
-      sessionRefreshSequence.current += 1;
-      window.clearTimeout(initialRefresh);
-      window.removeEventListener(ACCOUNT_SESSION_CHANGED_EVENT, refreshAccount);
-    };
-  }, [refreshAccount]);
 
   useEffect(() => {
     navigationScroll.current = true;

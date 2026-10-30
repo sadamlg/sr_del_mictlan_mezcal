@@ -112,6 +112,7 @@ test('Compose API creates Checkout from current prices and saves one owner-only 
     assert.deepEqual(await checkout.json(), { checkoutUrl: 'https://checkout.stripe.com/c/pay/cs_test_checkout' });
     assert.equal(sessionParams.line_items[0].price_data.unit_amount, 20000);
     assert.equal(sessionParams.line_items[0].quantity, 2);
+    assert.equal(sessionParams.success_url, `${frontendOrigin}/cuenta/pedidos?checkout=return&session_id={CHECKOUT_SESSION_ID}`);
     assert.equal(sessionParams.metadata.orderId, sessionParams.client_reference_id);
 
     const pendingOrder = await prisma.order.findUnique({ where: { id: sessionParams.metadata.orderId }, include: { items: true } });
@@ -119,6 +120,9 @@ test('Compose API creates Checkout from current prices and saves one owner-only 
     assert.equal(pendingOrder.items[0].unitPriceCents, 20000);
     const beforeWebhook = await fetch(`${apiUrl}/api/orders`, { headers: { Cookie: cookie, Origin: frontendOrigin } });
     assert.deepEqual((await beforeWebhook.json()).orders, []);
+    const pendingReturn = await fetch(`${apiUrl}/api/checkout/return-status?session_id=cs_test_checkout`, { headers: { Cookie: cookie, Origin: frontendOrigin } });
+    assert.equal(pendingReturn.status, 200);
+    assert.deepEqual(await pendingReturn.json(), { status: 'PENDING' });
 
     const signedEvent = (amountTotal) => JSON.stringify({
       id: 'evt_test_checkout',
@@ -173,6 +177,9 @@ test('Compose API creates Checkout from current prices and saves one owner-only 
     assert.equal(JSON.stringify(order).includes('cardNumber'), false);
     assert.equal(JSON.stringify(order).includes('cvc'), false);
     assert.equal((await prisma.accountCartItem.findMany({ where: { accountId } })).length, 0);
+    const paidReturn = await fetch(`${apiUrl}/api/checkout/return-status?session_id=cs_test_checkout`, { headers: { Cookie: cookie, Origin: frontendOrigin } });
+    assert.equal(paidReturn.status, 200);
+    assert.deepEqual(await paidReturn.json(), { status: 'PAID' });
 
     const otherLogin = await fetch(`${apiUrl}/api/auth/login`, {
       method: 'POST',
@@ -183,6 +190,9 @@ test('Compose API creates Checkout from current prices and saves one owner-only 
     const otherCookie = otherLogin.headers.get('set-cookie')?.split(';', 1)[0];
     const otherOrders = await fetch(`${apiUrl}/api/orders`, { headers: { Cookie: otherCookie, Origin: frontendOrigin } });
     assert.deepEqual((await otherOrders.json()).orders, []);
+    const otherReturn = await fetch(`${apiUrl}/api/checkout/return-status?session_id=cs_test_checkout`, { headers: { Cookie: otherCookie, Origin: frontendOrigin } });
+    assert.equal(otherReturn.status, 200);
+    assert.deepEqual(await otherReturn.json(), { status: 'NOT_FOUND' });
 
     await prisma.accountCartItem.create({ data: { accountId, productId: product.id, quantity: 1 } });
     await prisma.product.update({ where: { id: product.id }, data: { active: false } });

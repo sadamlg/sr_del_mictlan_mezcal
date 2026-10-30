@@ -101,6 +101,17 @@ export function createCheckoutHandlers({
       }
     },
 
+    returnStatus: async (request, response) => {
+      setCommonHeaders(response);
+      try {
+        const account = await accountService.getSession(readSessionCookie(request));
+        const result = await checkoutService.getCheckoutReturnStatus(account, request.query?.session_id);
+        return response.status(200).json(result);
+      } catch (error) {
+        return sendServiceError(response, error, logger, 'return status');
+      }
+    },
+
     createSession: async (request, response) => {
       setCommonHeaders(response);
       const { recipient, error: bodyError } = normalizeRecipientBody(request.body);

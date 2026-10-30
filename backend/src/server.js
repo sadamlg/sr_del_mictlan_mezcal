@@ -154,6 +154,7 @@ export function createApp({
 
   app.use('/api/checkout', express.json({ limit: '16kb' }));
   app.get('/api/checkout/payment-methods', checkoutHandlers.savedPaymentMethods);
+  app.get('/api/checkout/return-status', checkoutHandlers.returnStatus);
   app.post('/api/checkout/sessions', checkoutHandlers.createSession);
   app.use('/api/checkout', (error, _request, response, next) => {
     response.set('Cache-Control', 'no-store');

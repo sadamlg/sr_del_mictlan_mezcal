@@ -152,6 +152,20 @@ export function createCheckoutService({ repository, stripe, frontendOrigin, stri
       }
     },
 
+    async getCheckoutReturnStatus(account, sessionId) {
+      if (!account?.id) throw new CheckoutError(401, 'AUTHENTICATION_REQUIRED', 'Inicia sesión para continuar.');
+      if (typeof sessionId !== 'string' || !/^cs_[a-z0-9_]{1,252}$/i.test(sessionId)) {
+        throw new CheckoutError(400, 'INVALID_CHECKOUT_SESSION', 'La sesión de pago no es válida.');
+      }
+
+      try {
+        const status = await repository.getCheckoutSessionStatus(account.id, sessionId);
+        return { status: ['PENDING', 'PAID', 'FAILED', 'EXPIRED'].includes(status) ? status : 'NOT_FOUND' };
+      } catch {
+        throw checkoutUnavailable();
+      }
+    },
+
     async processStripeEvent(event) {
       const eventType = event?.type;
       const session = event?.data?.object;
@@ -260,7 +274,7 @@ export function createCheckoutService({ repository, stripe, frontendOrigin, stri
               quantity: item.quantity,
             };
           }),
-          success_url: checkoutUrl(frontendOrigin, '/cuenta/pedidos?checkout=return'),
+          success_url: checkoutUrl(frontendOrigin, '/cuenta/pedidos?checkout=return&session_id={CHECKOUT_SESSION_ID}'),
           cancel_url: checkoutUrl(frontendOrigin, '/?checkout=cancelled#coleccion'),
         };
 
