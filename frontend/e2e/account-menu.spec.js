@@ -47,6 +47,10 @@ test('successful login returns to the landing page and exposes account actions',
     currentAccount = account;
     await route.fulfill({ status: 200, json: { account } });
   });
+  await page.route('**/api/cart/account', (route) => route.fulfill({
+    status: 200,
+    json: { cart: { items: [], subtotal: { amount: 0, currency: 'MXN' } } },
+  }));
   await page.route('**/api/profile', async (route) => {
     if (route.request().method() === 'PATCH') {
       const { firstName, lastName } = route.request().postDataJSON();
@@ -275,10 +279,12 @@ test('authenticated orders show the empty state and point back to the collection
   await expect(page.getByRole('navigation', { name: 'Secciones de tu cuenta' }).getByRole('link', { name: 'Mis pedidos' })).toHaveAttribute('aria-current', 'page');
 });
 
-test('Stripe return shows the pending confirmation state and refreshes into a paid order', async ({ page }) => {
+test('Stripe return waits for payment confirmation, then refreshes the cart and paid order', async ({ page }) => {
   const order = {
     id: 'c4d7d051-1234-4234-8234-123456789012',
     createdAt: '2026-10-29T12:00:00.000Z',
+    paidAt: '2026-10-29T12:05:00.000Z',
+    status: 'PAID',
     total: { amount: 25000, currency: 'MXN' },
     items: [{
       slug: 'calios',
@@ -289,18 +295,35 @@ test('Stripe return shows the pending confirmation state and refreshes into a pa
     }],
   };
   let orderRequests = 0;
-  let showOrderAfterRefresh = false;
+  let checkoutStatusRequests = 0;
+  let cartRequests = 0;
+  const cartItem = {
+    slug: 'calios',
+    name: order.items[0].name,
+    quantity: 1,
+    available: true,
+    unitPrice: { amount: 25000, currency: 'MXN' },
+    lineTotal: { amount: 25000, currency: 'MXN' },
+  };
   await page.route('**/api/auth/session', (route) => route.fulfill({
     status: 200,
     json: { account: { id: 'account-id', firstName: 'Ana', lastName: 'Martínez' } },
   }));
-  await page.route('**/api/cart/account**', (route) => route.fulfill({
-    status: 200,
-    json: { cart: { items: [], subtotal: { amount: 0, currency: 'MXN' } } },
-  }));
+  await page.route('**/api/cart/account**', (route) => {
+    cartRequests += 1;
+    const items = checkoutStatusRequests > 1 ? [] : [cartItem];
+    return route.fulfill({
+      status: 200,
+      json: { cart: { items, subtotal: { amount: items.length ? 25000 : 0, currency: 'MXN' } } },
+    });
+  });
+  await page.route('**/api/checkout/return-status**', (route) => {
+    checkoutStatusRequests += 1;
+    return route.fulfill({ status: 200, json: { status: checkoutStatusRequests > 1 ? 'PAID' : 'PENDING' } });
+  });
   await page.route('**/api/orders', (route) => {
     orderRequests += 1;
-    return route.fulfill({ status: 200, json: { orders: showOrderAfterRefresh ? [order] : [] } });
+    return route.fulfill({ status: 200, json: { orders: checkoutStatusRequests > 1 ? [order] : [] } });
   });
   await page.route('**/api/catalog/products', (route) => route.fulfill({
     status: 200,
@@ -312,15 +335,17 @@ test('Stripe return shows the pending confirmation state and refreshes into a pa
     body: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 80"><rect width="64" height="80" fill="#0a0b0a"/></svg>',
   }));
 
-  await page.goto('/cuenta/pedidos?checkout=return');
+  await page.goto('/cuenta/pedidos?checkout=return&session_id=cs_test_return_123');
   await expect(page.getByText('Estamos esperando la confirmación', { exact: true })).toBeVisible();
   await expect(page.getByRole('status').filter({ hasText: 'Regresaste de Stripe' })).toBeVisible();
-  showOrderAfterRefresh = true;
-  await page.getByRole('button', { name: 'Actualizar pedidos' }).click();
 
   await expect(page.getByRole('heading', { name: 'Pedido C4D7D051' })).toBeVisible();
   await expect(page.getByText('Pagado', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: /Abrir carrito/ }).click();
+  await expect(page.getByRole('dialog', { name: 'Tu carrito' }).getByRole('status')).toHaveText('El carrito está vacío');
   expect(orderRequests).toBeGreaterThan(1);
+  expect(checkoutStatusRequests).toBeGreaterThan(1);
+  expect(cartRequests).toBeGreaterThan(1);
 });
 
 test('account section navigation remains legible and within the viewport on narrow screens', async ({ page }) => {

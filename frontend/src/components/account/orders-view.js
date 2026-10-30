@@ -106,16 +106,19 @@ function OrderSummary({ order, productImages, onRepeatOrder, reorderState, canRe
   );
 }
 
-export default function OrdersView({ checkoutReturned }) {
+export default function OrdersView({ checkoutReturned, checkoutSessionId }) {
   const router = useRouter();
-  const { addOrderItemsToCart, busy: cartBusy, catalog, closeMobilePanel, registerCatalog, sessionState } = useCart();
+  const { addOrderItemsToCart, busy: cartBusy, catalog, closeMobilePanel, registerCatalog, retryCart, sessionState } = useCart();
   const [orders, setOrders] = useState(null);
   const [error, setError] = useState('');
   const [signedOut, setSignedOut] = useState(false);
   const [reloadCount, setReloadCount] = useState(0);
+  const [checkoutStatus, setCheckoutStatus] = useState(checkoutReturned ? 'checking' : 'idle');
+  const [checkoutPollKey, setCheckoutPollKey] = useState(0);
   const [reorderState, setReorderState] = useState({ orderId: null, status: 'idle', message: '' });
   const transferIds = useRef(new Map());
   const reorderLock = useRef(false);
+  const completedCheckoutSession = useRef(null);
   const productImages = useMemo(() => new Map(catalog.map((product) => [product.slug, product.image])), [catalog]);
 
   useEffect(() => {
@@ -134,6 +137,61 @@ export default function OrdersView({ checkoutReturned }) {
   }, [reloadCount]);
 
   useEffect(() => {
+    if (
+      !checkoutReturned || !checkoutSessionId || sessionState !== 'account' ||
+      completedCheckoutSession.current === checkoutSessionId
+    ) return undefined;
+
+    const controller = new AbortController();
+    let timeoutId;
+    let attempts = 0;
+
+    async function checkPaymentStatus() {
+      try {
+        const result = await accountRequest(
+          `checkout/return-status?session_id=${encodeURIComponent(checkoutSessionId)}`,
+          { signal: controller.signal },
+        );
+        if (controller.signal.aborted) return;
+
+        if (result.status === 'PAID') {
+          completedCheckoutSession.current = checkoutSessionId;
+          setCheckoutStatus('paid');
+          setOrders(null);
+          setReloadCount((count) => count + 1);
+          await retryCart();
+          return;
+        }
+        if (['FAILED', 'EXPIRED', 'NOT_FOUND'].includes(result.status)) {
+          setCheckoutStatus(result.status.toLowerCase());
+          return;
+        }
+        setCheckoutStatus('pending');
+      } catch (requestError) {
+        if (controller.signal.aborted) return;
+        if (requestError.status === 401) {
+          setSignedOut(true);
+          return;
+        }
+        setCheckoutStatus('pending');
+      }
+
+      attempts += 1;
+      if (attempts >= 20) {
+        setCheckoutStatus('timeout');
+        return;
+      }
+      timeoutId = window.setTimeout(checkPaymentStatus, Math.min(750 * (2 ** Math.min(attempts - 1, 2)), 3000));
+    }
+
+    checkPaymentStatus();
+    return () => {
+      controller.abort();
+      window.clearTimeout(timeoutId);
+    };
+  }, [checkoutPollKey, checkoutReturned, checkoutSessionId, retryCart, sessionState]);
+
+  useEffect(() => {
     if (catalog.length > 0 || !orders?.length) return undefined;
     let active = true;
     getPublicCatalog()
@@ -147,6 +205,11 @@ export default function OrdersView({ checkoutReturned }) {
     setError('');
     setSignedOut(false);
     setReloadCount((count) => count + 1);
+    if (checkoutReturned) {
+      setCheckoutStatus(completedCheckoutSession.current === checkoutSessionId ? 'paid' : 'checking');
+      setCheckoutPollKey((count) => count + 1);
+      retryCart();
+    }
   }
 
   async function repeatOrder(order) {
@@ -198,8 +261,16 @@ export default function OrdersView({ checkoutReturned }) {
     <AccountCard title="Mis pedidos" description="Consulta aquí el estado y los detalles de tus compras." wide>
       <AccountNavigation active="orders" />
       {checkoutReturned && (
-        <AccountNotice kind="success">
-          Regresaste de Stripe. Tus pedidos aparecerán aquí después de que la tienda reciba la confirmación del pago.
+        <AccountNotice kind={['failed', 'expired', 'not_found'].includes(checkoutStatus) ? 'error' : 'success'}>
+          {checkoutStatus === 'paid'
+            ? 'Pago confirmado. Actualizamos tu carrito y tus pedidos.'
+            : checkoutStatus === 'failed' || checkoutStatus === 'expired'
+              ? 'El pago no se confirmó. Tus productos siguen disponibles en el carrito.'
+              : checkoutStatus === 'not_found'
+                ? 'No pudimos vincular esta sesión con tu cuenta. Actualiza para revisar tus pedidos.'
+                : checkoutStatus === 'timeout'
+                  ? 'La confirmación está tardando. Actualiza para volver a revisar el pago y el carrito.'
+                  : 'Regresaste de Stripe. Estamos esperando la confirmación para sincronizar el carrito.'}
         </AccountNotice>
       )}
       {error && (
@@ -233,12 +304,20 @@ export default function OrdersView({ checkoutReturned }) {
       {orders?.length === 0 && !error && (
         <div className="py-8 text-center">
           <p className="font-display text-2xl text-mictlan-ivory">
-            {checkoutReturned ? 'Estamos esperando la confirmación' : 'Todavía no tienes pedidos'}
+            {checkoutStatus === 'failed' || checkoutStatus === 'expired'
+              ? 'El pago no se completó'
+              : checkoutStatus === 'not_found'
+                ? 'No encontramos esta sesión'
+                : checkoutReturned ? 'Estamos esperando la confirmación' : 'Todavía no tienes pedidos'}
           </p>
           <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-mictlan-sage-muted">
-            {checkoutReturned
-              ? 'La confirmación puede tardar un momento. Actualiza esta lista para revisar si tu pedido ya está disponible.'
-              : 'Cuando hagas una compra, encontrarás aquí la información y el total de tu pedido.'}
+            {checkoutStatus === 'failed' || checkoutStatus === 'expired'
+              ? 'Tus productos siguen en el carrito para que puedas revisar la compra y volver a intentarlo.'
+              : checkoutStatus === 'not_found'
+                ? 'Actualiza para revisar tus pedidos. El carrito conserva sus productos.'
+                : checkoutReturned
+                  ? 'La confirmación puede tardar un momento. Actualizamos el carrito cuando Stripe confirme el pago.'
+                  : 'Cuando hagas una compra, encontrarás aquí la información y el total de tu pedido.'}
           </p>
           {checkoutReturned && (
             <button

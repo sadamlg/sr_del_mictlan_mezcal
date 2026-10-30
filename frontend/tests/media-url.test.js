@@ -21,6 +21,16 @@ test('public media keep their external origin and optional base path', async () 
   );
 });
 
+test('bypasses server-side image optimization for private HTTP media only in development', async () => {
+  const { shouldBypassNextImageOptimization } = await import('../src/lib/media-url.js');
+
+  assert.equal(shouldBypassNextImageOptimization('http://192.168.100.11:3001', { nodeEnv: 'development' }), true);
+  assert.equal(shouldBypassNextImageOptimization('http://localhost:3001', { nodeEnv: 'development' }), true);
+  assert.equal(shouldBypassNextImageOptimization('https://media.example.test', { nodeEnv: 'development' }), false);
+  assert.equal(shouldBypassNextImageOptimization('http://192.168.100.11:3001', { nodeEnv: 'production' }), false);
+  assert.equal(shouldBypassNextImageOptimization('http://8.8.8.8:3001', { nodeEnv: 'development' }), false);
+});
+
 test('media base URLs cannot include credentials or query parameters', async () => {
   const { mediaObjectUrl } = await import('../src/lib/media-url.js');
 

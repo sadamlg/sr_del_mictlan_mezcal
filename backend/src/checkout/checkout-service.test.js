@@ -24,6 +24,7 @@ function setup({
   savedPaymentMethods = { data: [] },
   savedPaymentMethodsError,
   stripeCustomerId = null,
+  checkoutSessionStatus = 'PENDING',
 } = {}) {
   const calls = [];
   const repository = {
@@ -38,6 +39,10 @@ function setup({
     },
     async attachCheckoutSession(input) {
       calls.push(['attachSession', input]);
+    },
+    async getCheckoutSessionStatus(accountId, sessionId) {
+      calls.push(['returnStatus', accountId, sessionId]);
+      return checkoutSessionStatus;
     },
     async confirmPaidOrder(input) {
       calls.push(['confirmPaidOrder', input]);
@@ -177,7 +182,7 @@ test('creates hosted Checkout from the signed-in account cart using current serv
   assert.equal(sessionCall[1].customer_email, account.email);
   assert.equal(sessionCall[1].customer_creation, 'always');
   assert.deepEqual(sessionCall[1].saved_payment_method_options, { payment_method_save: 'enabled' });
-  assert.equal(sessionCall[1].success_url, 'http://localhost:3000/cuenta/pedidos?checkout=return');
+  assert.equal(sessionCall[1].success_url, 'http://localhost:3000/cuenta/pedidos?checkout=return&session_id={CHECKOUT_SESSION_ID}');
   assert.equal(sessionCall[1].cancel_url, 'http://localhost:3000/?checkout=cancelled#coleccion');
   assert.deepEqual(sessionCall[2], { idempotencyKey: 'checkout-order-123' });
   assert.equal(calls[0][0], 'cart');
@@ -195,6 +200,14 @@ test('creates hosted Checkout from the signed-in account cart using current serv
   }]);
   assert.equal(calls[1][1].totalCents, 24690);
   assert.deepEqual(calls[3], ['attachSession', { orderId: 'order-123', sessionId: 'cs_test_123' }]);
+});
+
+test('checkout return status only looks up the signed-in account session', async () => {
+  const { calls, service } = setup({ checkoutSessionStatus: 'PAID' });
+
+  assert.deepEqual(await service.getCheckoutReturnStatus(account, 'cs_test_123'), { status: 'PAID' });
+  assert.deepEqual(calls[0], ['returnStatus', 'account-1', 'cs_test_123']);
+  await assert.rejects(service.getCheckoutReturnStatus(account, 'invalid-session'), { code: 'INVALID_CHECKOUT_SESSION' });
 });
 
 test('reuses the account Stripe Customer, keeps its profile details current, and displays consented saved methods', async () => {

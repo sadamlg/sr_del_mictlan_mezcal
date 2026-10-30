@@ -41,6 +41,6 @@ Los cuerpos de registro y perfil rechazan campos no permitidos. Nunca aceptan un
 
 ## Correo e interfaz
 
-El worker obtiene de PostgreSQL los trabajos de confirmación de registro, cambio de correo y recuperación y los envía por SMTP. En Compose, Mailpit (`mailpit:1025`) captura esos mensajes sin usar un proveedor externo. Resend y los correos de compra aún no están integrados.
+El worker obtiene de PostgreSQL los trabajos de confirmación de registro, cambio de correo y recuperación y los envía por SMTP. En Compose, Mailpit (`mailpit:1025`) captura esos mensajes sin usar un proveedor externo. El correo de compra usa Resend y se describe en el [contrato de Checkout y pedidos](checkout-y-pedidos.md).
 
 Después de registrarse, la interfaz explica que debe confirmar el correo. Si el registro comenzó al intentar comprar, confirmar inicia sesión, transfiere el carrito de invitado y lleva al resumen de compra; en los demás casos, vuelve a la tienda. Confirmar un cambio de correo conserva la sesión. Los formularios de registro y cambio de contraseña permiten mostrar u ocultar la contraseña. El aviso de cambios guardados en el perfil es temporal; al volver a esa sección sólo permanece la confirmación del correo. **Mis pedidos** muestra pedidos reales y sólo del titular; la interfaz también resuelve estados sin sesión, carga, error y sesión vencida.

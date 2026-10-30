@@ -68,6 +68,14 @@ export function createCheckoutRepository(database) {
       if (result.count !== 1) throw new Error('La sesión de Checkout no coincide con el pedido pendiente.');
     },
 
+    async getCheckoutSessionStatus(accountId, sessionId) {
+      const order = await database.order.findFirst({
+        where: { accountId, stripeCheckoutSessionId: sessionId },
+        select: { status: true },
+      });
+      return order?.status ?? null;
+    },
+
     async confirmPaidOrder({ orderId, sessionId, paymentIntentId, customerId, amountTotal, currency, paidAt }) {
       return database.$transaction(async (transaction) => {
         const order = await transaction.order.findUnique({ where: { id: orderId }, include: { items: true } });

@@ -13,6 +13,20 @@ function isPrivateIpv4(hostname) {
     (first === 192 && second === 168);
 }
 
+export function shouldBypassNextImageOptimization(mediaBaseUrl, { nodeEnv = process.env.NODE_ENV } = {}) {
+  if (nodeEnv !== 'development' || typeof mediaBaseUrl !== 'string') return false;
+
+  let url;
+  try {
+    url = new URL(mediaBaseUrl);
+  } catch {
+    return false;
+  }
+
+  return url.protocol === 'http:' &&
+    (LOCAL_HOSTS.has(url.hostname) || isPrivateIpv4(url.hostname));
+}
+
 function validateKey(key) {
   if (typeof key !== 'string' || key.length === 0 || key.startsWith('/')) {
     throw new Error('La clave relativa del medio no es válida.');

@@ -51,6 +51,13 @@ function createDatabase({ order = orderState() } = {}) {
     order: {
       async create(query) { calls.push(['order.create', query]); return { id: 'order-1' }; },
       async findUnique(query) { calls.push(['order.findUnique', query]); return state.order; },
+      async findFirst(query) {
+        calls.push(['order.findFirst', query]);
+        return state.order.accountId === query.where.accountId &&
+          state.order.stripeCheckoutSessionId === query.where.stripeCheckoutSessionId
+          ? { status: state.order.status }
+          : null;
+      },
       async updateMany(query) {
         calls.push(['order.updateMany', query]);
         const statusFilter = query.where.status;
@@ -208,4 +215,16 @@ test('order history query is limited to paid orders owned by the account', async
   assert.deepEqual(received.where, { accountId: 'account-1', status: 'PAID' });
   assert.deepEqual(received.orderBy, [{ paidAt: 'desc' }, { id: 'desc' }]);
   assert.ok(received.select.items);
+});
+
+test('checkout return status is looked up by both Stripe session and account owner', async () => {
+  const { calls, database } = createDatabase({ order: orderState({ status: 'PAID' }) });
+  const repository = createCheckoutRepository(database);
+
+  assert.equal(await repository.getCheckoutSessionStatus('account-1', 'cs_test_1'), 'PAID');
+  assert.equal(await repository.getCheckoutSessionStatus('other-account', 'cs_test_1'), null);
+  assert.deepEqual(calls.filter(([name]) => name === 'order.findFirst').map(([, query]) => query.where), [
+    { accountId: 'account-1', stripeCheckoutSessionId: 'cs_test_1' },
+    { accountId: 'other-account', stripeCheckoutSessionId: 'cs_test_1' },
+  ]);
 });

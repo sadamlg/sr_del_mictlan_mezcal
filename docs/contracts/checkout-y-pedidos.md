@@ -7,7 +7,7 @@
 1. El checkout requiere sesión. Una persona invitada pasa por inicio de sesión o registro; confirmar una cuenta nueva conserva la intención y vuelve al resumen de compra.
 2. El resumen ordena sus secciones así: productos seleccionados editables con imágenes; datos de envío y contacto; tarjetas guardadas que Stripe permite volver a mostrar; total y acciones. Se pueden cambiar cantidades y editar destinatario para esa orden. Estos cambios no modifican el perfil.
 3. Al confirmar, la API crea una orden pendiente desde el carrito y precios actuales del servidor, y abre Stripe Checkout alojado.
-4. Stripe devuelve al usuario a la tienda, pero sólo el webhook firmado confirma el pago. “Mis pedidos” lista las órdenes pagadas. “Volver a pedir” repone sus artículos y abre directamente el resumen.
+4. Stripe devuelve al usuario a la tienda con el ID de la sesión. La página consulta su estado hasta que el webhook firmado confirma el pago; entonces recarga el carrito y “Mis pedidos”. “Volver a pedir” repone los artículos y abre directamente el resumen.
 
 No hay reserva ni comprobación de existencias. La aplicación no almacena PAN, CVC ni IDs de métodos de pago. Stripe puede guardar una tarjeta cuando el comprador da su consentimiento; el resumen sólo muestra marca, últimos cuatro y vencimiento, además del titular si Stripe lo devuelve.
 
@@ -16,6 +16,7 @@ No hay reserva ni comprobación de existencias. La aplicación no almacena PAN, 
 | Método y ruta | Acceso | Uso |
 |---|---|---|
 | `GET /api/checkout/payment-methods` | Sesión | Devuelve `{ "cards": [] }` si no hay Customer asociado; si hay tarjetas, sólo incluye los datos que se pueden mostrar. |
+| `GET /api/checkout/return-status?session_id=...` | Sesión | Devuelve el estado de la sesión de Checkout asociada a esa cuenta; las sesiones de otra cuenta responden `NOT_FOUND`. |
 | `POST /api/checkout/sessions` | Sesión | Crea una sesión desde el carrito persistido y devuelve `checkoutUrl`. Acepta opcionalmente el destinatario de esta compra. |
 | `POST /api/webhooks/stripe` | Firma Stripe | Procesa eventos recibidos con cuerpo crudo y `Stripe-Signature` válida. |
 | `GET /api/orders` | Sesión | Devuelve sólo pedidos pagados del titular, con importes y líneas históricas. |

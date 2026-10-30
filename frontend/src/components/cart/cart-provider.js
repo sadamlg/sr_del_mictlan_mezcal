@@ -78,6 +78,13 @@ export function CartProvider({ children }) {
       setSessionState('account');
     } catch (requestError) {
       if (sequence !== requestSequence.current) return;
+      if (requestError.status === 401) {
+        setAccount(null);
+        setAccountCart(EMPTY_ACCOUNT_CART);
+        setError('');
+        setSessionState('guest');
+        return;
+      }
       setMergeConflict(requestError.code === 'PRODUCT_NOT_AVAILABLE');
       setError(requestError.message || 'No se pudo consultar el carrito de tu cuenta.');
       setSessionState('error');

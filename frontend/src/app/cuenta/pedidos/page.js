@@ -3,7 +3,12 @@ import OrdersView from '../../../components/account/orders-view';
 
 async function OrdersContent({ searchParams }) {
   const params = await searchParams;
-  return <OrdersView checkoutReturned={params?.checkout === 'return'} />;
+  return (
+    <OrdersView
+      checkoutReturned={params?.checkout === 'return'}
+      checkoutSessionId={typeof params?.session_id === 'string' ? params.session_id : null}
+    />
+  );
 }
 
 export default function OrdersPage({ searchParams }) {
