@@ -10,7 +10,7 @@ Estado de implementación del [MVP aprobado](MVP_SCOPE.md). Las decisiones durad
 | 04 · Cuentas y perfil | Registro, correo, sesión, perfil y seguridad | Concluida |
 | 05 · Carritos | Persistencia, carrito invitado y transferencia | Concluida |
 | 06 · Stripe Checkout y pedidos | Pago alojado, webhook firmado e historial | Concluida |
-| 07 · Correo de compra y PDF | Resend y dos comprobantes PDF por compra pagada | Siguiente |
+| 07 · Correo de compra y PDF | Resend y detalle del pedido en PDF por compra pagada | En curso |
 | 08 · Integración en staging | Configuración no productiva, aceptación y Turnstile | Planeada |
 | 09 · Preparación de producción | Servicios, medios, operación y salida autorizada | Planeada |
 
@@ -20,16 +20,18 @@ Estado de implementación del [MVP aprobado](MVP_SCOPE.md). Las decisiones durad
 - Cuentas, confirmación de correo, cambio de contraseña, perfil y pedidos están conectados a PostgreSQL. En Compose, el worker envía correos de cuenta por SMTP a Mailpit.
 - El carrito se puede usar como invitado o con cuenta. Al iniciar sesión se transfieren las cantidades sin duplicarlas.
 - Stripe Checkout crea sesiones en el servidor. El backend confirma órdenes mediante webhook firmado e idempotente, conserva una instantánea de compra y sólo muestra pedidos pagados a su titular. La interfaz permite cambiar el destinatario de la compra sin modificar el perfil, consultar los datos seguros de tarjetas guardadas y volver a pedir desde el resumen.
-- No están implementados Turnstile, los correos de confirmación de compra ni los PDF. Resend tampoco está conectado: la configuración actual de correo es SMTP.
+- El webhook crea atómicamente un único trabajo de confirmación por pedido pagado. El worker prepara el envío por Resend con el detalle del pedido en PDF; los correos de cuenta continúan por SMTP.
+- La integración con la API de Resend está en el código. Para enviar desde un entorno hace falta configurar una clave y un remitente verificado; el envío real aún no se ha validado con una cuenta externa.
+- Turnstile todavía no está implementado; corresponde a la fase 08.
 - El repositorio no contiene configuración versionada de despliegue a Railway ni de DNS/TLS. No se puede inferir desde el código si staging o producción están publicados o configurados.
 
 ## Próximas fases
 
 ### 07. Correo de compra y PDF
 
-Crear un trabajo persistido por pedido pagado, enviar por Resend una confirmación con el comprobante de pago y la copia de la orden, y definir reintentos y observabilidad sin duplicar correos ante eventos repetidos.
+Crear un trabajo persistido por pedido pagado, enviar por Resend una confirmación con el detalle del pedido en PDF, y definir reintentos y observabilidad sin duplicar correos ante eventos repetidos. El envío se confirma con un remitente verificado en Resend y los recorridos de éxito, reintento e idempotencia verificados.
 
-**Cierre:** contenido y dos PDF correctos, envío recuperable ante fallos y pruebas de los casos de éxito, reintento e idempotencia.
+**Cierre:** contenido y PDF de detalle correctos, envío recuperable ante fallos y pruebas de los casos de éxito, reintento e idempotencia.
 
 ### 08. Integración en staging
 

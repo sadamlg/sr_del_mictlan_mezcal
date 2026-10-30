@@ -100,6 +100,10 @@ export function createCheckoutRepository(database) {
           throw new Error('No se pudo confirmar el estado del pedido.');
         }
 
+        await transaction.emailJob.create({
+          data: { accountId: order.accountId, orderId: order.id, type: 'PURCHASE_CONFIRMATION' },
+        });
+
         if (customerId) {
           const customerLink = await transaction.account.updateMany({
             where: { id: order.accountId, OR: [{ stripeCustomerId: null }, { stripeCustomerId: customerId }] },

@@ -1,12 +1,26 @@
 import { prisma } from './database/prisma-client.js';
 import { createAccountRepository } from './accounts/account-repository.js';
 import { createSmtpTransport } from './email/smtp-transport.js';
+import { createResendTransport } from './email/resend-transport.js';
+import { createPurchaseEmailDelivery } from './email/purchase-email-delivery.js';
 import { createEmailWorker } from './email/email-worker.js';
+
+const smtpTransport = createSmtpTransport();
+const mailFrom = process.env.MAIL_FROM || 'noreply@senordelmictlan.local';
+const purchaseEmailDelivery = createPurchaseEmailDelivery({
+  nodeEnv: process.env.NODE_ENV,
+  smtpTransport,
+  resendTransport: createResendTransport(),
+  mailFrom,
+  resendFrom: process.env.RESEND_FROM,
+});
 
 const emailWorker = createEmailWorker({
   repository: createAccountRepository(prisma),
-  transport: createSmtpTransport(),
-  from: process.env.MAIL_FROM || 'noreply@senordelmictlan.local',
+  transport: smtpTransport,
+  purchaseTransport: purchaseEmailDelivery.transport,
+  from: mailFrom,
+  purchaseFrom: purchaseEmailDelivery.from,
   appBaseUrl: process.env.APP_BASE_URL || 'http://localhost:3000',
 });
 

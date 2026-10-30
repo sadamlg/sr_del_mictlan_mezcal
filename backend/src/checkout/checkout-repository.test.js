@@ -31,9 +31,16 @@ function orderState(overrides = {}) {
 
 function createDatabase({ order = orderState() } = {}) {
   const calls = [];
-  const state = { order };
+  const state = { order, emailJobs: [] };
   const database = {
     async $transaction(callback) { return callback(database); },
+    emailJob: {
+      async create(query) {
+        calls.push(['emailJob.create', query]);
+        state.emailJobs.push(query.data);
+        return query.data;
+      },
+    },
     accountCartItem: {
       async findMany(query) { calls.push(['cart.findMany', query]); return []; },
       async deleteMany(query) { calls.push(['cart.deleteMany', query]); return { count: 1 }; },
@@ -142,6 +149,7 @@ test('paid webhook verifies amount, currency and session, then atomically update
   assert.equal(result.updated, true);
   assert.equal(state.order.status, 'PAID');
   assert.equal(state.order.stripePaymentIntentId, 'pi_test_1');
+  assert.deepEqual(state.emailJobs, [{ accountId: 'account-1', orderId: 'order-1', type: 'PURCHASE_CONFIRMATION' }]);
   assert.ok(calls.some(([name, query]) => name === 'cart.deleteMany' && query.where.version === snapshot.cartItemVersion));
   assert.ok(calls.some(([name, query]) => name === 'account.updateMany' && query.data.stripeCustomerId === 'cus_test_1'));
 });
@@ -167,12 +175,13 @@ test('paid webhook rejects amount, currency or session mismatches without changi
     }));
 
     assert.equal(state.order.status, 'PENDING');
+    assert.equal(state.emailJobs.length, 0);
     assert.equal(calls.some(([name]) => name === 'order.updateMany' || name === 'cart.deleteMany'), false);
   }
 });
 
 test('duplicate paid webhooks are idempotent and do not clear the cart twice', async () => {
-  const { calls, database } = createDatabase();
+  const { calls, database, state } = createDatabase();
   const repository = createCheckoutRepository(database);
   const input = {
     orderId: 'order-1',
@@ -187,6 +196,7 @@ test('duplicate paid webhooks are idempotent and do not clear the cart twice', a
   assert.equal((await repository.confirmPaidOrder(input)).updated, true);
   assert.equal((await repository.confirmPaidOrder(input)).updated, false);
   assert.equal(calls.filter(([name]) => name === 'cart.deleteMany').length, 1);
+  assert.equal(state.emailJobs.length, 1);
 });
 
 test('order history query is limited to paid orders owned by the account', async () => {

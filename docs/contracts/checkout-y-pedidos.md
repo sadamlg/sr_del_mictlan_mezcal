@@ -53,8 +53,16 @@ Ejemplo reducido de pedido:
 
 Los montos están en centavos de MXN. Los ejemplos no son precios comerciales.
 
-## Pendiente
+## Correo de compra y comprobantes
 
-El correo de confirmación de compra y los dos PDF acordados (comprobante de pago y copia de la orden) no están implementados; pertenecen a la fase 07. La integración actual de correo sólo cubre mensajes de cuenta vía SMTP.
+Al confirmar el pago, la misma transacción que cambia el pedido a `PAID` crea un trabajo `PURCHASE_CONFIRMATION`. `email_jobs.order_id` es único; un webhook repetido no crea otro trabajo ni elimina el carrito otra vez. El worker carga el pedido y sus líneas históricas y dirige el mensaje a `recipientEmail` de la compra, que puede diferir del correo del perfil.
+
+El correo de confirmación incluye un único PDF de **detalle del pedido**, generado desde esa instantánea. Reúne la referencia, fechas del pedido y pago, destinatario, dirección de envío, productos, subtotal y total pagado. No es un documento fiscal.
+
+Los errores de envío usan la cola existente: hasta cinco intentos, reintento de trabajos `PROCESSING` abandonados después de dos minutos y esperas crecientes de 2, 4, 8 y 16 segundos entre intentos. Un fallo definitivo deja el trabajo en `FAILED`. El worker registra el ID del trabajo, tipo, intento y código de error; no escribe destinatarios, domicilios ni contenido del mensaje en logs. Resend recibe una clave estable `purchase-confirmation/<orderId>` para deduplicar la solicitud dentro de su ventana documentada de 24 horas.
+
+El worker necesita `RESEND_API_KEY` y `RESEND_FROM` con un remitente autorizado en Resend. Los mensajes de cuenta siguen usando SMTP y Mailpit en Compose.
+
+Para envío y reintentos, consulta la documentación oficial de [Send Email](https://resend.com/docs/api-reference/emails/send-email), [Attachments](https://resend.com/docs/dashboard/emails/attachments) e [Idempotency Keys](https://resend.com/docs/dashboard/emails/idempotency-keys).
 
 Para implementar o revisar Stripe, consulta la documentación oficial sobre [crear Checkout Sessions](https://docs.stripe.com/api/checkout/sessions/create), [fulfillment](https://docs.stripe.com/checkout/fulfillment), [webhooks](https://docs.stripe.com/webhooks) y [reutilizar métodos de pago con consentimiento](https://docs.stripe.com/payments/existing-customers?platform=web&ui=stripe-hosted).
