@@ -24,16 +24,15 @@ export function renderBrandedEmail(contentHtml) {
 <html lang="es">
   <head>
     <meta charset="utf-8">
-    <style>@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&display=swap');</style>
   </head>
-  <body style="margin:0;padding:0;background-color:${EMAIL_COLORS.background};color:${EMAIL_COLORS.ivory};font-family:'Open Sans',Arial,sans-serif">
+  <body style="margin:0;padding:0;background-color:${EMAIL_COLORS.background};color:${EMAIL_COLORS.ivory};font-family:Arial,Helvetica,sans-serif">
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;background-color:${EMAIL_COLORS.background}">
       <tr>
         <td align="center" style="padding:36px 16px">
           <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" style="width:100%;max-width:560px;background-color:${EMAIL_COLORS.carbon};border:1px solid rgba(151,210,198,0.24)">
             <tr>
               <td style="padding:32px 28px">
-                <p style="margin:0;color:${EMAIL_COLORS.bone};font-family:'Cinzel Decorative',Georgia,'Times New Roman',serif;font-size:17px;font-weight:400;letter-spacing:1.5px;line-height:1.5;text-transform:uppercase">Señor del Mictlán</p>
+                <p style="margin:0;color:${EMAIL_COLORS.bone};font-family:Georgia,'Times New Roman',serif;font-size:17px;font-weight:400;letter-spacing:1.5px;line-height:1.5;text-transform:uppercase">Señor del Mictlán</p>
                 <div style="width:40px;height:1px;margin:18px 0 24px;background-color:${EMAIL_COLORS.teal}"></div>
                 ${contentHtml}
                 <p style="margin:28px 0 0;border-top:1px solid rgba(224,205,184,0.16);padding-top:18px;color:${EMAIL_COLORS.earthMuted};font-size:11px;letter-spacing:1.2px;line-height:1.6;text-transform:uppercase">Señor del Mictlán · Etúcuaro, Michoacán</p>
