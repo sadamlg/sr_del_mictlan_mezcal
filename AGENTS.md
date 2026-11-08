@@ -51,8 +51,8 @@
 ## Pruebas y ejecución
 
 - Los cambios de lógica o comportamiento incluyen pruebas del contrato afectado y siguen TDD. Los cambios sólo documentales o visuales no requieren pruebas unitarias artificiales.
-- Usa `node:test` para el backend, pruebas unitarias del frontend en `frontend/tests/` y Playwright para recorridos de navegador en `frontend/e2e/`.
-- Usa Docker Compose como entorno local de referencia. Antes de builds o E2E, revisa memoria con `free -h` y carga con `docker stats --no-stream`; ejecuta cargas intensivas en serie.
+- Usa `node:test` para el backend y pruebas unitarias del frontend en `frontend/tests/`.
+- Usa Docker Compose como entorno local de referencia. Antes de builds, revisa memoria con `free -h` y carga con `docker stats --no-stream`; ejecuta cargas intensivas en serie.
 - Usa el nivel de prueba más bajo que dé confianza: unitarias para lógica aislada, integración para límites de API y navegador para recorridos críticos. Las pruebas generadas sólo cuentan si se revisan, versionan y pueden reproducirse.
 - Antes de cerrar cambios visuales, revisa los estados y tamaños afectados en navegador, incluida la consola; no declares validaciones que falten.
 - No afirmes que verificaste algo si no ejecutaste la comprobación.

@@ -9,10 +9,9 @@ Ejecuta el frontend dentro de Docker Compose, que es el entorno local documentad
 ```bash
 docker compose exec frontend npm run lint
 docker compose exec frontend npm test
-docker compose run --rm frontend-e2e
 ```
 
-`npm test` ejecuta las pruebas unitarias de `frontend/tests/`. Playwright ejecuta recorridos de navegador ubicados en `frontend/e2e/`.
+`npm test` ejecuta las pruebas unitarias de `frontend/tests/`.
 
 ## Referencias
 

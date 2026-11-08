@@ -14,7 +14,7 @@ stripe listen \
   --forward-to http://localhost:4000/api/webhooks/stripe
 ```
 
-Los cuatro eventos corresponden a los que procesa `backend/src/checkout/checkout-service.js`. Si el segundo proyecto usa `BACKEND_PORT=4001`, cambia el destino a `localhost:4001`. La CLI reenvía eventos desde Stripe a la API local; no hace falta crear un endpoint público en el Dashboard para este caso. [Referencia de Stripe CLI](https://docs.stripe.com/cli/listen).
+Los cuatro eventos corresponden a los que procesa `backend/src/checkout/checkout-service.js`. La CLI reenvía eventos desde Stripe a la API local; no hace falta crear un endpoint público en el Dashboard para este caso. [Referencia de Stripe CLI](https://docs.stripe.com/cli/listen).
 
 4. Copia el `whsec_…` que muestra **ese listener** a `STRIPE_WEBHOOK_SECRET` en `.env` y recrea el backend:
 

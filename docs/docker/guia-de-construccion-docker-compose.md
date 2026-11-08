@@ -9,7 +9,7 @@ La aplicación guarda los trabajos de correo en PostgreSQL y el worker los proce
 ## Requisitos y convenciones
 
 - Docker Engine 28 o posterior, Docker CLI y el plugin de Compose, invocado como <code>docker compose</code>. Esta guía no usa el ejecutable independiente <code>docker-compose</code>. Docker documenta una excepción para versiones anteriores a Engine 28: otros equipos del mismo segmento de red podían alcanzar puertos enlazados a loopback. [Publicación de puertos en Docker](https://docs.docker.com/engine/network/port-publishing/) y [plugin de Docker Compose](https://docs.docker.com/compose/install/).
-- Git, <code>curl</code> y una terminal Bash en Linux, macOS o WSL 2. Los comandos que crean archivos se ejecutan desde la raíz del repositorio, salvo que se indique otro directorio.
+- Git, <code>curl</code> y una terminal Bash en Linux, macOS o WSL 2. Los comandos que crean archivos se ejecutan desde la raíz del directorio de trabajo del ejercicio.
 - No hace falta instalar Node.js ni npm en el equipo anfitrión: los comandos de Node se ejecutan en contenedores temporales y las aplicaciones se ejecutan en Compose.
 - <code>.env.example</code> contiene valores ilustrativos; <code>.env</code> es local y no se versiona.
 
@@ -37,30 +37,7 @@ flowchart LR
     Worker -->|"SMTP · correo local"| Mailpit
 ~~~
 
-| Servicio | Puerto dentro de Compose | Acceso desde el anfitrión |
-|---|---:|---|
-| Next.js | <code>frontend:3000</code> | <code>http://localhost:3000</code> |
-| Express | <code>backend:3000</code> | <code>http://localhost:4000</code> |
-| PostgreSQL | <code>postgres:5432</code> | <code>localhost:5432</code> para herramientas locales |
-| Worker | Sin puerto HTTP | Sin puerto publicado |
-| Mailpit SMTP | <code>mailpit:1025</code> | Sin puerto publicado; sólo red Compose |
-| Mailpit UI | <code>mailpit:8025</code> | <code>http://localhost:8025</code> por defecto; configurable con <code>MAILPIT_PORT</code> |
-
-Cuando Next.js consulte Express durante SSR, el destino será <code>http://backend:3000</code>, resoluble dentro de Compose. Las peticiones que el navegador envíe a la API usarán el puerto publicado del anfitrión, normalmente <code>http://localhost:4000</code>; el navegador no puede resolver el DNS privado <code>backend</code>.
-
-Compose publica la API en el anfitrión. El navegador usa <code>NEXT_PUBLIC_API_URL</code> y Express permite el origen configurado en <code>FRONTEND_ORIGIN</code>. Para el acceso LAN, sigue la sección [Desarrollo por LAN](#desarrollo-lan); SSR conserva <code>http://backend:3000</code> dentro de Compose. El worker usa PostgreSQL y Mailpit por la red privada y no necesita un puerto HTTP.
-
-## Mapa de entornos y recorridos
-
-| Recorrido | Aplicación y acceso | Medios | Correo y pagos | Instrucciones |
-|---|---|---|---|---|
-| Desarrollo local estándar | Compose; navegador en `localhost` | Archivos locales servidos por Next.js | Mailpit; Stripe CLI opcional para pagos de prueba | [Desarrollo local](#desarrollo-local) |
-| Desarrollo por LAN | Los mismos contenedores; navegador en la IP del anfitrión | Medios locales por LAN o URL pública de R2 | Mailpit; Stripe CLI puede reenviar al puerto publicado de la API | [Desarrollo LAN](#desarrollo-lan) |
-| Prueba de medios con R2 desde Compose | Compose local, con URL pública no productiva de R2 | Bucket no productivo | Mailpit; no cambia el proveedor de correo | [Guía R2](../cloudflare/r2.md) |
-| Staging | Servicios separados en Railway | Recursos R2 no productivos | Resend y credenciales Stripe de prueba | [Despliegue en Railway](../deployment/railway-staging-produccion.md) |
-| Producción objetivo | Railway y la capa pública de Cloudflare | Bucket y hostname de producción | Resend y credenciales Stripe de producción | [Despliegue](../deployment/railway-staging-produccion.md) y [Cloudflare](../cloudflare/implementacion.md) |
-
-El acceso LAN y el origen de los medios son opciones independientes que se pueden combinar. Para medios locales, la URL debe usar la IP del anfitrión; para R2, se usa su URL pública HTTPS. Mailpit conserva su SMTP privado en Compose y su bandeja web queda accesible desde la LAN al activar ese modo. Railway es la configuración separada para probar Resend y los servicios externos con recursos de staging.
+Durante SSR, Next.js llega a Express por <code>http://backend:3000</code> en la red privada de Compose. El navegador usa <code>NEXT_PUBLIC_API_URL</code> para llamar a la API por el puerto publicado del anfitrión (normalmente <code>http://localhost:4000</code>); no puede resolver el nombre interno <code>backend</code>. Express permite el origen configurado en <code>FRONTEND_ORIGIN</code>. El worker se conecta a PostgreSQL y Mailpit por la red privada y no necesita un puerto HTTP publicado. Para abrir frontend y API desde otro dispositivo, sigue [Desarrollo por LAN](#desarrollo-lan).
 
 ## Imágenes y versiones de referencia
 
@@ -91,230 +68,30 @@ docker pull axllent/mailpit:v1.31.5
 
 Compose también puede descargarlas automáticamente. El comando <code>docker image ls</code> muestra las imágenes que ya existen localmente.
 
-<a id="desarrollo-local"></a>
-## Desarrollo local estándar
+## Construcción desde cero
 
-Desde la raíz del repositorio, crea `.env` si aún no existe. `cp -n` conserva cualquier archivo que ya tengas:
-
-~~~bash
-cp -n .env.example .env
-~~~
-
-Valida la sintaxis e interpolación antes de crear contenedores. Si falta una variable requerida, Compose lo indica aquí:
-
-~~~bash
-docker compose config --quiet
-~~~
-
-Construye las imágenes y espera a que los servicios estén en estado <code>healthy</code>:
-
-~~~bash
-docker compose up --build --detach --wait --wait-timeout 180
-docker compose ps
-~~~
-
-En un clon de la aplicación completa, después del arranque aplica las migraciones existentes y, sólo para una base local de demostración, carga las tres fichas:
-
-~~~bash
-docker compose exec backend npm run prisma:migrate:deploy
-docker compose exec -T postgres sh -c 'psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < backend/prisma/dev-showcase.sql
-~~~
-
-El SQL contiene precios provisionales y no es un catálogo comercial. El servicio `frontend-e2e` usa el perfil `e2e`; no arranca con el `up` normal y se solicita con `docker compose run --rm frontend-e2e`. La [guía de Railway](../deployment/railway-staging-produccion.md) explica los Dockerfiles de producción.
-
-La primera ejecución descarga las imágenes de PostgreSQL y Mailpit, instala dependencias mediante <code>npm ci</code>, genera Prisma Client y crea el volumen y la red del proyecto. <code>--wait</code> hace que Compose espere a que PostgreSQL, Mailpit, backend, worker y frontend estén saludables antes de devolver el control. [Comando <code>docker compose up</code>](https://docs.docker.com/reference/cli/docker/compose/up/)
-
-### Comprobar cada servicio
-
-#### PostgreSQL, Prisma y API
-
-~~~bash
-docker compose exec --no-TTY postgres \
-  sh -c 'pg_isready --username="$POSTGRES_USER" --dbname="$POSTGRES_DB"'
-
-docker compose exec --no-TTY backend npm run prisma:validate
-docker compose exec --no-TTY backend npm run prisma:generate
-curl --fail --show-error --silent http://localhost:4000/health
-~~~
-
-La respuesta esperada de <code>/health</code> es <code>{"status":"ok"}</code>. La ruta ejecuta <code>SELECT 1</code> con Prisma; si PostgreSQL no responde, Express devuelve HTTP 503. En este esqueleto inicial todavía no hay modelos de negocio ni migraciones; la aplicación actual sí los incluye.
-
-Comprueba el estado de todos los servicios:
-
-~~~bash
-docker compose ps
-docker compose logs --no-color --tail=30 worker
-~~~
-
-Todos los servicios deben aparecer como <code>Up</code> y <code>healthy</code>. En el esqueleto inicial el worker informa que PostgreSQL está disponible. En la aplicación actual aparece <code>Worker de correo iniciado.</code> y el proceso también atiende trabajos de correo.
-
-#### Frontend
-
-~~~bash
-curl --fail --show-error --silent --output /dev/null \
-  --write-out 'HTTP %{http_code}\n' \
-  http://localhost:3000
-~~~
-
-El comando debe mostrar un estado HTTP <code>200</code>. Abre <code>http://localhost:3000</code> en un navegador: el esqueleto muestra la pantalla inicial de Next.js; el clon completo muestra la tienda.
-
-#### Mailpit
-
-Envía un mensaje de comprobación por el SMTP interno de Mailpit:
-
-~~~bash
-docker compose exec --no-TTY mailpit sendmail <<'EMAIL'
-From: infra@example.test
-To: developer@example.test
-Subject: Mailpit SMTP check
-
-El servidor SMTP local recibió este mensaje de prueba.
-EMAIL
-~~~
-
-Abre <code>http://localhost:8025</code> (o el puerto definido por <code>MAILPIT_PORT</code>) y confirma que aparece el mensaje. Mailpit almacena correo temporal de desarrollo; no es un proveedor de envío ni un archivo de correo. Sus puertos predeterminados son UI <code>8025</code> y SMTP <code>1025</code>. [Documentación Docker de Mailpit](https://mailpit.axllent.org/docs/install/docker/)
-
-### Flujo diario de Prisma
-
-Cuando se agregue un modelo a <code>backend/prisma/schema.prisma</code>, crea y aplica una migración local con un nombre descriptivo:
-
-~~~bash
-docker compose exec --no-TTY \
-  --user "$(id -u):$(id -g)" \
-  --env HOME=/tmp \
-  backend \
-  npm run prisma:migrate:dev -- --name nombre_descriptivo
-~~~
-
-La migración se escribe en el directorio <code>backend/prisma</code> montado desde el host. Ejecutar este comando con el UID y GID del usuario anfitrión deja los archivos generados editables desde el host.
-
-<code>migrate dev</code> es el comando de desarrollo: crea y aplica migraciones. Prisma 7 no ejecuta <code>prisma generate</code> automáticamente después de las migraciones, así que genera el cliente explícitamente:
-
-~~~bash
-docker compose exec backend npm run prisma:generate
-~~~
-
-Para aplicar migraciones ya versionadas en una base local:
-
-~~~bash
-docker compose exec backend npm run prisma:migrate:deploy
-docker compose exec backend npm run prisma:migrate:status
-~~~
-
-No confirmes un reset si hay datos locales que necesites conservar. Prisma documenta <code>migrate dev</code> para desarrollo y <code>migrate deploy</code> para aplicar migraciones pendientes. En Prisma 7, <code>migrate dev</code> no ejecuta <code>prisma generate</code> automáticamente, por lo que los comandos aparecen como pasos separados. [Referencia CLI de Prisma 7](https://www.prisma.io/docs/orm/v7/reference/prisma-cli-reference)
-
-### Verificaciones de la aplicación completa
-
-Con el esquema aplicado, las pruebas y el lint del repositorio se ejecutan dentro de Compose:
-
-~~~bash
-docker compose exec backend npm test
-docker compose exec backend npm run test:db
-docker compose exec frontend npm test
-docker compose run --rm frontend-e2e
-docker compose exec backend npm run lint
-docker compose exec frontend npm run lint
-~~~
-
-`frontend-e2e` está bajo el perfil `e2e`; al solicitar ese servicio expresamente Compose lo ejecuta sin incluirlo en el arranque normal. Las pruebas de base necesitan migraciones aplicadas y un entorno de prueba adecuado. Los comandos de este apartado describen cómo ejecutarlas; no indican que hayan pasado en esta revisión documental.
-
-### Detener y limpiar
-
-Detén los contenedores y la red sin borrar los datos de PostgreSQL:
-
-~~~bash
-docker compose down
-~~~
-
-Para volver a iniciar el entorno:
-
-~~~bash
-docker compose up --build --detach --wait --wait-timeout 180
-~~~
-
-Para borrar también el volumen y perder los datos locales de PostgreSQL:
-
-~~~bash
-docker compose down --volumes
-~~~
-
-No uses <code>--volumes</code> como solución rutinaria a un error de Prisma o Compose: elimina los datos persistidos. Revisa primero <code>docker compose logs --follow &lt;servicio&gt;</code> y el estado mostrado por <code>docker compose ps</code>.
-<a id="desarrollo-lan"></a>
-## Desarrollo por LAN
-
-Usa este modo para abrir la tienda desde otro equipo o teléfono conectado a la misma red. Indica la IPv4 del anfitrión; el script publica la tienda, la API y la bandeja web de Mailpit para el acceso LAN, y deja PostgreSQL con el enlace definido en `.env` y el SMTP de Mailpit sólo en la red interna de Compose.
-
-Next.js ejecuta `next dev`; las interacciones del navegador para cuentas y carritos llaman a Express, así que el modo LAN publica tanto el frontend como la API. La red privada de Compose y la dirección `backend:3000` para SSR no cambian.
-
-Para usar medios locales:
-
-~~~bash
-scripts/dev-lan.sh up 192.168.1.20
-~~~
-
-El script usa los puertos configurados en `.env` (`FRONTEND_PORT`, `BACKEND_PORT` y `MAILPIT_PORT`). Con los valores predeterminados, abre la tienda en `http://192.168.1.20:3000`, la API en `http://192.168.1.20:4000` y Mailpit en `http://192.168.1.20:8025`; sustituye la IP por la del anfitrión. Si cambiaste los puertos, el script imprime las direcciones resultantes. La interfaz de Mailpit queda disponible para revisar los mensajes generados durante las pruebas.
-
-Para que el dispositivo cargue los medios desde R2, pasa la URL pública HTTPS del bucket no productivo:
-
-~~~bash
-scripts/dev-lan.sh up 192.168.1.20 --media-url https://pub-47df7d3a7dd94d268c1661b2c36e0ae5.r2.dev
-~~~
-
-Con `--media-url`, el script establece esa URL en `MEDIA_BASE_URL` y `STRIPE_MEDIA_BASE_URL` y reconstruye las imágenes para que Next.js admita el origen. Esto sólo cambia las URL usadas para obtener medios; no abre puertos para R2 ni cambia el worker de correo. Sin esa opción, las imágenes se sirven desde la aplicación en la dirección LAN.
-
-Si modificas `frontend/next.config.mjs`, reconstruye la imagen del frontend porque Compose no monta ese archivo. El script ya usa `--build` cuando recibe `--media-url`.
-
-En ambos casos, `NEXT_PUBLIC_API_URL`, `FRONTEND_ORIGIN` y `APP_BASE_URL` usan la IP del anfitrión. `NEXT_ALLOWED_DEV_ORIGIN` recibe sólo el hostname, sin protocolo ni puerto. `INTERNAL_API_URL=http://backend:3000` permanece sin cambios: Next.js sigue consultando Express por la red privada de Compose. El worker continúa usando Mailpit por `mailpit:1025`.
-
-Para volver al modo local estándar, sin cambiar `.env` ni borrar datos de PostgreSQL:
-
-~~~bash
-scripts/dev-lan.sh off
-~~~
-
-El comando recrea frontend, API, worker y Mailpit con los valores base de `.env` y retira el archivo temporal de configuración LAN. Si cambia la IP del anfitrión, vuelve a activar el modo con la nueva dirección.
-
-El script conserva los valores de `.env` y añade un archivo temporal sólo para Compose. Compose procesa los archivos `--env-file` en orden y los posteriores pueden reemplazar los anteriores; consulta la [documentación oficial de interpolación de variables](https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/) para más detalles.
-
-### Dos proyectos activos en el mismo equipo
-
-Cada proyecto necesita un `COMPOSE_PROJECT_NAME` distinto y puertos de anfitrión que no estén ocupados. Por ejemplo, para una segunda copia local puedes ajustar `.env` así:
-
-~~~dotenv
-COMPOSE_PROJECT_NAME=sr-del-mictlan-segunda-copia
-FRONTEND_PORT=3001
-BACKEND_PORT=4001
-POSTGRES_PORT=5433
-MAILPIT_PORT=8026
-~~~
-
-El script de LAN toma esos puertos y configura las URL públicas del navegador. La API conserva `INTERNAL_API_URL=http://backend:3000` dentro de Compose. Para Stripe CLI, usa el puerto publicado de esa copia —`localhost:4001` en este ejemplo— y sigue la [guía de Stripe](../stripe/implementacion.md). `MAILPIT_PORT` es el puerto de anfitrión de la bandeja web; el SMTP continúa en `mailpit:1025` dentro de Compose.
-
-## Integraciones externas y staging
-
-- **R2 desde desarrollo local:** puedes usar la opción `--media-url` del script LAN para probar el origen público desde otro dispositivo. La [guía de R2](../cloudflare/r2.md) mantiene el inventario, los requisitos del bucket y las comprobaciones de medios.
-- **Stripe en desarrollo local:** Stripe CLI reenvía los webhooks de prueba a la API local; sigue la [guía de Stripe](../stripe/implementacion.md). Stripe Checkout usa `STRIPE_MEDIA_BASE_URL` sólo si necesita descargar imágenes desde una URL pública.
-- **Resend:** Compose fija `NODE_ENV=development` y el worker usa SMTP con Mailpit. Resend se valida en Railway staging con su clave y remitentes de ese entorno; no actives Resend cambiando el modo LAN. Consulta la [guía de Resend](../resend/implementacion.md).
-- **Staging y producción:** la [guía de Railway](../deployment/railway-staging-produccion.md) es la instrucción operativa para servicios, variables, secretos, migraciones y aceptación. La [guía de Cloudflare](../cloudflare/implementacion.md) organiza DNS, proxy y dominios; la [guía de R2](../cloudflare/r2.md) cubre medios.
-
-El estado de cada recurso externo y las comprobaciones realizadas se documentan en su guía específica. Esta sección ofrece el mapa para elegir el recorrido sin duplicar esos procedimientos.
-
-## Tutorial reproducible: construir el esqueleto desde cero
-
-Estas secciones conservan los pasos y ejemplos mínimos para reconstruir la base técnica. Haz este ejercicio en una carpeta vacía; nunca sobrescribas un clon existente. No sustituyen el modo de desarrollo local de la aplicación completa.
+Los pasos 1–7 crean, arrancan y comprueban una infraestructura base mínima. Ejecuta el ejercicio desde un directorio de trabajo vacío y separado del clon del proyecto; no sobrescribas los archivos de un clon existente. No sustituye el modo de desarrollo local de la aplicación completa.
 
 ### 1. Preparar archivos comunes
 
-Desde la raíz del repositorio, crea la estructura inicial del backend:
+Desde la raíz del directorio de trabajo vacío, crea la estructura inicial del backend:
 
 ~~~bash
 mkdir -p backend/src/database backend/src/scripts backend/prisma
 ~~~
 
-El repositorio ya contiene un <code>.gitignore</code> en la raíz. Añade esta regla para excluir el cliente de Prisma generado:
+Crea <code>.gitignore</code> en la raíz para excluir los archivos locales y generados:
 
 ~~~gitignore
+.env
+.env.*
+!.env.example
+node_modules/
+.next/
 backend/generated/prisma/
+dist/
+coverage/
+*.log
 ~~~
 
 Crea <code>.env.example</code> en la raíz:
@@ -332,7 +109,7 @@ BACKEND_BIND_ADDRESS=127.0.0.1
 BACKEND_PORT=4000
 FRONTEND_BIND_ADDRESS=127.0.0.1
 FRONTEND_PORT=3000
-# For LAN testing, set this to the host's LAN IP.
+# The LAN helper overrides this value temporarily.
 MAILPIT_BIND_ADDRESS=127.0.0.1
 MAILPIT_PORT=8025
 
@@ -344,7 +121,7 @@ NEXT_ALLOWED_DEV_ORIGIN=
 FRONTEND_ORIGIN=http://localhost:3000
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
-# For LAN testing, use the frontend's LAN origin here as well.
+# The LAN helper overrides this value temporarily.
 APP_BASE_URL=http://localhost:3000
 SMTP_HOST=mailpit
 SMTP_PORT=1025
@@ -567,7 +344,7 @@ En este paso del tutorial, el worker sólo comprueba que alcanza PostgreSQL. La 
 
 ### 3. Generar el frontend Next.js con Tailwind
 
-<code>create-next-app</code> genera <code>frontend/</code> como subdirectorio de la raíz. Se monta el repositorio completo en <code>/workspace</code> porque el generador necesita un nombre de proyecto explícito; no uses <code>.</code> como destino.
+<code>create-next-app</code> genera <code>frontend/</code> como subdirectorio de la raíz del ejercicio. Se monta el directorio de trabajo completo en <code>/workspace</code> porque el generador necesita un nombre de proyecto explícito; no uses <code>.</code> como destino.
 
 ~~~bash
 docker run --rm \
@@ -860,7 +637,6 @@ services:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
       MEDIA_BASE_URL: ${MEDIA_BASE_URL:-http://localhost:3000}
       NEXT_ALLOWED_DEV_ORIGIN: ${NEXT_ALLOWED_DEV_ORIGIN:-}
-    command: ["npm", "run", "dev", "--", "--hostname", "0.0.0.0"]
     ports:
       - "${FRONTEND_BIND_ADDRESS:-127.0.0.1}:${FRONTEND_PORT:-3000}:3000"
     volumes:
@@ -875,36 +651,11 @@ services:
       start_period: 20s
     restart: unless-stopped
 
-  frontend-e2e:
-    profiles:
-      - e2e
-    image: ${COMPOSE_PROJECT_NAME:-mictlan-mezcal}-frontend-e2e:dev
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.e2e
-    init: true
-    environment:
-      NODE_ENV: development
-      CI: "true"
-      NEXT_TELEMETRY_DISABLED: "1"
-      INTERNAL_API_URL: http://backend:3000
-      NEXT_PUBLIC_API_URL: http://backend:3000
-      MEDIA_BASE_URL: http://localhost:3100
-    volumes:
-      - ./frontend/src:/app/src
-      - ./frontend/public:/app/public
-      - ./frontend/e2e:/app/e2e
-      - ./frontend/playwright.config.js:/app/playwright.config.js:ro
-    command: ["npm", "run", "test:e2e"]
-    depends_on:
-      backend:
-        condition: service_healthy
-
 volumes:
   postgres_data:
 ~~~
 
-Este Compose reproduce el archivo versionado de la aplicación completa, incluido el perfil opcional `e2e`. Si estás construyendo únicamente el esqueleto, el servicio E2E requiere los archivos adicionales de Playwright del frontend completo y permanece desactivado en el arranque normal. El endpoint <code>/readyz</code> de Mailpit devuelve HTTP 200 cuando está listo. El worker usa un script pequeño que verifica la conexión a PostgreSQL para que Docker también pueda reportar su estado de salud. [Health checks de Mailpit](https://mailpit.axllent.org/docs/integration/healthcheck/)
+Este ejemplo reproduce la infraestructura base. El endpoint <code>/readyz</code> de Mailpit devuelve HTTP 200 cuando está listo. El worker usa un script pequeño que verifica la conexión a PostgreSQL para que Docker también pueda reportar su estado de salud. [Health checks de Mailpit](https://mailpit.axllent.org/docs/integration/healthcheck/)
 
 #### Decisiones de Compose
 
@@ -915,3 +666,212 @@ Este Compose reproduce el archivo versionado de la aplicación completa, incluid
 - El worker comparte la imagen y las dependencias del backend, pero ejecuta otro proceso. Lee y actualiza trabajos de correo en PostgreSQL y no necesita puerto HTTP. El esqueleto de este tutorial sólo verifica la conectividad con la base.
 - Next.js usa <code>backend:3000</code> para las consultas SSR privadas. Las interacciones iniciadas por el navegador usan <code>NEXT_PUBLIC_API_URL</code> y el puerto publicado de Express.
 - El directorio generado de Prisma se encuentra en <code>/app/generated</code>, fuera de los volúmenes montados. Así, el montaje de <code>src/</code> no oculta el cliente y el inicio regenera el cliente a partir del esquema local.
+
+<a id="arranque-y-comprobacion"></a>
+### 6. Construir y arrancar el entorno
+
+Desde la raíz del directorio de trabajo, crea `.env` si aún no existe. `cp -n` conserva cualquier archivo que ya tengas:
+
+~~~bash
+cp -n .env.example .env
+~~~
+
+Valida la sintaxis e interpolación antes de crear contenedores. Si falta una variable requerida, Compose lo indica aquí:
+
+~~~bash
+docker compose config --quiet
+~~~
+
+Construye las imágenes y espera a que los servicios estén en estado <code>healthy</code>:
+
+~~~bash
+docker compose up --build --detach --wait --wait-timeout 180
+docker compose ps
+~~~
+
+En la primera ejecución, Compose construye las imágenes de los servicios que tienen `build` y descarga las imágenes publicadas que falten, como PostgreSQL y Mailpit. Mailpit no requiere un Dockerfile propio: Compose usa `axllent/mailpit:v1.31.5` y crea su contenedor junto con los demás servicios. `--wait` espera a que PostgreSQL, Mailpit, backend, worker y frontend estén saludables antes de devolver el control. [Comando `docker compose up`](https://docs.docker.com/reference/cli/docker/compose/up/)
+
+<a id="comprobacion-servicios"></a>
+### 7. Comprobar cada servicio
+
+#### PostgreSQL, Prisma y API
+
+~~~bash
+docker compose exec --no-TTY postgres \
+  sh -c 'pg_isready --username="$POSTGRES_USER" --dbname="$POSTGRES_DB"'
+
+docker compose exec --no-TTY backend npm run prisma:validate
+docker compose exec --no-TTY backend npm run prisma:generate
+curl --fail --show-error --silent http://localhost:4000/health
+~~~
+
+La respuesta esperada de <code>/health</code> es <code>{"status":"ok"}</code>. La ruta ejecuta <code>SELECT 1</code> con Prisma; si PostgreSQL no responde, Express devuelve HTTP 503. En este esqueleto inicial todavía no hay modelos de negocio ni migraciones; la aplicación actual sí los incluye.
+
+Comprueba el estado de todos los servicios:
+
+~~~bash
+docker compose ps
+docker compose logs --no-color --tail=30 worker
+~~~
+
+Todos los servicios deben aparecer como <code>Up</code> y <code>healthy</code>. En el esqueleto inicial el worker informa que PostgreSQL está disponible. En la aplicación actual aparece <code>Worker de correo iniciado.</code> y el proceso también atiende trabajos de correo.
+
+#### Frontend
+
+~~~bash
+curl --fail --show-error --silent --output /dev/null \
+  --write-out 'HTTP %{http_code}\n' \
+  http://localhost:3000
+~~~
+
+El comando debe mostrar un estado HTTP <code>200</code>. Abre <code>http://localhost:3000</code> en un navegador: el esqueleto muestra la pantalla inicial de Next.js; el clon completo muestra la tienda.
+
+#### Mailpit
+
+Envía un mensaje de comprobación por el SMTP interno de Mailpit:
+
+~~~bash
+docker compose exec --no-TTY mailpit sendmail <<'EMAIL'
+From: infra@example.test
+To: developer@example.test
+Subject: Mailpit SMTP check
+
+El servidor SMTP local recibió este mensaje de prueba.
+EMAIL
+~~~
+
+Abre <code>http://localhost:8025</code> (o el puerto definido por <code>MAILPIT_PORT</code>) y confirma que aparece el mensaje. Mailpit almacena correo temporal de desarrollo; no es un proveedor de envío ni un archivo de correo. Sus puertos predeterminados son UI <code>8025</code> y SMTP <code>1025</code>. [Documentación Docker de Mailpit](https://mailpit.axllent.org/docs/install/docker/)
+
+## Mapa de entornos y recorridos
+
+| Recorrido | Aplicación y acceso | Medios | Correo y pagos | Instrucciones |
+|---|---|---|---|---|
+| Desarrollo local estándar | Compose; navegador en `localhost` | Archivos locales servidos por Next.js | Mailpit; Stripe CLI opcional para pagos de prueba | [Desarrollo local](#desarrollo-local) |
+| Desarrollo por LAN | Los mismos contenedores; navegador en la IP del anfitrión | Medios locales por LAN o URL pública de R2 | Mailpit; Stripe CLI puede reenviar al puerto publicado de la API | [Desarrollo LAN](#desarrollo-lan) |
+| Prueba de medios con R2 desde Compose | Compose local, con URL pública no productiva de R2 | Bucket no productivo | Mailpit; no cambia el proveedor de correo | [Guía R2](../cloudflare/r2.md) |
+| Staging | Servicios separados en Railway | Recursos R2 no productivos | Resend y credenciales Stripe de prueba | [Despliegue en Railway](../deployment/railway-staging-produccion.md) |
+| Producción objetivo | Railway y la capa pública de Cloudflare | Bucket y hostname de producción | Resend y credenciales Stripe de producción | [Despliegue](../deployment/railway-staging-produccion.md) y [Cloudflare](../cloudflare/implementacion.md) |
+
+El acceso LAN y el origen de los medios son opciones independientes que se pueden combinar. Para medios locales, la URL debe usar la IP del anfitrión; para R2, se usa su URL pública HTTPS. Mailpit conserva su SMTP privado en Compose y su bandeja web queda accesible desde la LAN al activar ese modo. Railway es la configuración separada para probar Resend y los servicios externos con recursos de staging.
+
+<a id="desarrollo-local"></a>
+## Desarrollo local estándar
+
+En un clon de la aplicación completa, sigue primero los [pasos 6 y 7 de arranque y comprobación](#arranque-y-comprobacion). Después aplica las migraciones existentes y, sólo para una base local de demostración, carga las tres fichas:
+
+~~~bash
+docker compose exec backend npm run prisma:migrate:deploy
+docker compose exec -T postgres sh -c 'psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < backend/prisma/dev-showcase.sql
+~~~
+
+El SQL contiene precios provisionales y no es un catálogo comercial. La [guía de Railway](../deployment/railway-staging-produccion.md) explica los Dockerfiles de producción.
+
+### Flujo diario de Prisma
+
+Cuando se agregue un modelo a <code>backend/prisma/schema.prisma</code>, crea y aplica una migración local con un nombre descriptivo:
+
+~~~bash
+docker compose exec --no-TTY \
+  --user "$(id -u):$(id -g)" \
+  --env HOME=/tmp \
+  backend \
+  npm run prisma:migrate:dev -- --name nombre_descriptivo
+~~~
+
+La migración se escribe en el directorio <code>backend/prisma</code> montado desde el host. Ejecutar este comando con el UID y GID del usuario anfitrión deja los archivos generados editables desde el host.
+
+<code>migrate dev</code> es el comando de desarrollo: crea y aplica migraciones. Prisma 7 no ejecuta <code>prisma generate</code> automáticamente después de las migraciones, así que genera el cliente explícitamente:
+
+~~~bash
+docker compose exec backend npm run prisma:generate
+~~~
+
+Para aplicar migraciones ya versionadas en una base local:
+
+~~~bash
+docker compose exec backend npm run prisma:migrate:deploy
+docker compose exec backend npm run prisma:migrate:status
+~~~
+
+No confirmes un reset si hay datos locales que necesites conservar. Prisma documenta <code>migrate dev</code> para desarrollo y <code>migrate deploy</code> para aplicar migraciones pendientes. En Prisma 7, <code>migrate dev</code> no ejecuta <code>prisma generate</code> automáticamente, por lo que los comandos aparecen como pasos separados. [Referencia CLI de Prisma 7](https://www.prisma.io/docs/orm/v7/reference/prisma-cli-reference)
+
+### Verificaciones de la aplicación completa
+
+Con el esquema aplicado, las pruebas y el lint del repositorio se ejecutan dentro de Compose:
+
+~~~bash
+docker compose exec backend npm test
+docker compose exec backend npm run test:db
+docker compose exec frontend npm test
+docker compose exec backend npm run lint
+docker compose exec frontend npm run lint
+~~~
+
+Las pruebas de base necesitan migraciones aplicadas y un entorno de prueba adecuado. Los comandos de este apartado describen cómo ejecutarlas; no indican que hayan pasado en esta revisión documental.
+
+### Detener y limpiar
+
+Detén los contenedores y la red sin borrar los datos de PostgreSQL:
+
+~~~bash
+docker compose down
+~~~
+
+Para volver a iniciar el entorno:
+
+~~~bash
+docker compose up --build --detach --wait --wait-timeout 180
+~~~
+
+Para borrar también el volumen y perder los datos locales de PostgreSQL:
+
+~~~bash
+docker compose down --volumes
+~~~
+
+No uses <code>--volumes</code> como solución rutinaria a un error de Prisma o Compose: elimina los datos persistidos. Revisa primero <code>docker compose logs --follow &lt;servicio&gt;</code> y el estado mostrado por <code>docker compose ps</code>.
+<a id="desarrollo-lan"></a>
+## Desarrollo por LAN
+
+Usa este modo para abrir la tienda desde otro equipo o teléfono conectado a la misma red. Indica la IPv4 del anfitrión; el script publica la tienda, la API y la bandeja web de Mailpit para el acceso LAN, y deja PostgreSQL con el enlace definido en `.env` y el SMTP de Mailpit sólo en la red interna de Compose.
+
+Next.js ejecuta `next dev`; las interacciones del navegador para cuentas y carritos llaman a Express, así que el modo LAN publica tanto el frontend como la API. La red privada de Compose y la dirección `backend:3000` para SSR no cambian.
+
+Para usar medios locales:
+
+~~~bash
+scripts/dev-lan.sh up 192.168.1.20
+~~~
+
+El script usa los puertos configurados en `.env` (`FRONTEND_PORT`, `BACKEND_PORT` y `MAILPIT_PORT`). Con los valores predeterminados, abre la tienda en `http://192.168.1.20:3000`, la API en `http://192.168.1.20:4000` y Mailpit en `http://192.168.1.20:8025`; sustituye la IP por la del anfitrión. Si cambiaste los puertos, el script imprime las direcciones resultantes. La interfaz de Mailpit queda disponible para revisar los mensajes generados durante las pruebas.
+
+Para que el dispositivo cargue los medios desde R2, pasa la URL pública HTTPS del bucket no productivo:
+
+~~~bash
+scripts/dev-lan.sh up 192.168.1.20 --media-url https://pub-47df7d3a7dd94d268c1661b2c36e0ae5.r2.dev
+~~~
+
+Con `--media-url`, el script establece esa URL en `MEDIA_BASE_URL` y `STRIPE_MEDIA_BASE_URL` y reconstruye las imágenes para que Next.js admita el origen. Esto sólo cambia las URL usadas para obtener medios; no abre puertos para R2 ni cambia el worker de correo. Sin esa opción, las imágenes se sirven desde la aplicación en la dirección LAN.
+
+Si modificas `frontend/next.config.mjs`, reconstruye la imagen del frontend porque Compose no monta ese archivo. El script ya usa `--build` cuando recibe `--media-url`.
+
+En ambos casos, `NEXT_PUBLIC_API_URL`, `FRONTEND_ORIGIN` y `APP_BASE_URL` usan la IP del anfitrión. `NEXT_ALLOWED_DEV_ORIGIN` recibe sólo el hostname, sin protocolo ni puerto. `INTERNAL_API_URL=http://backend:3000` permanece sin cambios: Next.js sigue consultando Express por la red privada de Compose. El worker continúa usando Mailpit por `mailpit:1025`.
+
+Para volver al modo local estándar, sin cambiar `.env` ni borrar datos de PostgreSQL:
+
+~~~bash
+scripts/dev-lan.sh off
+~~~
+
+El comando recrea frontend, API, worker y Mailpit con los valores base de `.env` y retira el archivo temporal de configuración LAN. Si cambia la IP del anfitrión, vuelve a activar el modo con la nueva dirección.
+
+El script conserva los valores de `.env` y añade un archivo temporal sólo para Compose. Compose procesa los archivos `--env-file` en orden y los posteriores pueden reemplazar los anteriores; consulta la [documentación oficial de interpolación de variables](https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/) para más detalles.
+
+## Integraciones externas y staging
+
+- **R2 desde desarrollo local:** puedes usar la opción `--media-url` del script LAN para probar el origen público desde otro dispositivo. La [guía de R2](../cloudflare/r2.md) mantiene el inventario, los requisitos del bucket y las comprobaciones de medios.
+- **Stripe en desarrollo local:** Stripe CLI reenvía los webhooks de prueba a la API local; sigue la [guía de Stripe](../stripe/implementacion.md). Stripe Checkout usa `STRIPE_MEDIA_BASE_URL` sólo si necesita descargar imágenes desde una URL pública.
+- **Resend:** Compose fija `NODE_ENV=development` y el worker usa SMTP con Mailpit. Resend se valida en Railway staging con su clave y remitentes de ese entorno; no actives Resend cambiando el modo LAN. Consulta la [guía de Resend](../resend/implementacion.md).
+- **Staging y producción:** la [guía de Railway](../deployment/railway-staging-produccion.md) es la instrucción operativa para servicios, variables, secretos, migraciones y aceptación. La [guía de Cloudflare](../cloudflare/implementacion.md) organiza DNS, proxy y dominios; la [guía de R2](../cloudflare/r2.md) cubre medios.
+
+El estado de cada recurso externo y las comprobaciones realizadas se documentan en su guía específica. Esta sección ofrece el mapa para elegir el recorrido sin duplicar esos procedimientos.
