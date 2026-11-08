@@ -12,6 +12,7 @@ Presentar la marca y su catálogo, permitir preparar compras como invitado o cli
 
 - Landing con navegación, escaparate, aviso de mayoría de edad y contador de sesiones de navegador. El contador no identifica personas ni guarda IP.
 - El aviso aparece cuando la sección de mezcales entra en pantalla. “Entrar al Mictlán” recuerda la respuesta en `sessionStorage` de esa pestaña; “No, salir del sitio” abre Google en otra pestaña y deja la original abierta sin conceder acceso al escaparate. Es una declaración, no una verificación de identidad ni un consentimiento de cookies.
+- El aviso de mayoría de edad es independiente del consentimiento de cookies; rechazar cookies no debe bloquear la navegación.
 - Productos, precios, disponibilidad y referencias de medios se administran manualmente en PostgreSQL; no hay panel administrativo, inventario ni carga de archivos.
 - La tienda sólo vende productos activos. Antes de cobrar, el backend vuelve a comprobar que sigan activos y toma el precio vigente.
 - El alcance de contenido comprende la landing y el catálogo. Agregar medios por sí solo no amplía el alcance funcional.
@@ -20,8 +21,10 @@ Presentar la marca y su catálogo, permitir preparar compras como invitado o cli
 
 - Registro, confirmación de correo, inicio/cierre de sesión, recuperación y cambio de contraseña, actualización de perfil y cambio de correo confirmado.
 - El registro solicita nombre, apellidos, correo, fecha de nacimiento y dirección en México. La fecha debe acreditar al menos 18 años; el código postal debe tener cinco dígitos. No se consulta un servicio externo de direcciones.
+- La dirección incluye calle, número, colonia, localidad o ciudad, estado y código postal. La información personal se puede editar y una fecha de nacimiento modificada debe seguir acreditando mayoría de edad.
 - La cuenta sólo se activa al confirmar el correo. Si el registro nació durante el checkout, confirmar el correo inicia sesión y continúa al resumen de compra; en los demás casos vuelve a la tienda.
 - La cuenta contiene las secciones **Información personal**, **Contraseña** y **Mis pedidos**. Sólo la información personal permite editar los datos del perfil; la contraseña tiene su propio formulario.
+- Con sesión iniciada, el encabezado muestra un saludo con el primer nombre; el menú da acceso a la cuenta, los pedidos y el cierre de sesión.
 - Registro e inicio de sesión deberán protegerse con Cloudflare Turnstile validado también por el backend. **Pendiente:** actualmente Turnstile no está integrado; se incluye en la fase 08 del roadmap.
 
 ### Carrito y checkout
@@ -40,6 +43,7 @@ Presentar la marca y su catálogo, permitir preparar compras como invitado o cli
 ## Fuera del MVP
 
 - Panel administrativo, inventario, reserva de existencias, logística e integración con proveedores de entrega.
+- Varios carritos o borradores de compra simultáneos por cuenta.
 - Páginas independientes de categorías o detalle de producto.
 - Administración de tarjetas desde el perfil o guardar una tarjeta fuera de una compra.
 - Documentos fiscales, marketing y recuperación de carritos.

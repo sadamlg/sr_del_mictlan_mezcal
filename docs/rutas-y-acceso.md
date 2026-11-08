@@ -2,6 +2,23 @@
 
 Esta guía diferencia las páginas que muestra el navegador de las operaciones de la API. Las primeras presentan la interfaz; las segundas leen o cambian datos en el backend.
 
+## Primero: ¿qué es una ruta?
+
+Una **ruta** es una dirección que lleva a una página o pide una acción al sistema. Por ejemplo:
+
+- `/cuenta/registro` abre el formulario para crear una cuenta.
+- `POST /api/auth/register` envía ese formulario al backend para procesar el registro.
+
+La ruta de la página y la ruta de la API son distintas aunque formen parte del mismo recorrido. La página muestra la interfaz; la API recibe o devuelve datos.
+
+En las rutas de API, la palabra al principio indica qué se quiere hacer:
+
+- `GET`: consultar información.
+- `POST`: enviar información o solicitar una acción.
+- `PATCH`: actualizar información existente.
+- `PUT`: crear o reemplazar el estado de un elemento.
+- `DELETE`: retirar un elemento.
+
 ## Tipos de acceso
 
 | Acceso | Significado |

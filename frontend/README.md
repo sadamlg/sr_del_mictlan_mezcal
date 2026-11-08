@@ -13,3 +13,7 @@ docker compose run --rm frontend-e2e
 ```
 
 `npm test` ejecuta las pruebas unitarias de `frontend/tests/`. Playwright ejecuta recorridos de navegador ubicados en `frontend/e2e/`.
+
+## Referencias
+
+El frontend se creó con `create-next-app`. Para consultar conceptos generales del framework y su App Router, revisa la [documentación de Next.js](https://nextjs.org/docs) y [Learn Next.js](https://nextjs.org/learn). La configuración y el despliegue de este proyecto se describen en sus propias guías; el texto del generador sobre Geist y Vercel no describe la configuración actual.
