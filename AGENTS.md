@@ -7,8 +7,14 @@
 - `docs/ROADMAP.md`: estado y próximos hitos.
 - `docs/contracts/`: comportamiento actual de cada módulo.
 - `docs/docker/`, `docs/cloudflare/`, `docs/stripe/`, `docs/resend/`, `docs/neubox/` y `docs/deployment/`: guías para reproducir infraestructura e integraciones.
-- `design.md`: sistema visual; `frontend/src/app/globals.css` implementa sus tokens.
+- `docs/DESIGN.md`: sistema visual; `frontend/src/app/globals.css` implementa sus tokens.
 - Mantén cada hecho en su fuente principal. En otros documentos, enlázala en vez de copiar su contenido. Distingue funciones implementadas, pendientes y dependientes de configuración externa.
+
+## Idioma
+
+- Mantén la documentación del proyecto en español como idioma principal.
+- Redacta en inglés los mensajes de commit y los títulos y descripciones de PR para facilitar la revisión internacional.
+- Si se añade una traducción, identifícala claramente y enlázala con la versión en español para que ambas se puedan encontrar.
 
 ## Conservación de la documentación
 
@@ -37,7 +43,7 @@
 
 - No amplíes el MVP por agregar o cambiar medios en una superficie aprobada; revisa el contrato si cambia una página, un flujo o una capacidad de usuario.
 - Usa Tailwind CSS 4 como opción predeterminada. Agrupa componentes por responsabilidades claras y evita un archivo por elemento visual.
-- Sigue `design.md` y sus tokens `mictlan-*`; no sustituyas los colores de marca con colores cromáticos genéricos de Tailwind. Si falta un rol cromático, actualiza `design.md` y `globals.css` juntos.
+- Sigue `docs/DESIGN.md` y sus tokens `mictlan-*`; no sustituyas los colores de marca con colores cromáticos genéricos de Tailwind. Si falta un rol cromático, actualiza `docs/DESIGN.md` y `globals.css` juntos.
 - Usa Lucide React para iconos. Valida en navegador cambios de interfaz, estados relevantes, accesibilidad, responsividad y consola.
 
 - Antes de migrar una sección existente de la landing, revisa su estructura, recursos, estilos, interacciones y tamaños en la referencia disponible. Conserva el comportamiento aprobado y señala ambigüedades antes de cambiarlo.

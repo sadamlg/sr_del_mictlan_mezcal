@@ -1,17 +1,8 @@
 # Señor del Mictlán
 
-![Architecture overview](./architecture-overview.png)
+![Architecture](./docs/ARCHITECTURE.png)
 
 Señor del Mictlán reúne mezcales de agave Cupreata silvestre y destilados procedentes de Etúcuaro, Michoacán. Este repositorio contiene el desarrollo de su tienda en línea, landing y catálogo digital.
-
-La arquitectura combina Next.js, React y Tailwind CSS para la experiencia web; una API REST construida con Express; y PostgreSQL con Prisma ORM para los datos de usuarios, productos, carritos, pedidos y trabajos de correo. Stripe Checkout gestiona el pago alojado y el backend valida los webhooks firmados de Stripe. Un worker de Node.js procesa los trabajos de correo guardados en PostgreSQL y solicita su envío mediante Resend.
-
-Si quieres saber qué direcciones puede visitar una persona y cuáles requieren sesión o un enlace de correo, consulta la guía sencilla de [rutas y acceso al sistema](docs/rutas-y-acceso.md).
-
-La arquitectura de producción prevista utiliza Railway para alojar el frontend, la API, el worker y PostgreSQL. Cloudflare proporciona DNS, proxy, CDN y TLS para los hostnames públicos; Cloudflare R2 almacena y sirve las imágenes de productos y los medios de la landing. Durante el renderizado del servidor, Next.js consulta la API por la red privada. Las interacciones del navegador llegan a la API mediante su hostname público.
-
-El entorno local de desarrollo se construye con Docker Compose e incluye frontend, backend, PostgreSQL, worker y Mailpit para probar correo. Las guías del repositorio documentan el stack, la infraestructura, el despliegue y las decisiones de servicios y costos.
-
 
 ## Stack
 
@@ -26,22 +17,14 @@ El entorno local de desarrollo se construye con Docker Compose e incluye fronten
 | Pagos | Stripe Checkout | Checkout alojado y notificaciones firmadas de pago |
 | Correo | Resend | Correos transaccionales, como recuperación de contraseña y confirmación de pedidos |
 | Medios | Cloudflare R2 | Almacenar y entregar imágenes de producto y medios de la landing |
-| Capa pública | Cloudflare Free | DNS autoritativo; proxy/CDN y TLS para hostnames configurados como *Proxied*; WAF, protección DDoS y Bot Fight Mode (requiere habilitación) |
+| Capa pública | Cloudflare Free | DNS autoritativo; proxy/CDN y TLS para los hostnames públicos; WAF, protección DDoS y Bot Fight Mode |
 | Despliegue | Railway | Alojar frontend, backend, worker y PostgreSQL |
-
-## Documentación
-
-- [Alcance funcional del MVP](docs/MVP_SCOPE.md) y [roadmap](docs/ROADMAP.md).
-- [Desarrollo local con Docker Compose](docs/docker/guia-de-construccion-docker-compose.md) y [despliegue en Railway](docs/deployment/railway-staging-produccion.md).
-- [Rutas y acceso al sistema](docs/rutas-y-acceso.md).
-- [Implementación de Cloudflare](docs/cloudflare/implementacion.md) y [guía de R2](docs/cloudflare/r2.md).
-- Contratos funcionales: [catálogo](docs/contracts/catalogo-landing.md), [cuentas](docs/contracts/cuentas-perfil.md), [carritos](docs/contracts/carritos.md), [pedidos](docs/contracts/checkout-y-pedidos.md) y [visitas](docs/contracts/visitas-landing.md).
-- [Servicios y costos](docs/servicios-y-costos.md).
-- Para ejecutar las pruebas E2E de Playwright manualmente: `docker compose run --build --rm frontend-e2e`.
 
 ## Arquitectura
 
-El diagrama muestra las conexiones entre el navegador, Cloudflare, Railway y los servicios externos. Cloudflare se conectará cuando se configure el dominio; al inicio, *staging* puede usar las URL de Railway.
+Cloudflare publica los hostnames de la tienda, la API y los medios. Durante el renderizado del servidor, Next.js consulta Express por la red privada de Railway; el navegador y los webhooks firmados de Stripe llegan a la API por su hostname público. El navegador carga las imágenes y los medios desde Cloudflare R2.
+
+El diagrama muestra las conexiones entre el navegador, Cloudflare, Railway y los servicios externos.
 
 ```mermaid
 flowchart TB
@@ -120,7 +103,7 @@ sequenceDiagram
 
 - Express comprueba que los productos sigan activos y usa sus precios vigentes; PostgreSQL conserva el pedido y sus datos históricos. El MVP no comprueba existencias.
 - Express crea la sesión de Stripe y devuelve al navegador la URL para abrir el Checkout alojado.
-- El backend verifica el webhook firmado de Stripe y actualiza el pedido en PostgreSQL. Después registra el trabajo de correo correspondiente en PostgreSQL; el worker consulta los trabajos pendientes, actualiza su estado y envía el correo mediante Resend. El redirect de regreso sirve para mostrar el resultado al cliente, pero no es prueba de pago.
+- El backend verifica la firma del webhook de Stripe. Cuando confirma un pago, valida la sesión, el importe y la moneda antes de marcar el pedido como pagado; en la misma transacción registra en PostgreSQL el trabajo de confirmación. El worker procesa ese trabajo y envía el correo mediante Resend. Los eventos de pago fallido o Checkout expirado cierran el pedido pendiente sin generar ese correo. Al volver de Checkout, la página consulta al backend el estado del pedido; sólo el webhook firmado puede confirmarlo como pagado.
 - El navegador obtiene las imágenes de producto y los medios de la landing mediante Cloudflare R2. PostgreSQL conserva referencias y metadatos, no los archivos.
 
 ## Ramas y despliegues
@@ -165,12 +148,13 @@ La opción `--build` reconstruye las imágenes antes de iniciar los contenedores
 
 Docker Compose construye las imágenes del frontend y backend, y levanta frontend, API, PostgreSQL, worker de correos y Mailpit. `--wait` espera los health checks de los servicios. Los procesos de desarrollo se ejecutan dentro de sus contenedores: el frontend con `npm run dev`, el backend genera Prisma Client y arranca Node con observación de cambios, y el worker con `npm run worker:dev`. No hace falta instalar Node.js en el anfitrión ni iniciar esos procesos manualmente.
 
-| Servicio | Dirección local |
+| Servicio o endpoint | Dirección local |
 |---|---|
 | Tienda frontend | [http://localhost:3000](http://localhost:3000) |
 | API; comprobar salud | [http://localhost:4000/health](http://localhost:4000/health) |
 | API; catálogo público | [http://localhost:4000/api/catalog/products](http://localhost:4000/api/catalog/products) |
 | API; contador de visitas | [http://localhost:4000/api/visits](http://localhost:4000/api/visits) |
+| [Webhook de Stripe (Stripe CLI)](docs/stripe/implementacion.md) | `POST http://localhost:4000/api/webhooks/stripe` |
 | Mailpit; bandeja de correo de desarrollo | [http://localhost:8025](http://localhost:8025) |
 | PostgreSQL | `localhost:5432` |
 
@@ -190,8 +174,7 @@ docker compose up --detach --force-recreate frontend backend
 docker compose up --build --detach --force-recreate frontend backend
 ```
 
-`restart` no aplica cambios de variables de entorno ni de publicación de puertos; para eso usa `--force-recreate`. Reconstruir las imágenes no es necesario para cambios sólo en `.env`.
-
+Usa `restart` si el proceso del frontend o de la API se detuvo o quedó bloqueado. Los cambios normales de código se aplican automáticamente durante el desarrollo.
 
 Para consultar la salida de los servicios, ejecuta `docker compose logs --follow`; Ctrl+C deja los contenedores en ejecución. Para detenerlos:
 
@@ -200,3 +183,12 @@ docker compose down
 ```
 
 Este comando conserva los volúmenes locales de PostgreSQL. `docker compose down -v` también los elimina y borra los datos locales.
+
+## Documentación
+
+- [Alcance funcional del MVP](docs/MVP_SCOPE.md) y [roadmap](docs/ROADMAP.md).
+- [Desarrollo local con Docker Compose](docs/docker/guia-de-construccion-docker-compose.md) y [despliegue en Railway](docs/deployment/railway-staging-produccion.md).
+- [Implementación de Cloudflare](docs/cloudflare/implementacion.md) y [guía de R2](docs/cloudflare/r2.md).
+- Contratos funcionales: [catálogo](docs/contracts/catalogo-landing.md), [cuentas](docs/contracts/cuentas-perfil.md), [carritos](docs/contracts/carritos.md), [pedidos](docs/contracts/checkout-y-pedidos.md) y [visitas](docs/contracts/visitas-landing.md).
+- [Servicios y costos](docs/servicios-y-costos.md).
+- Para ejecutar las pruebas E2E de Playwright manualmente: `docker compose run --build --rm frontend-e2e`.

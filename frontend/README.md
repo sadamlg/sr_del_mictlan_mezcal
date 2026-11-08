@@ -1,6 +1,6 @@
 # Frontend
 
-Interfaz de la tienda y sus flujos de cuenta, carrito, resumen de compra y pedidos. El proyecto usa Next.js, React y Tailwind CSS 4. La configuración visual está en [`../design.md`](../design.md); la guía principal para iniciar la aplicación está en [`../README.md`](../README.md).
+Interfaz de la tienda y sus flujos de cuenta, carrito, resumen de compra y pedidos. El proyecto usa Next.js, React y Tailwind CSS 4. La configuración visual está en [`../docs/DESIGN.md`](../docs/DESIGN.md); la guía principal para iniciar la aplicación está en [`../README.md`](../README.md).
 
 ## Comandos
 
