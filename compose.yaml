@@ -104,7 +104,6 @@ services:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
       MEDIA_BASE_URL: ${MEDIA_BASE_URL:-http://localhost:3000}
       NEXT_ALLOWED_DEV_ORIGIN: ${NEXT_ALLOWED_DEV_ORIGIN:-}
-    command: ["npm", "run", "dev", "--", "--hostname", "0.0.0.0"]
     ports:
       - "${FRONTEND_BIND_ADDRESS:-127.0.0.1}:${FRONTEND_PORT:-3000}:3000"
     volumes:
