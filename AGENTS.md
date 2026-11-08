@@ -10,6 +10,24 @@
 - `design.md`: sistema visual; `frontend/src/app/globals.css` implementa sus tokens.
 - Mantén cada hecho en su fuente principal. En otros documentos, enlázala en vez de copiar su contenido. Distingue funciones implementadas, pendientes y dependientes de configuración externa.
 
+## Conservación de la documentación
+
+- Trata el README, las guías y los contratos existentes como material aprobado. Antes de reescribirlos, revisa su contenido y su historial.
+- Simplificar significa mejorar el orden y eliminar duplicación sin perder instrucciones útiles, decisiones, ejemplos, criterios de cierre ni información necesaria para reproducir el proyecto.
+- No elimines, reduzcas drásticamente ni sustituyas una guía, sección sustancial o diagrama sin presentar antes qué contenido se perdería, dónde quedaría y obtener autorización explícita del usuario. Si el usuario ya autorizó ese cambio concreto, no vuelvas a pedirla.
+- Conserva las carpetas que agrupan documentación por tema o proveedor. Al mover o renombrar archivos, actualiza y comprueba sus enlaces.
+- El README es un documento protegido: no lo reestructures ni reduzcas sin una solicitud explícita. Los enlaces rotos pueden corregirse sin alterar su contenido.
+- Al actualizar una guía, conserva sus pasos para construir desde cero y distingue los ejemplos históricos del estado actual. Contrasta comandos, variables y comportamiento con los archivos y el código vigentes.
+- Antes de cerrar un cambio documental, compara la versión anterior y la nueva. Informa qué contenido se conservó, trasladó, actualizó o retiró. Verificar enlaces o levantar contenedores no demuestra por sí solo que se haya preservado la información.
+
+## Planificación y estado del roadmap
+
+- Para cada fase nueva o modificada, documenta: objetivo, fases o servicios que necesita antes de empezar, resultado esperado y comprobaciones concretas para darla por terminada.
+- Si una fase requiere una cuenta, dominio, configuración DNS, credencial o recurso externo, indica quién debe prepararlo y en qué momento. Incluye ese requisito antes del paso que lo utiliza y enlaza la guía correspondiente.
+- Al actualizar el estado de una fase, distingue si el código está implementado, si el servicio externo está configurado y si el recorrido completo se ha probado. Indica el entorno y la fecha de la evidencia; marca como pendiente lo que no se haya comprobado.
+- Conserva los resultados, dependencias y criterios de las fases anteriores. Si una decisión posterior los cambia, actualízalos y explica qué cambió sin borrar el contexto necesario para reconstruir el proyecto.
+- Antes de proponer la siguiente fase, comprueba sus requisitos contra el roadmap, el código y la configuración conocida. Señala lo que falte o no puedas verificar; no lo presentes como ya disponible.
+
 ## Referencia del proyecto anterior
 
 - Al iniciar una fase funcional, si está disponible `../sr_del_mictlan`, revisa sus contratos, decisiones, flujos, casos límite, pruebas y código relacionados. Es una referencia, no la fuente de verdad: adapta sólo lo compatible con la arquitectura y el alcance actuales.
@@ -35,6 +53,7 @@
 
 ## Flujo de trabajo
 
+- Al informar el estado del proyecto, revisa los PR abiertos y señala cuáles están pendientes o desactualizados. Si no puedes consultar GitHub, indícalo; no cierres ni fusiones un PR por tu cuenta al hacer esa revisión.
 - Trabaja en modo supervisado salvo delegación explícita: deja los cambios revisables y no hagas commits sin autorización explícita. Una autorización de commit no autoriza push, PR ni despliegue.
 - Mantén los cambios limitados a la solicitud. No agregues Redis ni BullMQ: PostgreSQL persiste los trabajos asíncronos y el worker los procesa.
 - Completa la parte de frontend de cada módulo antes de avanzar al siguiente. Mantén una fase del roadmap por chat salvo indicación del usuario.
