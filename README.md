@@ -22,7 +22,9 @@ Señor del Mictlán reúne mezcales de agave Cupreata silvestre y destilados pro
 
 ## Arquitectura
 
-Cloudflare publica los hostnames de la tienda, la API y los medios. Durante el renderizado del servidor, Next.js consulta Express por la red privada de Railway; el navegador y los webhooks firmados de Stripe llegan a la API por su hostname público. El navegador carga las imágenes y los medios desde Cloudflare R2.
+En producción, Cloudflare publica la tienda, el endpoint de la API para webhooks de Stripe y los medios. El navegador envía las solicitudes de la aplicación al mismo origen del frontend, bajo `/api/backend/*`; Next.js las reenvía a Express por la red privada de Railway. El renderizado del servidor también consulta Express por esa red. Stripe entrega sus webhooks al endpoint público de la API. El navegador carga las imágenes y los medios desde Cloudflare R2.
+
+La decisión de renderizado y los criterios SEO están en [Renderizado y SEO](docs/architecture/RENDERING-AND-SEO.md).
 
 El diagrama muestra las conexiones entre el navegador, Cloudflare, Railway y los servicios externos.
 
@@ -40,19 +42,21 @@ flowchart TB
         pg[("PostgreSQL<br/>datos del negocio y trabajos de correo<br/>red privada + volumen persistente")]
         worker["Worker<br/>correos · proceso separado"]
 
-        web -.->|"SSR: consulta del servidor Next.js<br/>red privada"| api
+        web -.->|"SSR y proxy /api/backend/*<br/>red privada"| api
         api -->|"SQL: datos del negocio y trabajos de correo<br/>red privada"| pg
         pg -->|"Entrega trabajos pendientes<br/>red privada"| worker
         worker -->|"Actualiza el estado del trabajo<br/>red privada"| pg
     end
 
-    browser -->|"HTTPS: tienda y API"| cf
+    browser -->|"HTTPS: tienda y solicitudes /api/backend/*"| cf
     cf -->|"Hostname de tienda"| web
-    cf -->|"Hostname de API y webhook"| api
+    cf -->|"Endpoint público de API para el webhook de Stripe"| api
 
     api -->|"Crear sesión de Checkout"| stripe
     stripe -->|"URL de Checkout"| api
-    api -->|"Devolver URL de pago"| browser
+    api -->|"Respuesta de API por el proxy"| web
+    web -->|"Respuesta HTTPS"| cf
+    cf --> browser
     browser -->|"Pago en página alojada"| stripe
     stripe -->|"Regreso del navegador<br/>solo para UX"| browser
     stripe -->|"Webhook firmado por HTTPS"| cf
@@ -65,7 +69,7 @@ flowchart TB
 
 ### Flujos principales
 
-Los recorridos se muestran por separado para distinguir la carga SSR de las peticiones que el navegador envía directamente a la API.
+Los recorridos distinguen la carga SSR, las solicitudes del navegador que pasan por el proxy del frontend y el webhook público de Stripe.
 
 #### Carga de una página renderizada por servidor
 
@@ -93,12 +97,15 @@ sequenceDiagram
 sequenceDiagram
     participant Browser as Navegador
     participant CF as Cloudflare
+    participant Next as Next.js · frontend
     participant Express as Express API
 
-    Browser->>CF: HTTPS: petición de API
-    CF->>Express: Hostname público de API
-    Express-->>CF: Respuesta de API
-    CF-->>Browser: Respuesta para la interfaz
+    Browser->>CF: HTTPS: petición al origen del frontend · /api/backend/auth/login
+    CF->>Next: Hostname de la tienda
+    Next->>Express: Proxy a /api/auth/login · red privada Railway
+    Express-->>Next: Respuesta y cookie de sesión
+    Next-->>CF: Respuesta bajo el origen del frontend
+    CF-->>Browser: Respuesta y cookie de primera parte
 ```
 
 - Express comprueba que los productos sigan activos y usa sus precios vigentes; PostgreSQL conserva el pedido y sus datos históricos. El MVP no comprueba existencias.

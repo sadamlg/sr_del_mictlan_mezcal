@@ -65,8 +65,9 @@ Estos resultados y criterios se conservaron del plan original. Las referencias a
 ### 02. Alcance y plan maestro — concluida
 
 - **Dependencias:** fase 01.
-- **Resultado esperado:** contrato funcional aprobado, instrucciones duraderas del repositorio, roadmap ordenado y guía de Cloudflare coherente con el momento de integración de medios.
-- **Criterio de cierre:** `docs/MVP_SCOPE.md`, `AGENTS.md`, este roadmap y la guía de Cloudflare concuerdan; quedan identificadas las dependencias y los criterios de cierre de las fases.
+- **Resultado esperado:** contrato funcional aprobado, instrucciones duraderas del repositorio, roadmap ordenado y arquitectura documentada para desarrollo y producción, incluida la ruta del navegador hacia la API.
+- **Decisión de arquitectura incorporada retrospectivamente:** en producción, el navegador usa el proxy del mismo origen del frontend (`/api/backend/*`); Next.js reenvía las solicitudes a Express por la red privada de Railway. El endpoint público de la API recibe el webhook de Stripe. Esta decisión debe conocerse antes de implementar las cuentas; la necesidad se hizo visible durante las pruebas de sesión en staging y móvil, no porque Railway requiera el proxy para conectar ambos servicios.
+- **Criterio de cierre:** `docs/MVP_SCOPE.md`, `AGENTS.md`, este roadmap y las guías de arquitectura concuerdan; quedan identificadas las dependencias y las comprobaciones previstas para cada fase.
 
 ### 03. Landing, catálogo y medios — concluida
 
@@ -80,6 +81,7 @@ Estos resultados y criterios se conservaron del plan original. Las referencias a
 **Verificación registrada al cerrar la fase:** las suites de backend, frontend y navegador, ESLint y el build de producción terminaron correctamente; Mailpit recibió los mensajes de registro y cambio de correo. No equivale a una ejecución nueva de esas pruebas.
 
 - **Dependencias:** fases 01 y 02; las pantallas se integran con las superficies definidas en fase 03.
+- **Sesión en producción:** la arquitectura de fase 02 define el proxy del frontend hacia la API antes de construir los flujos de cuenta. En Compose el navegador puede usar la URL local de la API; la estrategia de producción se valida al desplegar en fase 08.
 - **Resultado esperado:** registro con validación de mayoría de edad y dirección, inicio/cierre y restauración de sesión, recuperación de contraseña, edición de nombre(s), apellidos, correo, fecha de nacimiento y dirección, y las vistas de perfil y “Mis pedidos”.
 - **Correo:** se envía confirmación tras el registro; el login y las vistas privadas se habilitan después de consumir el enlace. Un cambio de correo sólo se aplica después de confirmar el nuevo destino. Esta fase incorpora el trabajo persistido en PostgreSQL y activa el worker existente con Mailpit para probar los mensajes de cuenta; Resend de producción se integra en la fase 07.
 - **Pedidos:** originalmente la vista mostraba un estado vacío; la fase 06 la conectó a órdenes reales.
@@ -109,7 +111,9 @@ Crear un trabajo persistido por pedido pagado, enviar por Resend una confirmaci�
 
 Desplegar los servicios no productivos y configurar Stripe en modo de prueba, correo y medios aislados. Configurar Turnstile en registro e inicio de sesión, validando el token en servidor con Siteverify. Cloudflare DNS/TLS para un dominio de staging sólo se configura cuando ese dominio esté disponible.
 
-**Cierre:** recorridos críticos aceptados en staging, incluidos tokens Turnstile válidos, ausentes e inválidos; secretos y datos separados de producción.
+Al desplegar el frontend, usar `Dockerfile.production`, el proxy `/api/backend/*` y `INTERNAL_API_URL` hacia la red privada de la API. El dominio público de la API se conserva para el webhook de Stripe. Esta solución se añadió después de encontrar problemas de sesión entre dominios y en navegadores móviles; no es un requisito de Railway para la conectividad entre servicios.
+
+**Cierre:** recorridos críticos aceptados en staging, incluidos tokens Turnstile válidos, ausentes e inválidos y la conservación de sesión al confirmar correo e iniciar sesión desde móvil; secretos y datos separados de producción.
 
 ### 09. Preparación de producción
 
