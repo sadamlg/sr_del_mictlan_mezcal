@@ -55,7 +55,7 @@ El límite de solicitudes es local a cada proceso. Con varias réplicas se neces
 
 El worker obtiene de PostgreSQL los trabajos de confirmación de registro, cambio de correo y recuperación. En Railway los envía mediante la API HTTPS de Resend; en Compose, Mailpit (`mailpit:1025`) captura esos mensajes por SMTP sin usar un proveedor externo. El correo de compra también usa Resend y se describe en el [contrato de Checkout y pedidos](checkout-y-pedidos.md).
 
-Para reproducir la configuración del dominio, los remitentes y el worker, consulta la [guía de Resend](../resend/implementacion.md) y la [guía de Neubox/cPanel](../neubox/dominio-y-dns.md).
+Para reproducir la configuración del dominio, los remitentes y el worker, consulta la [guía de Resend](../services/RESEND.md) y la [guía de Neubox/cPanel](../services/NEUBOX.md).
 
 Los trabajos de cuenta contienen identificador de usuario y tipo de mensaje, no la contraseña ni el token en claro. El worker crea el token al procesar y persiste su hash; los enlaces de confirmación de cuenta y cambio de correo vencen en 24 horas y los de recuperación en 30 minutos.
 

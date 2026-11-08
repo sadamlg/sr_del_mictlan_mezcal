@@ -748,9 +748,9 @@ Abre <code>http://localhost:8025</code> (o el puerto definido por <code>MAILPIT_
 |---|---|---|---|---|
 | Desarrollo local estándar | Compose; navegador en `localhost` | Archivos locales servidos por Next.js | Mailpit; Stripe CLI opcional para pagos de prueba | [Desarrollo local](#desarrollo-local) |
 | Desarrollo por LAN | Los mismos contenedores; navegador en la IP del anfitrión | Medios locales por LAN o URL pública de R2 | Mailpit; Stripe CLI puede reenviar al puerto publicado de la API | [Desarrollo LAN](#desarrollo-lan) |
-| Prueba de medios con R2 desde Compose | Compose local, con URL pública no productiva de R2 | Bucket no productivo | Mailpit; no cambia el proveedor de correo | [Guía R2](../cloudflare/r2.md) |
-| Staging | Servicios separados en Railway | Recursos R2 no productivos | Resend y credenciales Stripe de prueba | [Despliegue en Railway](../deployment/railway-staging-produccion.md) |
-| Producción objetivo | Railway y la capa pública de Cloudflare | Bucket y hostname de producción | Resend y credenciales Stripe de producción | [Despliegue](../deployment/railway-staging-produccion.md) y [Cloudflare](../cloudflare/implementacion.md) |
+| Prueba de medios con R2 desde Compose | Compose local, con URL pública no productiva de R2 | Bucket no productivo | Mailpit; no cambia el proveedor de correo | [Guía R2](../services/R2.md) |
+| Staging | Servicios separados en Railway | Recursos R2 no productivos | Resend y credenciales Stripe de prueba | [Despliegue en Railway](../services/RAILWAY.md) |
+| Producción objetivo | Railway y la capa pública de Cloudflare | Bucket y hostname de producción | Resend y credenciales Stripe de producción | [Despliegue](../services/RAILWAY.md) y [Cloudflare](../services/CLOUDFLARE.md) |
 
 El acceso LAN y el origen de los medios son opciones independientes que se pueden combinar. Para medios locales, la URL debe usar la IP del anfitrión; para R2, se usa su URL pública HTTPS. Mailpit conserva su SMTP privado en Compose y su bandeja web queda accesible desde la LAN al activar ese modo. Railway es la configuración separada para probar Resend y los servicios externos con recursos de staging.
 
@@ -764,7 +764,7 @@ docker compose exec backend npm run prisma:migrate:deploy
 docker compose exec -T postgres sh -c 'psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < backend/prisma/dev-showcase.sql
 ~~~
 
-El SQL contiene precios provisionales y no es un catálogo comercial. La [guía de Railway](../deployment/railway-staging-produccion.md) explica los Dockerfiles de producción.
+El SQL contiene precios provisionales y no es un catálogo comercial. La [guía de Railway](../services/RAILWAY.md) explica los Dockerfiles de producción.
 
 ### Flujo diario de Prisma
 
@@ -869,9 +869,9 @@ El script conserva los valores de `.env` y añade un archivo temporal sólo para
 
 ## Integraciones externas y staging
 
-- **R2 desde desarrollo local:** puedes usar la opción `--media-url` del script LAN para probar el origen público desde otro dispositivo. La [guía de R2](../cloudflare/r2.md) mantiene el inventario, los requisitos del bucket y las comprobaciones de medios.
-- **Stripe en desarrollo local:** Stripe CLI reenvía los webhooks de prueba a la API local; sigue la [guía de Stripe](../stripe/implementacion.md). Stripe Checkout usa `STRIPE_MEDIA_BASE_URL` sólo si necesita descargar imágenes desde una URL pública.
-- **Resend:** Compose fija `NODE_ENV=development` y el worker usa SMTP con Mailpit. Resend se valida en Railway staging con su clave y remitentes de ese entorno; no actives Resend cambiando el modo LAN. Consulta la [guía de Resend](../resend/implementacion.md).
-- **Staging y producción:** la [guía de Railway](../deployment/railway-staging-produccion.md) es la instrucción operativa para servicios, variables, secretos, migraciones y aceptación. La [guía de Cloudflare](../cloudflare/implementacion.md) organiza DNS, proxy y dominios; la [guía de R2](../cloudflare/r2.md) cubre medios.
+- **R2 desde desarrollo local:** puedes usar la opción `--media-url` del script LAN para probar el origen público desde otro dispositivo. La [guía de R2](../services/R2.md) mantiene el inventario, los requisitos del bucket y las comprobaciones de medios.
+- **Stripe en desarrollo local:** Stripe CLI reenvía los webhooks de prueba a la API local; sigue la [guía de Stripe](../services/STRIPE.md). Stripe Checkout usa `STRIPE_MEDIA_BASE_URL` sólo si necesita descargar imágenes desde una URL pública.
+- **Resend:** Compose fija `NODE_ENV=development` y el worker usa SMTP con Mailpit. Resend se valida en Railway staging con su clave y remitentes de ese entorno; no actives Resend cambiando el modo LAN. Consulta la [guía de Resend](../services/RESEND.md).
+- **Staging y producción:** la [guía de Railway](../services/RAILWAY.md) es la instrucción operativa para servicios, variables, secretos, migraciones y aceptación. La [guía de Cloudflare](../services/CLOUDFLARE.md) organiza DNS, proxy y dominios; la [guía de R2](../services/R2.md) cubre medios.
 
 El estado de cada recurso externo y las comprobaciones realizadas se documentan en su guía específica. Esta sección ofrece el mapa para elegir el recorrido sin duplicar esos procedimientos.

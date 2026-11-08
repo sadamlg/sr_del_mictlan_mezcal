@@ -12,7 +12,7 @@ La pantalla **Nameservers** del registrador cambia la delegación de toda la zon
 
 ## Añadir registros de Resend
 
-Primero crea el dominio o subdominio de envío en Resend como explica la [guía de correo](../resend/implementacion.md). Resend mostrará los registros necesarios para ese dominio. En **Zone Editor → Manage → Add Record**:
+Primero crea el dominio o subdominio de envío en Resend como explica la [guía de correo](RESEND.md). Resend mostrará los registros necesarios para ese dominio. En **Zone Editor → Manage → Add Record**:
 
 1. Copia el tipo, nombre/host, valor y prioridad exactamente como los muestra Resend. Si cPanel completa automáticamente `.srmictlan.com`, comprueba la vista final antes de guardar para no duplicar el sufijo.
 2. Añade registros nuevos sin reemplazar el MX que recibe el correo del dominio principal ni borrar SPF/DKIM de otros servicios. Un MX que Resend solicita para su subdominio de retorno no equivale al MX de tu buzón existente.
@@ -23,9 +23,9 @@ El proyecto usa `mail.srmictlan.com` como subdominio de envío. Los valores DNS 
 
 ## Conectar Railway o migrar DNS después
 
-Para un dominio personalizado de Railway, crea únicamente los registros de verificación y destino que Railway entregue para ese servicio y entorno. Valida HTTPS antes de reemplazar URLs de la aplicación. El despliegue inicial puede usar dominios públicos de Railway sin mover la delegación del dominio. Consulta [Railway](../deployment/railway-staging-produccion.md).
+Para un dominio personalizado de Railway, crea únicamente los registros de verificación y destino que Railway entregue para ese servicio y entorno. Valida HTTPS antes de reemplazar URLs de la aplicación. El despliegue inicial puede usar dominios públicos de Railway sin mover la delegación del dominio. Consulta [Railway](RAILWAY.md).
 
-Si más adelante decides administrar DNS en Cloudflare, copia primero todos los registros vigentes a la nueva zona, incluidos los de web, correo, Resend y verificaciones. Sólo entonces cambia los *nameservers* en Neubox y comprueba web, recepción de correo y envío desde Resend. Un cambio de *nameservers* afecta toda la zona, no sólo un subdominio. La URL de desarrollo `r2.dev` no requiere cambiar los *nameservers*; un hostname propio de medios de producción se prepara como explica [Medios](../cloudflare/r2.md).
+Si más adelante decides administrar DNS en Cloudflare, copia primero todos los registros vigentes a la nueva zona, incluidos los de web, correo, Resend y verificaciones. Sólo entonces cambia los *nameservers* en Neubox y comprueba web, recepción de correo y envío desde Resend. Un cambio de *nameservers* afecta toda la zona, no sólo un subdominio. La URL de desarrollo `r2.dev` no requiere cambiar los *nameservers*; un hostname propio de medios de producción se prepara como explica [Medios](R2.md).
 
 Al conectar dominios propios de frontend y API, comprueba HTTPS y el certificado del origen antes de activar el proxy o un modo TLS estricto. Evalúa WAF y Bot Fight Mode después: publicar registros DNS no activa automáticamente esos controles. Contrasta la configuración vigente con las guías de [Railway para dominios](https://docs.railway.com/networking/domains/working-with-domains) y [Cloudflare Full (Strict)](https://developers.cloudflare.com/ssl/origin-configuration/ssl-modes/full-strict/).
 

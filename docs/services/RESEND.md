@@ -4,12 +4,12 @@ La aplicación crea trabajos de correo en PostgreSQL y un worker los envía. En 
 
 ## Probar primero sin proveedor externo
 
-Levanta Compose según [Desarrollo local](../docker/guia-de-construccion-docker-compose.md). Registra una cuenta y abre http://localhost:8025 para ver el enlace de confirmación. Después haz una compra de prueba con [Stripe](../stripe/implementacion.md) y comprueba en Mailpit el mensaje con un solo PDF de detalle del pedido. Si no aparece, revisa `docker compose logs --follow worker` y el estado del trabajo en la base antes de cambiar credenciales.
+Levanta Compose según [Desarrollo local](../docker/guia-de-construccion-docker-compose.md). Registra una cuenta y abre http://localhost:8025 para ver el enlace de confirmación. Después haz una compra de prueba con [Stripe](STRIPE.md) y comprueba en Mailpit el mensaje con un solo PDF de detalle del pedido. Si no aparece, revisa `docker compose logs --follow worker` y el estado del trabajo en la base antes de cambiar credenciales.
 
 ## Preparar un dominio de envío
 
 1. Crea una cuenta de Resend y añade un dominio o subdominio que controles. En este proyecto se eligió `mail.srmictlan.com`; otra instalación debe usar su propio dominio.
-2. Copia los registros DNS que Resend muestre para **ese** dominio y cuenta al editor de la zona autoritativa. La [guía de Neubox y cPanel](../neubox/dominio-y-dns.md) explica dónde hacerlo y cómo preservar el correo existente.
+2. Copia los registros DNS que Resend muestre para **ese** dominio y cuenta al editor de la zona autoritativa. La [guía de Neubox y cPanel](NEUBOX.md) explica dónde hacerlo y cómo preservar el correo existente.
 3. Espera a que Resend indique que la capacidad de envío del dominio está verificada. Si un registro falla, revisa su nombre final, tipo, valor y propagación; no cambies *nameservers* para corregir un TXT individual.
 4. Define remitentes del dominio verificado: por ejemplo, `Señor del Mictlán <cuentas@mail.srmictlan.com>` para cuentas y `Señor del Mictlán <pedidos@mail.srmictlan.com>` para compras. Verificar un dominio permite enviar desde direcciones de ese dominio; recibir respuestas en esas direcciones requiere configurar por separado un buzón o reenvío. [Dominios verificados de Resend](https://resend.com/docs/dashboard/domains/introduction).
 

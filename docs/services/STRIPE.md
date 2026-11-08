@@ -24,7 +24,7 @@ docker compose up --detach --force-recreate backend
 
 5. Haz una compra con una [tarjeta de prueba de Stripe](https://docs.stripe.com/testing). Mantén la CLI abierta hasta que llegue el evento. Comprueba la entrega en la terminal, el pedido en **Mis pedidos**, la limpieza de los artículos pagados del carrito y el correo con PDF en Mailpit. Reintentar un mismo evento no debe duplicar el pedido ni el trabajo de correo.
 
-Cada vez que uses un listener o cuenta distintos, compara su secreto de firma con el `.env` activo. `STRIPE_SECRET_KEY` autentica llamadas a la API de Stripe; `STRIPE_WEBHOOK_SECRET` verifica eventos entrantes. No son intercambiables. Si el Checkout no muestra imágenes, usa un origen HTTPS público en `STRIPE_MEDIA_BASE_URL` según [Medios](../cloudflare/r2.md).
+Cada vez que uses un listener o cuenta distintos, compara su secreto de firma con el `.env` activo. `STRIPE_SECRET_KEY` autentica llamadas a la API de Stripe; `STRIPE_WEBHOOK_SECRET` verifica eventos entrantes. No son intercambiables. Si el Checkout no muestra imágenes, usa un origen HTTPS público en `STRIPE_MEDIA_BASE_URL` según [Medios](R2.md).
 
 ## Staging en Railway
 

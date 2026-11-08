@@ -2,7 +2,7 @@
 
 Esta guía permite configurar la aplicación en Railway desde cero. El responsable confirmó una compra de prueba en staging el 29 de octubre de 2026; quien prepare un entorno nuevo necesita su propia cuenta, dominios, secretos y remitentes. Las credenciales y los valores efectivos de esos entornos no se guardan en el repositorio.
 
-Antes de configurar staging, completa el [entorno local](../docker/guia-de-construccion-docker-compose.md), prueba [Stripe en local](../stripe/implementacion.md), prepara [medios no productivos](../cloudflare/r2.md) y verifica el dominio y remitentes según las guías de [Neubox y cPanel](../neubox/dominio-y-dns.md) y [Resend](../resend/implementacion.md). No necesitas cambiar los *nameservers* del dominio para usar los dominios públicos de Railway en staging.
+Antes de configurar staging, completa el [entorno local](../docker/guia-de-construccion-docker-compose.md), prueba [Stripe en local](STRIPE.md), prepara [medios no productivos](R2.md) y verifica el dominio y remitentes según las guías de [Neubox y cPanel](NEUBOX.md) y [Resend](RESEND.md). No necesitas cambiar los *nameservers* del dominio para usar los dominios públicos de Railway en staging.
 
 ## Por qué existen Dockerfiles de producción
 
@@ -101,16 +101,16 @@ Variables:
 
 Las cookies de sesión de producción usan `SameSite=Lax; Secure`. El proxy conserva `Origin` para que la API siga validando `FRONTEND_ORIGIN`, reenvía la cookie HttpOnly y conserva `X-Real-IP` para que el rate limit siga distinguiendo a cada cliente.
 
-Staging puede seguir usando el bucket no productivo documentado en [Cloudflare R2](../cloudflare/r2.md). Antes de producción configura un bucket y hostname separados, y reemplaza ambas URL de medios.
+Staging puede seguir usando el bucket no productivo documentado en [Cloudflare R2](R2.md). Antes de producción configura un bucket y hostname separados, y reemplaza ambas URL de medios.
 
 ## 5. Configurar Stripe y validar staging
 
 1. En Stripe, usa credenciales de prueba y crea un webhook que apunte a `https://<dominio-publico-api>/api/webhooks/stripe`.
-2. Suscribe el webhook a los cuatro eventos manejados por la aplicación y copia su secreto `whsec_…` a `STRIPE_WEBHOOK_SECRET` de staging. La [guía de Stripe](../stripe/implementacion.md) detalla la selección del destino, eventos y diferencia entre los secretos. No ejecutes `stripe listen` para un webhook ya publicado en Railway; Stripe llega directamente al dominio HTTPS.
+2. Suscribe el webhook a los cuatro eventos manejados por la aplicación y copia su secreto `whsec_…` a `STRIPE_WEBHOOK_SECRET` de staging. La [guía de Stripe](STRIPE.md) detalla la selección del destino, eventos y diferencia entre los secretos. No ejecutes `stripe listen` para un webhook ya publicado en Railway; Stripe llega directamente al dominio HTTPS.
 3. Despliega primero API y worker, confirma `/health` y que las migraciones terminaron. Después despliega frontend.
 4. Carga en staging el catálogo y las imágenes no productivas. No uses `backend/prisma/dev-showcase.sql` como catálogo real.
 5. Prueba registro, confirmación de cuenta, recuperación de contraseña, inicio de sesión, imágenes del catálogo y carrito, compra aceptada, compra cancelada, webhook, limpieza del carrito, orden y PDF, entrega/reintento del worker y logs de errores.
-6. Revisa los correos de cuenta y la confirmación de compra en Resend. La [guía de Resend](../resend/implementacion.md) explica la clave, remitentes y diagnóstico del worker.
+6. Revisa los correos de cuenta y la confirmación de compra en Resend. La [guía de Resend](RESEND.md) explica la clave, remitentes y diagnóstico del worker.
 7. Antes de dar por cerrada la fase 08, implementa y valida Turnstile: aún no está en el código. La integración debe validar el token en servidor con Cloudflare Siteverify.
 
 ### Ejemplo reproducible de catálogo para staging
@@ -118,7 +118,7 @@ Staging puede seguir usando el bucket no productivo documentado en [Cloudflare R
 Este ejemplo independiente crea tres fichas con precios provisionales en una base de **staging aislada**, después de aplicar las migraciones y con Stripe en modo de prueba. El archivo `backend/prisma/dev-showcase.sql` conserva su indicación de uso local; este bloque documenta por separado la decisión de usar precios de prueba también en staging. No uses estos importes para ventas reales ni ejecutes el bloque en producción.
 
 1. Instala Railway CLI y `psql`; ejecuta `railway login` y `railway link` desde la raíz del proyecto, y selecciona el proyecto correcto. Conecta la base del entorno de prueba con `railway connect postgres --environment Staging` (sustituye `postgres` y `Staging` si tus nombres son distintos). La [CLI de Railway](https://docs.railway.com/cli/connect) puede usar un túnel SSH cuando la base no tiene proxy público.
-2. Antes de ejecutar el bloque, confirma en Railway que la conexión corresponde a **Staging**, que Stripe usa claves de prueba y que las imágenes están cargadas en el bucket no productivo con las claves del [inventario R2](../cloudflare/r2.md). En el prompt de `psql`, pega:
+2. Antes de ejecutar el bloque, confirma en Railway que la conexión corresponde a **Staging**, que Stripe usa claves de prueba y que las imágenes están cargadas en el bucket no productivo con las claves del [inventario R2](R2.md). En el prompt de `psql`, pega:
 
 ```sql
 INSERT INTO products (

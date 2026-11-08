@@ -6,7 +6,7 @@
 - `docs/MVP_SCOPE.md`: alcance objetivo aprobado.
 - `docs/ROADMAP.md`: estado y próximos hitos.
 - `docs/contracts/`: comportamiento actual de cada módulo.
-- `docs/docker/`, `docs/cloudflare/`, `docs/stripe/`, `docs/resend/`, `docs/neubox/` y `docs/deployment/`: guías para reproducir infraestructura e integraciones.
+- `docs/docker/` y `docs/services/`: guías para reproducir infraestructura e integraciones.
 - `docs/DESIGN.md`: sistema visual; `frontend/src/app/globals.css` implementa sus tokens.
 - Mantén cada hecho en su fuente principal. En otros documentos, enlázala en vez de copiar su contenido. Distingue funciones implementadas, pendientes y dependientes de configuración externa.
 

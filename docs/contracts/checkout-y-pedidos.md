@@ -153,7 +153,7 @@ Para envío y reintentos, consulta la documentación oficial de [Send Email](htt
 
 Para implementar o revisar Stripe, consulta la documentación oficial sobre [crear Checkout Sessions](https://docs.stripe.com/api/checkout/sessions/create), [fulfillment](https://docs.stripe.com/checkout/fulfillment), [webhooks](https://docs.stripe.com/webhooks) y [reutilizar métodos de pago con consentimiento](https://docs.stripe.com/payments/existing-customers?platform=web&ui=stripe-hosted).
 
-La [guía de Stripe del proyecto](../stripe/implementacion.md) describe el listener local, los eventos, el endpoint de Railway y los problemas observados. La [guía de Resend](../resend/implementacion.md) detalla el envío y diagnóstico del correo con PDF.
+La [guía de Stripe del proyecto](../services/STRIPE.md) describe el listener local, los eventos, el endpoint de Railway y los problemas observados. La [guía de Resend](../services/RESEND.md) detalla el envío y diagnóstico del correo con PDF.
 
 ## Orden de implementación y pruebas de la fase 06
 

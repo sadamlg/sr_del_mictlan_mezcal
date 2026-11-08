@@ -1,6 +1,6 @@
 # Mapa de implementación de Cloudflare
 
-> Este documento resume la función de Cloudflare y el orden de su configuración pública. La preparación de R2, el inventario de medios y su integración tienen una sola guía: [Cloudflare R2 para los medios](r2.md). Verifica la documentación vigente del proveedor al configurar cada cuenta.
+> Este documento resume la función de Cloudflare y el orden de su configuración pública. La preparación de R2, el inventario de medios y su integración tienen una sola guía: [Cloudflare R2 para los medios](R2.md). Verifica la documentación vigente del proveedor al configurar cada cuenta.
 
 ## Qué se configura en cada servicio
 
@@ -8,7 +8,7 @@ Cloudflare puede administrar la zona DNS, el proxy/CDN y R2 desde una cuenta. R2
 
 El dominio puede estar registrado en cualquier registrador. Para la configuración habitual de Cloudflare Free, se agrega la zona a Cloudflare y se cambian los *nameservers* en el registrador. Antes de hacerlo, revisa y copia los registros DNS existentes, especialmente los de correo y verificación. [Configuración DNS principal](https://developers.cloudflare.com/dns/get-started/), [cambio de nameservers](https://developers.cloudflare.com/dns/nameservers/update-nameservers/)
 
-Para el dominio de este proyecto, la [guía de Neubox y cPanel](../neubox/dominio-y-dns.md) explica cómo identificar la zona actual, conservar sus registros y configurar los que solicita Resend antes de cualquier cambio de delegación.
+Para el dominio de este proyecto, la [guía de Neubox y cPanel](NEUBOX.md) explica cómo identificar la zona actual, conservar sus registros y configurar los que solicita Resend antes de cualquier cambio de delegación.
 
 Cloudflare administra la entrada pública y los medios; Railway ejecuta Next.js, Express, PostgreSQL y el worker. Las conexiones internas entre servicios Railway —por ejemplo, Next.js a Express durante SSR y Express a PostgreSQL— permanecen dentro de su red privada.
 
@@ -18,7 +18,7 @@ La compra de prueba y el correo con PDF fueron confirmados manualmente por el re
 
 ### 1. Preparar R2 para desarrollo/staging
 
-Sigue la [guía dedicada de R2](r2.md) para crear la cuenta, activar R2, preparar el bucket de staging, integrar el inventario completo de medios, cargar los archivos y configurar <code>MEDIA_BASE_URL</code>. El bucket de producción se prepara por separado en su fase.
+Sigue la [guía dedicada de R2](R2.md) para crear la cuenta, activar R2, preparar el bucket de staging, integrar el inventario completo de medios, cargar los archivos y configurar <code>MEDIA_BASE_URL</code>. El bucket de producción se prepara por separado en su fase.
 
 La integración local de R2 no requiere cambios DNS ni dominio personalizado. La carga del MVP es manual; no agregues credenciales de escritura a la aplicación. Consulta [Servicios y costos](../servicios-y-costos.md) antes de activar servicios para un entorno real.
 

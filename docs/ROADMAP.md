@@ -32,10 +32,10 @@ El mapa refleja la secuencia de trabajo; el estado detallado y la evidencia actu
 
 ## Orden para reproducir las integraciones
 
-1. **Fases 01–03:** construye o levanta el [entorno local con Docker](docker/guia-de-construccion-docker-compose.md) y prepara los [medios locales o R2 no productivo](cloudflare/r2.md).
-2. **Fases 04–06:** prueba cuentas y correo local en Mailpit; después configura [Stripe CLI y su webhook local](stripe/implementacion.md) para verificar Checkout y pedidos.
-3. **Fase 07:** prueba el correo de compra y el PDF en Mailpit. Para envío real, identifica el DNS en [Neubox/cPanel](neubox/dominio-y-dns.md), verifica un dominio y configura la clave y remitentes del worker siguiendo [Resend](resend/implementacion.md).
-4. **Fase 08:** prepara las imágenes de producción y los servicios con la [guía de Railway](deployment/railway-staging-produccion.md). Crea el webhook HTTPS de Stripe para staging con su propio secreto, configura medios y correo de ese entorno y acepta los recorridos completos. La [capa pública de Cloudflare](cloudflare/implementacion.md) se configura cuando se vaya a usar un dominio propio; no es requisito para la URL pública inicial de Railway.
+1. **Fases 01–03:** construye o levanta el [entorno local con Docker](docker/guia-de-construccion-docker-compose.md) y prepara los [medios locales o R2 no productivo](services/R2.md).
+2. **Fases 04–06:** prueba cuentas y correo local en Mailpit; después configura [Stripe CLI y su webhook local](services/STRIPE.md) para verificar Checkout y pedidos.
+3. **Fase 07:** prueba el correo de compra y el PDF en Mailpit. Para envío real, identifica el DNS en [Neubox/cPanel](services/NEUBOX.md), verifica un dominio y configura la clave y remitentes del worker siguiendo [Resend](services/RESEND.md).
+4. **Fase 08:** prepara las imágenes de producción y los servicios con la [guía de Railway](services/RAILWAY.md). Crea el webhook HTTPS de Stripe para staging con su propio secreto, configura medios y correo de ese entorno y acepta los recorridos completos. La [capa pública de Cloudflare](services/CLOUDFLARE.md) se configura cuando se vaya a usar un dominio propio; no es requisito para la URL pública inicial de Railway.
 5. **Fase 09:** prepara recursos, claves, dominios, respaldos y recuperación de producción después de aceptar staging. No uses claves de prueba ni los datos de demostración para ventas reales.
 
 Las guías incluyen los puntos de comprobación y los errores observados. El estado de las fases y el de cada cuenta externa deben revisarse por separado antes de continuar.
@@ -48,7 +48,7 @@ Las guías incluyen los puntos de comprobación y los errores observados. El est
 - Stripe Checkout crea sesiones en el servidor. El backend confirma órdenes mediante webhook firmado e idempotente, conserva una instantánea de compra y sólo muestra pedidos pagados a su titular. La interfaz permite cambiar el destinatario de la compra sin modificar el perfil, consultar los datos seguros de tarjetas guardadas y volver a pedir desde el resumen.
 - El webhook crea atómicamente un único trabajo de confirmación por pedido pagado. El worker envía por la API de Resend tanto los correos de compra con el detalle del pedido en PDF como los correos de cuenta en Railway; Compose usa Mailpit para las cuentas.
 - La integración con la API de Resend está en el código. Para enviar desde un entorno hace falta configurar una clave y un remitente verificado; el responsable confirmó la recepción de correos de prueba en staging el 29 de octubre de 2026. La aceptación completa y la configuración de producción siguen pendientes.
-- Hay Dockerfiles separados de producción y una [guía para configurar staging y producción en Railway](deployment/railway-staging-produccion.md). Hay servicios de staging desplegados y se confirmó una compra de prueba; el estado de cada recurso externo debe verificarse en Railway. Producción sigue pendiente.
+- Hay Dockerfiles separados de producción y una [guía para configurar staging y producción en Railway](services/RAILWAY.md). Hay servicios de staging desplegados y se confirmó una compra de prueba; el estado de cada recurso externo debe verificarse en Railway. Producción sigue pendiente.
 - Turnstile todavía no está implementado; corresponde a la fase 08.
 - El repositorio no contiene configuración versionada de despliegue a Railway ni de DNS/TLS. No se puede inferir desde el código si staging o producción están publicados o configurados.
 
