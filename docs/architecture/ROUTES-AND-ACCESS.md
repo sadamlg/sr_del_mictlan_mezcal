@@ -89,4 +89,4 @@ Estas operaciones requieren sesión válida. El backend deriva la cuenta de la c
 - Páginas: `frontend/src/app/`.
 - API: registro de rutas en `backend/src/server.js` y handlers de cada módulo bajo `backend/src/`.
 - El contador también tiene un endpoint Next.js en `frontend/src/app/api/visits/route.js`, que reenvía la solicitud a la API.
-- En desarrollo local, la [guía Docker](docker/guia-de-construccion-docker-compose.md#red-interna-de-compose-y-puertos) explica cómo se comunican SSR, el navegador y la API, y cómo abrirlos desde la LAN.
+- En desarrollo local, la [guía Docker](docker/COMPOSE.md#red-interna-de-compose-y-puertos) explica cómo se comunican SSR, el navegador y la API, y cómo abrirlos desde la LAN.

@@ -20,7 +20,7 @@ La compra de prueba y el correo con PDF fueron confirmados manualmente por el re
 
 Sigue la [guía dedicada de R2](R2.md) para crear la cuenta, activar R2, preparar el bucket de staging, integrar el inventario completo de medios, cargar los archivos y configurar <code>MEDIA_BASE_URL</code>. El bucket de producción se prepara por separado en su fase.
 
-La integración local de R2 no requiere cambios DNS ni dominio personalizado. La carga del MVP es manual; no agregues credenciales de escritura a la aplicación. Consulta [Servicios y costos](../servicios-y-costos.md) antes de activar servicios para un entorno real.
+La integración local de R2 no requiere cambios DNS ni dominio personalizado. La carga del MVP es manual; no agregues credenciales de escritura a la aplicación. Consulta [Servicios y costos](COSTS.md) antes de activar servicios para un entorno real.
 
 **Criterio de avance:** la aplicación muestra los medios previstos desde el entorno no productivo con claves estables, sin guardar URL temporales ni exponer credenciales.
 

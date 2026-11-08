@@ -1,6 +1,6 @@
 # Señor del Mictlán
 
-![Architecture](./docs/ARCHITECTURE.png)
+![Architecture](./docs/architecture/ARCHITECTURE.png)
 
 Señor del Mictlán reúne mezcales de agave Cupreata silvestre y destilados procedentes de Etúcuaro, Michoacán. Este repositorio contiene el desarrollo de su tienda en línea, landing y catálogo digital.
 
@@ -124,7 +124,7 @@ feature/* ── pull request ──> develop ──> Railway staging
 
 Se requiere Git, Docker Engine y Docker Compose. Desde la carpeta donde guardarás el proyecto:
 
-Para entender o reproducir la construcción de la infraestructura local desde cero, consulta la [guía de construcción con Docker Compose](docs/docker/guia-de-construccion-docker-compose.md). Si clonaste la aplicación actual, usa los archivos ya incluidos y sigue los comandos de esta sección.
+Para entender o reproducir la construcción de la infraestructura local desde cero, consulta la [guía de Docker Compose](docs/architecture/docker/COMPOSE.md). Si clonaste la aplicación actual, usa los archivos ya incluidos y sigue los comandos de esta sección.
 
 ```bash
 git clone https://github.com/sadamlg/sr_del_mictlan_mezcal.git
@@ -154,7 +154,7 @@ Docker Compose construye las imágenes del frontend y backend, y levanta fronten
 | API; comprobar salud | [http://localhost:4000/health](http://localhost:4000/health) |
 | API; catálogo público | [http://localhost:4000/api/catalog/products](http://localhost:4000/api/catalog/products) |
 | API; contador de visitas | [http://localhost:4000/api/visits](http://localhost:4000/api/visits) |
-| [Webhook de Stripe (Stripe CLI)](docs/services/STRIPE.md) | `POST http://localhost:4000/api/webhooks/stripe` |
+| [Webhook de Stripe (Stripe CLI)](docs/architecture/services/STRIPE.md) | `POST http://localhost:4000/api/webhooks/stripe` |
 | Mailpit; bandeja de correo de desarrollo | [http://localhost:8025](http://localhost:8025) |
 | PostgreSQL | `localhost:5432` |
 

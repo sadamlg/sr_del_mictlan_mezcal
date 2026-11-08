@@ -451,7 +451,7 @@ dist
 !.env.example
 ~~~
 
-El siguiente Dockerfile es el ejemplo mínimo del esqueleto. El [Dockerfile de desarrollo versionado](../../backend/Dockerfile) añade la copia de configuración de ESLint; para la aplicación completa usa el archivo versionado.
+El siguiente Dockerfile es el ejemplo mínimo del esqueleto. El [Dockerfile de desarrollo versionado](../../../backend/Dockerfile) añade la copia de configuración de ESLint; para la aplicación completa usa el archivo versionado.
 
 Crea <code>backend/Dockerfile</code>:
 

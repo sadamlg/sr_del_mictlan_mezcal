@@ -1,11 +1,11 @@
 # Stripe Checkout y webhooks
 
-La API crea Checkout Sessions y sólo marca un pedido como pagado al recibir un webhook con firma válida. Volver del Checkout al frontend muestra el estado, pero no confirma por sí mismo la compra. El [contrato de la fase 06](../contracts/checkout-y-pedidos.md) describe los datos y las transiciones del pedido.
+La API crea Checkout Sessions y sólo marca un pedido como pagado al recibir un webhook con firma válida. Volver del Checkout al frontend muestra el estado, pero no confirma por sí mismo la compra. El [contrato de la fase 06](../../contracts/checkout-y-pedidos.md) describe los datos y las transiciones del pedido.
 
 ## Desarrollo local: Stripe CLI
 
 1. Crea o abre una cuenta de Stripe en **modo de prueba**. Copia su clave secreta `sk_test_…` a `STRIPE_SECRET_KEY` en `.env`.
-2. Levanta Compose, aplica migraciones y carga productos locales como indica [Desarrollo local](../docker/guia-de-construccion-docker-compose.md).
+2. Levanta Compose, aplica migraciones y carga productos locales como indica [Desarrollo local](../docker/COMPOSE.md).
 3. Instala Stripe CLI, ejecuta `stripe login` y deja activa esta terminal:
 
 ```bash
@@ -46,5 +46,5 @@ Producción necesita claves `sk_live_…`, un endpoint propio, su propio `whsec_
 | El navegador regresa pero el pedido sigue pendiente | Revisa que el listener local siga activo o que Stripe registre entrega exitosa al dominio de Railway. |
 | No llegan eventos | Comprueba modo test/live, URL pública, puerto local y lista de eventos suscritos. |
 | Compra confirmada sin correo | Revisa el worker y sus trabajos; el pago y el envío de correo son pasos distintos. |
-| El carrito conserva artículos pagados | Comprueba la entrega del webhook y la sesión de la cuenta. El backend conserva las líneas modificadas mientras el Checkout estaba abierto; consulta el [contrato de carrito](../contracts/carritos.md). |
+| El carrito conserva artículos pagados | Comprueba la entrega del webhook y la sesión de la cuenta. El backend conserva las líneas modificadas mientras el Checkout estaba abierto; consulta el [contrato de carrito](../../contracts/carritos.md). |
 | Imágenes ausentes sólo en Checkout | Revisa `STRIPE_MEDIA_BASE_URL`; Stripe no puede leer `localhost` o una IP LAN. |

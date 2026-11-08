@@ -2,7 +2,7 @@
 
 Esta guía permite configurar la aplicación en Railway desde cero. El responsable confirmó una compra de prueba en staging el 29 de octubre de 2026; quien prepare un entorno nuevo necesita su propia cuenta, dominios, secretos y remitentes. Las credenciales y los valores efectivos de esos entornos no se guardan en el repositorio.
 
-Antes de configurar staging, completa el [entorno local](../docker/guia-de-construccion-docker-compose.md), prueba [Stripe en local](STRIPE.md), prepara [medios no productivos](R2.md) y verifica el dominio y remitentes según las guías de [Neubox y cPanel](NEUBOX.md) y [Resend](RESEND.md). No necesitas cambiar los *nameservers* del dominio para usar los dominios públicos de Railway en staging.
+Antes de configurar staging, completa el [entorno local](../docker/COMPOSE.md), prueba [Stripe en local](STRIPE.md), prepara [medios no productivos](R2.md) y verifica el dominio y remitentes según las guías de [Neubox y cPanel](NEUBOX.md) y [Resend](RESEND.md). No necesitas cambiar los *nameservers* del dominio para usar los dominios públicos de Railway en staging.
 
 ## Por qué existen Dockerfiles de producción
 

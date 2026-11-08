@@ -1,10 +1,10 @@
 # Correo transaccional con Mailpit y Resend
 
-La aplicación crea trabajos de correo en PostgreSQL y un worker los envía. En desarrollo (`NODE_ENV=development`), el worker usa SMTP hacia Mailpit para registro, recuperación, cambio de correo y compra con PDF. En Railway usa la API HTTPS de Resend para esos mismos trabajos; no necesita variables `SMTP_*` allí. Los contratos están en [cuentas](../contracts/cuentas-perfil.md) y [correo de compra](../contracts/checkout-y-pedidos.md#correo-de-compra-y-comprobantes).
+La aplicación crea trabajos de correo en PostgreSQL y un worker los envía. En desarrollo (`NODE_ENV=development`), el worker usa SMTP hacia Mailpit para registro, recuperación, cambio de correo y compra con PDF. En Railway usa la API HTTPS de Resend para esos mismos trabajos; no necesita variables `SMTP_*` allí. Los contratos están en [cuentas](../../contracts/cuentas-perfil.md) y [correo de compra](../../contracts/checkout-y-pedidos.md#correo-de-compra-y-comprobantes).
 
 ## Probar primero sin proveedor externo
 
-Levanta Compose según [Desarrollo local](../docker/guia-de-construccion-docker-compose.md). Registra una cuenta y abre http://localhost:8025 para ver el enlace de confirmación. Después haz una compra de prueba con [Stripe](STRIPE.md) y comprueba en Mailpit el mensaje con un solo PDF de detalle del pedido. Si no aparece, revisa `docker compose logs --follow worker` y el estado del trabajo en la base antes de cambiar credenciales.
+Levanta Compose según [Desarrollo local](../docker/COMPOSE.md). Registra una cuenta y abre http://localhost:8025 para ver el enlace de confirmación. Después haz una compra de prueba con [Stripe](STRIPE.md) y comprueba en Mailpit el mensaje con un solo PDF de detalle del pedido. Si no aparece, revisa `docker compose logs --follow worker` y el estado del trabajo en la base antes de cambiar credenciales.
 
 ## Preparar un dominio de envío
 
@@ -33,7 +33,7 @@ La API crea los trabajos; el worker envía. No pegues la clave en el README, `.e
 1. En staging, registra una cuenta usando un buzón al que tengas acceso. Comprueba que el worker procese el trabajo, que Resend muestre el mensaje y que el enlace apunte al frontend de staging.
 2. Confirma la cuenta y entra desde otro dispositivo; comprueba también recuperación de contraseña.
 3. Haz una compra de prueba y comprueba el correo con el PDF único. Revisa destinatario, remitente y datos del pedido. La recepción en la bandeja final confirma más que la sola aceptación por la API.
-4. Revisa las cuotas del plan vigente en [Servicios y costos](../servicios-y-costos.md). Registro, recuperación y compra comparten la capacidad diaria del mismo proveedor; vigila los rechazos y el estado de la cola antes de aumentar tráfico.
+4. Revisa las cuotas del plan vigente en [Servicios y costos](COSTS.md). Registro, recuperación y compra comparten la capacidad diaria del mismo proveedor; vigila los rechazos y el estado de la cola antes de aumentar tráfico.
 
 | Síntoma | Primer lugar para revisar |
 |---|---|
@@ -44,4 +44,4 @@ La API crea los trabajos; el worker envía. No pegues la clave en el README, `.e
 | Llegó la compra, pero no el PDF | Trabajo de compra, generación del adjunto y logs del worker. |
 | El pago está confirmado, pero no aparece correo en Resend | El webhook y el envío son etapas distintas: revisa que el pedido tenga trabajo de correo y que el worker haya podido generarlo y enviarlo. Una falla de PDF puede impedir ese envío; revisa el error del trabajo. |
 
-Los trabajos de compra usan una clave de idempotencia y reintentos según el [contrato de la fase 07](../contracts/checkout-y-pedidos.md#correo-de-compra-y-comprobantes). Consulta la [API de envío](https://resend.com/docs/api-reference/emails/send-email) y las [claves de idempotencia](https://resend.com/docs/dashboard/emails/idempotency-keys) para el comportamiento del proveedor.
+Los trabajos de compra usan una clave de idempotencia y reintentos según el [contrato de la fase 07](../../contracts/checkout-y-pedidos.md#correo-de-compra-y-comprobantes). Consulta la [API de envío](https://resend.com/docs/api-reference/emails/send-email) y las [claves de idempotencia](https://resend.com/docs/dashboard/emails/idempotency-keys) para el comportamiento del proveedor.
