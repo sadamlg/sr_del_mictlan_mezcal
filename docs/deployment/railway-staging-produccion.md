@@ -15,7 +15,7 @@ Railway puede importar servicios compatibles desde un archivo Compose, pero no t
 | Servicio Railway | Código / recurso | Exposición | Dockerfile |
 |---|---|---|---|
 | `postgres` | PostgreSQL de Railway con volumen | Sólo red privada | Plantilla PostgreSQL; respaldos se configuran por separado |
-| `api` | `backend/` | Dominio público para el navegador y Stripe; red privada para los demás servicios | `backend/Dockerfile.production` |
+| `api` | `backend/` | Dominio público para Stripe y red privada para los demás servicios; el frontend de producción usa su proxy | `backend/Dockerfile.production` |
 | `worker` | `backend/` | Sólo red privada | `backend/Dockerfile.production` |
 | `frontend` | `frontend/` | Dominio público | `frontend/Dockerfile.production` |
 
@@ -40,7 +40,7 @@ En el servicio `api`, selecciona el repositorio y configura:
 - **Start Command:** `node src/server.js`
 - **Healthcheck Path:** `/health`
 - **Pre-deploy Command:** `npm run prisma:migrate:deploy`
-- **Dominio público:** sí; Stripe y el navegador necesitan alcanzar la API.
+- **Dominio público:** sí; Stripe necesita alcanzar el webhook. En el Dockerfile de producción, las peticiones del navegador pasan por el proxy del frontend hacia la API privada.
 
 El pre-deploy ejecuta las migraciones existentes antes de arrancar la API. El Dockerfile instala Prisma CLI para que ese comando esté disponible. No pongas la migración también en `worker`: se ejecuta una vez en `api` para evitar que ambos procesos compitan al iniciar.
 
