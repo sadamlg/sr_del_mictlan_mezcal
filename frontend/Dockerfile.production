@@ -20,6 +20,10 @@ USER node
 
 RUN npm run build
 
+USER root
+RUN npm prune --omit=dev
+USER node
+
 ENV NODE_ENV=production
 
 EXPOSE 3000
