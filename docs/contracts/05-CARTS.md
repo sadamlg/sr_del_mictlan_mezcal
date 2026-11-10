@@ -2,7 +2,7 @@
 
 ## Propósito y límites
 
-El carrito permite preparar una compra como invitado o con cuenta. El módulo no crea sesiones de Stripe ni órdenes; el checkout implementado se describe en [Contrato de Checkout y pedidos](checkout-y-pedidos.md). No hay reserva ni verificación de existencias.
+El carrito permite preparar una compra como invitado o con cuenta. El módulo no crea sesiones de Stripe ni órdenes; el checkout implementado se describe en [Contrato de Checkout y pedidos](06-CHECKOUT-ORDERS.md). No hay reserva ni verificación de existencias.
 
 El carrito de invitado se conserva en `localStorage` del mismo navegador durante 30 días desde su última actividad. El carrito de cuenta se guarda en PostgreSQL. Al iniciar sesión, el backend suma por producto las cantidades del navegador y de la cuenta en una transacción; el resultado se muestra como un solo carrito. Cada cantidad final tiene un máximo de 99. El navegador borra únicamente las cantidades transferidas después de recibir confirmación. Si la petición falla, conserva los artículos y ofrece reintentar. Cerrar sesión oculta el carrito de cuenta y deja disponible un carrito local nuevo.
 
@@ -59,3 +59,11 @@ El webhook firmado de Stripe elimina sólo las líneas que coinciden con la inst
 ## Persistencia
 
 `account_cart_items` guarda una fila por cuenta y producto; las eliminaciones relacionadas limpian sus filas. `account_cart_merges` registra cada `transferId` para hacer idempotente la fusión. PostgreSQL limita cantidades a 1–99. El navegador conserva sólo `slug`, cantidad, última actividad y un identificador técnico para reintentos; nunca guarda precios.
+
+## Cobertura y referencia de la fase 05
+
+Las pruebas cubren validación de cantidades y slugs, aislamiento de cuentas, suma e idempotencia de transferencias, totales con precio actual, artículos inactivos, operaciones privadas, persistencia Prisma y vencimiento móvil de 30 días del carrito de invitado. Los recorridos de navegador comprueban agregar, actualizar, quitar, recargar, unir el carrito al iniciar sesión, recuperar el catálogo desde páginas de cuenta y mostrar el panel en 320, 768 y 1440 px.
+
+### Referencia revisada durante la fase
+
+Se revisó el repositorio hermano requerido para esta fase. No contiene módulo, contrato, flujo ni pruebas de carrito reutilizables, por lo que no se porta código; se implementan las reglas desde este contrato sobre Prisma/PostgreSQL y la sesión existente. La retención del carrito de invitado por 30 días sigue el alcance aprobado del MVP.

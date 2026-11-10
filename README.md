@@ -1,17 +1,8 @@
 # Señor del Mictlán
 
-![Architecture overview](./architecture-overview.png)
+![Architecture](./docs/architecture/ARCHITECTURE.png)
 
 Señor del Mictlán reúne mezcales de agave Cupreata silvestre y destilados procedentes de Etúcuaro, Michoacán. Este repositorio contiene el desarrollo de su tienda en línea, landing y catálogo digital.
-
-La arquitectura combina Next.js, React y Tailwind CSS para la experiencia web; una API REST construida con Express; y PostgreSQL con Prisma ORM para los datos de usuarios, productos, carritos, pedidos y trabajos de correo. Stripe Checkout gestiona el pago alojado y el backend valida los webhooks firmados de Stripe. Un worker de Node.js procesa los trabajos de correo guardados en PostgreSQL y solicita su envío mediante Resend.
-
-Si quieres saber qué direcciones puede visitar una persona y cuáles requieren sesión o un enlace de correo, consulta la guía sencilla de [rutas y acceso al sistema](docs/rutas-y-acceso.md).
-
-La arquitectura de producción prevista utiliza Railway para alojar el frontend, la API, el worker y PostgreSQL. Cloudflare proporciona DNS, proxy, CDN y TLS para los hostnames públicos; Cloudflare R2 almacena y sirve las imágenes de productos y los medios de la landing. Durante el renderizado del servidor, Next.js consulta la API por la red privada. Las interacciones del navegador llegan a la API mediante su hostname público.
-
-El entorno local de desarrollo se construye con Docker Compose e incluye frontend, backend, PostgreSQL, worker y Mailpit para probar correo. Las guías del repositorio documentan el stack, la infraestructura, el despliegue y las decisiones de servicios y costos.
-
 
 ## Stack
 
@@ -26,22 +17,16 @@ El entorno local de desarrollo se construye con Docker Compose e incluye fronten
 | Pagos | Stripe Checkout | Checkout alojado y notificaciones firmadas de pago |
 | Correo | Resend | Correos transaccionales, como recuperación de contraseña y confirmación de pedidos |
 | Medios | Cloudflare R2 | Almacenar y entregar imágenes de producto y medios de la landing |
-| Capa pública | Cloudflare Free | DNS autoritativo; proxy/CDN y TLS para hostnames configurados como *Proxied*; WAF, protección DDoS y Bot Fight Mode (requiere habilitación) |
+| Capa pública | Cloudflare Free | DNS autoritativo; proxy/CDN y TLS para los hostnames públicos; WAF, protección DDoS y Bot Fight Mode |
 | Despliegue | Railway | Alojar frontend, backend, worker y PostgreSQL |
-
-## Documentación
-
-- [Alcance funcional del MVP](docs/MVP_SCOPE.md) y [roadmap](docs/ROADMAP.md).
-- [Desarrollo local con Docker Compose](docs/docker/guia-de-construccion-docker-compose.md) y [despliegue en Railway](docs/deployment/railway-staging-produccion.md).
-- [Rutas y acceso al sistema](docs/rutas-y-acceso.md).
-- [Implementación de Cloudflare](docs/cloudflare/implementacion.md) y [guía de R2](docs/cloudflare/r2.md).
-- Contratos funcionales: [catálogo](docs/contracts/catalogo-landing.md), [cuentas](docs/contracts/cuentas-perfil.md), [carritos](docs/contracts/carritos.md), [pedidos](docs/contracts/checkout-y-pedidos.md) y [visitas](docs/contracts/visitas-landing.md).
-- [Servicios y costos](docs/servicios-y-costos.md).
-- Para ejecutar las pruebas E2E de Playwright manualmente: `docker compose run --build --rm frontend-e2e`.
 
 ## Arquitectura
 
-El diagrama muestra las conexiones entre el navegador, Cloudflare, Railway y los servicios externos. Cloudflare se conectará cuando se configure el dominio; al inicio, *staging* puede usar las URL de Railway.
+En producción, Cloudflare publica la tienda, el endpoint de la API para webhooks de Stripe y los medios. El navegador envía las solicitudes de la aplicación al mismo origen del frontend, bajo `/api/backend/*`; Next.js las reenvía a Express por la red privada de Railway. El renderizado del servidor también consulta Express por esa red. Stripe entrega sus webhooks al endpoint público de la API. El navegador carga las imágenes y los medios desde Cloudflare R2.
+
+La decisión de renderizado y los criterios SEO están en [Renderizado y SEO](docs/architecture/RENDERING-AND-SEO.md).
+
+El diagrama muestra las conexiones entre el navegador, Cloudflare, Railway y los servicios externos.
 
 ```mermaid
 flowchart TB
@@ -57,19 +42,21 @@ flowchart TB
         pg[("PostgreSQL<br/>datos del negocio y trabajos de correo<br/>red privada + volumen persistente")]
         worker["Worker<br/>correos · proceso separado"]
 
-        web -.->|"SSR: consulta del servidor Next.js<br/>red privada"| api
+        web -.->|"SSR y proxy /api/backend/*<br/>red privada"| api
         api -->|"SQL: datos del negocio y trabajos de correo<br/>red privada"| pg
         pg -->|"Entrega trabajos pendientes<br/>red privada"| worker
         worker -->|"Actualiza el estado del trabajo<br/>red privada"| pg
     end
 
-    browser -->|"HTTPS: tienda y API"| cf
+    browser -->|"HTTPS: tienda y solicitudes /api/backend/*"| cf
     cf -->|"Hostname de tienda"| web
-    cf -->|"Hostname de API y webhook"| api
+    cf -->|"Endpoint público de API para el webhook de Stripe"| api
 
     api -->|"Crear sesión de Checkout"| stripe
     stripe -->|"URL de Checkout"| api
-    api -->|"Devolver URL de pago"| browser
+    api -->|"Respuesta de API por el proxy"| web
+    web -->|"Respuesta HTTPS"| cf
+    cf --> browser
     browser -->|"Pago en página alojada"| stripe
     stripe -->|"Regreso del navegador<br/>solo para UX"| browser
     stripe -->|"Webhook firmado por HTTPS"| cf
@@ -82,7 +69,7 @@ flowchart TB
 
 ### Flujos principales
 
-Los recorridos se muestran por separado para distinguir la carga SSR de las peticiones que el navegador envía directamente a la API.
+Los recorridos distinguen la carga SSR, las solicitudes del navegador que pasan por el proxy del frontend y el webhook público de Stripe.
 
 #### Carga de una página renderizada por servidor
 
@@ -110,17 +97,20 @@ sequenceDiagram
 sequenceDiagram
     participant Browser as Navegador
     participant CF as Cloudflare
+    participant Next as Next.js · frontend
     participant Express as Express API
 
-    Browser->>CF: HTTPS: petición de API
-    CF->>Express: Hostname público de API
-    Express-->>CF: Respuesta de API
-    CF-->>Browser: Respuesta para la interfaz
+    Browser->>CF: HTTPS: petición al origen del frontend · /api/backend/auth/login
+    CF->>Next: Hostname de la tienda
+    Next->>Express: Proxy a /api/auth/login · red privada Railway
+    Express-->>Next: Respuesta y cookie de sesión
+    Next-->>CF: Respuesta bajo el origen del frontend
+    CF-->>Browser: Respuesta y cookie de primera parte
 ```
 
 - Express comprueba que los productos sigan activos y usa sus precios vigentes; PostgreSQL conserva el pedido y sus datos históricos. El MVP no comprueba existencias.
 - Express crea la sesión de Stripe y devuelve al navegador la URL para abrir el Checkout alojado.
-- El backend verifica el webhook firmado de Stripe y actualiza el pedido en PostgreSQL. Después registra el trabajo de correo correspondiente en PostgreSQL; el worker consulta los trabajos pendientes, actualiza su estado y envía el correo mediante Resend. El redirect de regreso sirve para mostrar el resultado al cliente, pero no es prueba de pago.
+- El backend verifica la firma del webhook de Stripe. Cuando confirma un pago, valida la sesión, el importe y la moneda antes de marcar el pedido como pagado; en la misma transacción registra en PostgreSQL el trabajo de confirmación. El worker procesa ese trabajo y envía el correo mediante Resend. Los eventos de pago fallido o Checkout expirado cierran el pedido pendiente sin generar ese correo. Al volver de Checkout, la página consulta al backend el estado del pedido; sólo el webhook firmado puede confirmarlo como pagado.
 - El navegador obtiene las imágenes de producto y los medios de la landing mediante Cloudflare R2. PostgreSQL conserva referencias y metadatos, no los archivos.
 
 ## Ramas y despliegues
@@ -141,7 +131,7 @@ feature/* ── pull request ──> develop ──> Railway staging
 
 Se requiere Git, Docker Engine y Docker Compose. Desde la carpeta donde guardarás el proyecto:
 
-Para entender o reproducir la construcción de la infraestructura local desde cero, consulta la [guía de construcción con Docker Compose](docs/docker/guia-de-construccion-docker-compose.md). Si clonaste la aplicación actual, usa los archivos ya incluidos y sigue los comandos de esta sección.
+Para entender o reproducir la construcción de la infraestructura local desde cero, consulta la [guía de Docker Compose](docs/architecture/docker/COMPOSE.md). Si clonaste la aplicación actual, usa los archivos ya incluidos y sigue los comandos de esta sección.
 
 ```bash
 git clone https://github.com/sadamlg/sr_del_mictlan_mezcal.git
@@ -165,12 +155,13 @@ La opción `--build` reconstruye las imágenes antes de iniciar los contenedores
 
 Docker Compose construye las imágenes del frontend y backend, y levanta frontend, API, PostgreSQL, worker de correos y Mailpit. `--wait` espera los health checks de los servicios. Los procesos de desarrollo se ejecutan dentro de sus contenedores: el frontend con `npm run dev`, el backend genera Prisma Client y arranca Node con observación de cambios, y el worker con `npm run worker:dev`. No hace falta instalar Node.js en el anfitrión ni iniciar esos procesos manualmente.
 
-| Servicio | Dirección local |
+| Servicio o endpoint | Dirección local |
 |---|---|
 | Tienda frontend | [http://localhost:3000](http://localhost:3000) |
 | API; comprobar salud | [http://localhost:4000/health](http://localhost:4000/health) |
 | API; catálogo público | [http://localhost:4000/api/catalog/products](http://localhost:4000/api/catalog/products) |
 | API; contador de visitas | [http://localhost:4000/api/visits](http://localhost:4000/api/visits) |
+| [Webhook de Stripe (Stripe CLI)](docs/architecture/services/STRIPE.md) | `POST http://localhost:4000/api/webhooks/stripe` |
 | Mailpit; bandeja de correo de desarrollo | [http://localhost:8025](http://localhost:8025) |
 | PostgreSQL | `localhost:5432` |
 
@@ -190,27 +181,7 @@ docker compose up --detach --force-recreate frontend backend
 docker compose up --build --detach --force-recreate frontend backend
 ```
 
-`restart` no aplica cambios de variables de entorno ni de publicación de puertos; para eso usa `--force-recreate`. Reconstruir las imágenes no es necesario para cambios sólo en `.env`.
-
-### Acceder desde otro dispositivo de la red local
-
-Sustituye `192.168.1.20` por la IP LAN del equipo anfitrión. En `.env`, configura frontend y API con ese mismo host:
-
-```dotenv
-FRONTEND_BIND_ADDRESS=0.0.0.0
-BACKEND_BIND_ADDRESS=0.0.0.0
-NEXT_ALLOWED_DEV_ORIGIN=192.168.1.20
-NEXT_PUBLIC_API_URL=http://192.168.1.20:4000
-FRONTEND_ORIGIN=http://192.168.1.20:3000
-```
-
-Conserva `INTERNAL_API_URL=http://backend:3000`; sólo se usa entre contenedores. Si sirves imágenes locales, configura `MEDIA_BASE_URL=http://192.168.1.20:3000`; si usas R2, conserva su URL pública HTTPS. Aplica la configuración recreando los servicios:
-
-```bash
-docker compose up --detach --force-recreate frontend backend
-```
-
-Después abre `http://192.168.1.20:3000`. Publicar la API en la LAN también permite que otros dispositivos de esa red alcancen el puerto 4000; usa esta configuración sólo en una red confiable. La [guía de Docker Compose](docs/docker/guia-de-construccion-docker-compose.md#9-acceso-opcional-desde-la-red-local) explica los detalles.
+Usa `restart` si el proceso del frontend o de la API se detuvo o quedó bloqueado. Los cambios normales de código se aplican automáticamente durante el desarrollo.
 
 Para consultar la salida de los servicios, ejecuta `docker compose logs --follow`; Ctrl+C deja los contenedores en ejecución. Para detenerlos:
 

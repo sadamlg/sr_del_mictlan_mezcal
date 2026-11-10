@@ -163,6 +163,8 @@ Los gradientes del aviso de edad y del pie combinan sombras rojizas y casi negra
 
 **Carácter:** Cinzel Decorative da presencia a títulos de marca y producto. Open Sans prioriza la lectura de párrafos y formularios; Montserrat distingue navegación, etiquetas y acciones breves.
 
+Reserva la serif decorativa para títulos; no la uses en párrafos, mensajes de estado ni instrucciones largas.
+
 ### Jerarquía
 
 - **Títulos de marca:** titulares y secciones en Cinzel Decorative, con escala adaptable al espacio.

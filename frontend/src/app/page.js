@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { io } from 'next/cache';
+import { cacheLife, io } from 'next/cache';
 import AgeGate from '../components/age-gate/age-gate';
 import SiteHeader from '../components/header/header';
 import LandingHero from '../components/landing/landing-hero';
@@ -9,39 +9,60 @@ import LandingFaq from '../components/landing/faq/landing-faq';
 import LandingVisitorCounter from '../components/landing/landing-visitor-counter';
 import LandingFooter from '../components/landing/landing-footer';
 
-async function loadCatalog() {
-  const apiUrl = process.env.INTERNAL_API_URL;
+async function getCachedCatalog(apiUrl) {
+  'use cache';
   if (!apiUrl) {
-    console.error('[catalog] INTERNAL_API_URL is not configured');
-    return null;
+    cacheLife('seconds');
+    return { kind: 'unconfigured' };
   }
 
   try {
     const response = await fetch(`${apiUrl.replace(/\/$/, '')}/api/catalog/products`, {
-      cache: 'no-store',
       signal: AbortSignal.timeout(5000),
     });
     if (!response.ok) {
-      console.error('[catalog] backend returned an unsuccessful response', { status: response.status });
-      return null;
+      cacheLife('seconds');
+      return { kind: 'http-error', status: response.status };
     }
 
     const body = await response.json();
-    if (Array.isArray(body.products)) return body.products;
-    console.error('[catalog] backend response did not match the catalog contract');
-    return null;
+    if (!Array.isArray(body.products)) {
+      cacheLife('seconds');
+      return { kind: 'invalid-response' };
+    }
+
+    cacheLife('days');
+    return { kind: 'success', products: body.products };
   } catch (error) {
-    console.error('[catalog] backend request failed', {
+    cacheLife('seconds');
+    return {
+      kind: 'request-error',
       name: error instanceof Error ? error.name : 'UnknownError',
       code: error && typeof error === 'object' && 'code' in error ? error.code : undefined,
-    });
-    return null;
+    };
   }
+}
+
+async function loadCatalog(apiUrl) {
+  const result = await getCachedCatalog(apiUrl);
+  if (result.kind === 'success') return result.products;
+
+  if (result.kind === 'unconfigured') {
+    console.error('[catalog] INTERNAL_API_URL is not configured');
+  } else if (result.kind === 'http-error') {
+    console.error('[catalog] backend returned an unsuccessful response', { status: result.status });
+  } else if (result.kind === 'invalid-response') {
+    console.error('[catalog] backend response did not match the catalog contract');
+  } else {
+    console.error('[catalog] backend request failed', { name: result.name, code: result.code });
+  }
+
+  return null;
 }
 
 async function CatalogContent({ mediaBaseUrl, searchParams }) {
   const params = await searchParams;
-  const products = await loadCatalog();
+  const products = await loadCatalog(process.env.INTERNAL_API_URL);
   const checkoutCancelled = params?.checkout === 'cancelled';
   return <MezcalShowcase products={products} mediaBaseUrl={mediaBaseUrl} checkoutCancelled={checkoutCancelled} />;
 }
