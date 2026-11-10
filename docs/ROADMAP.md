@@ -12,7 +12,7 @@ Las decisiones duraderas del repositorio siguen en [AGENTS.md](../AGENTS.md), el
 | 04 · Cuentas y perfil | Registro, confirmación, sesión, recuperación y perfil | Concluida |
 | 05 · Carritos | Carrito de invitado, cuenta y transferencia | Concluida |
 | 06 · Stripe Checkout y pedidos | Compra, webhook firmado, pedidos e idempotencia | Concluida |
-| 07 · Correo transaccional y PDF | Resend, mensajes de compra y detalle de pedido | En curso |
+| 07 · Correo transaccional y PDF | Resend, mensajes de compra y detalle de pedido | Concluida |
 | 08 · Staging | Railway, integraciones aisladas y aceptación de recorridos | En curso |
 | 09 · Producción | Dominio público, medios, costos, operación y salida autorizada | Planeada |
 
@@ -25,7 +25,7 @@ flowchart TB
     p03 --> p04["✅ 04 · Cuentas y perfil<br/>Concluida"]
     p04 --> p05["✅ 05 · Carritos<br/>Concluida"]
     p05 --> p06["✅ 06 · Stripe Checkout y pedidos<br/>Concluida"]
-    p06 --> p07["🔵 07 · Correo transaccional y PDF<br/>En curso"]
+    p06 --> p07["✅ 07 · Correo transaccional y PDF<br/>Concluida"]
     p07 --> p08["🔵 08 · Staging<br/>En curso"]
     p08 --> p09["▫️ 09 · Producción<br/>Planeada"]
 ```
@@ -99,7 +99,7 @@ La fase 02 aprueba el alcance maestro del MVP, la arquitectura transversal, las 
 - **Comprobaciones:** precios y disponibilidad vigentes, firma válida e inválida, eventos repetidos, estado pagado determinado por webhook y no por el retorno del navegador, orden visible en Mis pedidos y limpieza del carrito sin perder ediciones realizadas durante Checkout.
 - **Estado y evidencia:** fase concluida. Se informó una compra de prueba exitosa en staging con Stripe el 29 de octubre de 2026. Producción sigue pendiente. El [contrato de Checkout y pedidos](contracts/06-CHECKOUT-ORDERS.md) especifica los eventos, la instantánea y la idempotencia.
 
-### 07. Correo transaccional y PDF — en curso
+### 07. Correo transaccional y PDF — concluida
 
 - **Objetivo:** entregar mensajes de cuenta y una confirmación de compra con un único PDF de detalle del pedido.
 - **Dependencias:** fase 04 para mensajes de cuenta y fase 06 para pedidos pagados. Antes de habilitar envíos desde un dominio propio, el responsable del proyecto crea la cuenta de Resend y prepara el dominio de envío en el DNS autoritativo de Neubox/cPanel.
@@ -110,7 +110,7 @@ La fase 02 aprueba el alcance maestro del MVP, la arquitectura transversal, las 
 
 - **Resultado:** PostgreSQL persiste un solo trabajo de confirmación por pedido pagado y el worker lo procesa. En Compose el worker usa SMTP hacia Mailpit; en Railway usa la API HTTPS de Resend. La clave pertenece al Worker y se separa por entorno. `MAIL_FROM` se usa para mensajes de cuenta y `RESEND_FROM` para compras; verificar envío no crea por sí mismo un buzón para recibir respuestas. No se añade otro broker a la cola persistida. El worker registra tipo de trabajo, intento e error sin volcar destinatarios, domicilios ni contenido del mensaje.
 - **Comprobaciones:** dominio verificado, remitentes autorizados, enlaces con el origen del entorno correcto, mensaje visible en Resend y en la bandeja destino, PDF con el detalle correcto y trabajo recuperable ante fallos. No guardar claves en el repo ni configurarlas como `SMTP_PASSWORD`.
-- **Estado y evidencia:** código de Resend y PDF implementado; configuración de staging y recepción de mensajes de cuenta y compra reportadas. La aceptación visual del correo aún debe confirmar la tipografía de marca. La cola implementa reintentos y deduplicación; la aceptación de producción sigue pendiente. La recepción de compra está reportada para el 29 de octubre de 2026. Las instrucciones de cuenta, dominio y Worker están en [Resend](architecture/services/RESEND.md); el contenido del PDF y la cola están en el [contrato de Checkout](contracts/06-CHECKOUT-ORDERS.md#correo-de-compra-y-comprobantes).
+- **Estado y evidencia:** código de Resend y PDF implementado; configuración de staging y recepción de mensajes de cuenta y compra reportadas. Para la cabecera del correo se decidió usar la imagen de marca en vez de depender de Cinzel, que no se renderizaba de forma fiable en Gmail; el cambio quedó en el commit `488d78b` del 29 de octubre de 2026. La cola implementa reintentos y deduplicación. La recepción del correo de compra está reportada para esa misma fecha. La aceptación de producción corresponde a la fase 09. Las instrucciones de cuenta, dominio y Worker están en [Resend](architecture/services/RESEND.md); el contenido del PDF y la cola están en el [contrato de Checkout](contracts/06-CHECKOUT-ORDERS.md#correo-de-compra-y-comprobantes).
 
 ### 08. Staging — en curso
 

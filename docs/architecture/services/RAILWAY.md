@@ -189,6 +189,12 @@ Promueve sólo después de aceptar staging y preparar estos elementos en el ento
 
 Haz un primer pago real sólo después de autorizar explícitamente la salida a producción. Para deshacer una versión de aplicación, vuelve al despliegue anterior de API/frontend/worker compatible con el esquema actual. No reviertas una migración destructiva ni restaures una base sin revisar el impacto de datos.
 
+### Verificación inicial de memoria
+
+Después del primer despliegue en producción, registra el consumo de memoria de cada servicio en Railway durante el arranque y después de que el sistema haya atendido tráfico normal. Anota el servicio, el despliegue, el periodo observado y si hubo tráfico; distingue los picos de arranque del consumo sostenido. Usa esa medición como línea base de producción: los datos de staging no permiten predecir por sí solos el consumo en producción.
+
+No cambies límites de memoria ni configuración de Node.js por una medición aislada. Si un servicio mantiene un consumo alto, crece de forma sostenida o se acerca al límite disponible, identifica primero el proceso y recoge métricas antes de reiniciarlo; decide cualquier ajuste a partir de esa evidencia y del límite del plan.
+
 ### Respaldos y recuperación
 
 En el servicio PostgreSQL abre **Backups** y configura una programación de acuerdo con la pérdida de datos aceptable. Un respaldo de volumen se restaura en el mismo proyecto y entorno. Para verificar recuperación sin sustituir la base activa, prepara también un volcado lógico y restáuralo en una base de prueba; registra la fecha y el resultado. Consulta las guías de [respaldos de volumen](https://docs.railway.com/volumes/backups) y [respaldo y restauración de PostgreSQL](https://docs.railway.com/guides/postgres-backups-restores).
