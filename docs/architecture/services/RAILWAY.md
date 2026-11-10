@@ -108,14 +108,14 @@ Staging puede seguir usando el bucket no productivo documentado en [Cloudflare R
 1. En Stripe, usa credenciales de prueba y crea un webhook que apunte a `https://<dominio-publico-api>/api/webhooks/stripe`.
 2. Suscribe el webhook a los cuatro eventos manejados por la aplicación y copia su secreto `whsec_…` a `STRIPE_WEBHOOK_SECRET` de staging. La [guía de Stripe](STRIPE.md) detalla la selección del destino, eventos y diferencia entre los secretos. No ejecutes `stripe listen` para un webhook ya publicado en Railway; Stripe llega directamente al dominio HTTPS.
 3. Despliega primero API y worker, confirma `/health` y que las migraciones terminaron. Después despliega frontend.
-4. Carga en staging el catálogo y las imágenes no productivas. No uses `backend/prisma/dev-showcase.sql` como catálogo real.
+4. Carga en staging el catálogo y las imágenes no productivas con los importes actuales del MVP. El SQL incluido abajo es para pruebas en una base de staging aislada; no es un seed de producción.
 5. Prueba registro, confirmación de cuenta, recuperación de contraseña, inicio de sesión, imágenes del catálogo y carrito, compra aceptada, compra cancelada, webhook, limpieza del carrito, orden y PDF, entrega/reintento del worker y logs de errores.
 6. Revisa los correos de cuenta y la confirmación de compra en Resend. La [guía de Resend](RESEND.md) explica la clave, remitentes y diagnóstico del worker.
 7. Antes de dar por cerrada la fase 08, implementa y valida Turnstile: aún no está en el código. La integración debe validar el token en servidor con Cloudflare Siteverify.
 
 ### Ejemplo reproducible de catálogo para staging
 
-Este ejemplo independiente crea tres fichas con precios provisionales en una base de **staging aislada**, después de aplicar las migraciones y con Stripe en modo de prueba. El archivo `backend/prisma/dev-showcase.sql` conserva su indicación de uso local; este bloque documenta por separado la decisión de usar precios de prueba también en staging. No uses estos importes para ventas reales ni ejecutes el bloque en producción.
+Este ejemplo crea en **staging aislado** las tres fichas y los importes vigentes del alcance MVP, después de aplicar migraciones y con Stripe en modo de prueba. Son los precios correctos para validar el MVP; el cliente debe aprobar los precios comerciales finales antes de vender en producción. El archivo <code>backend/prisma/dev-showcase.sql</code> sigue siendo exclusivo de una base local vacía; este bloque de staging es independiente y no debe ejecutarse en producción.
 
 1. Instala Railway CLI y `psql`; ejecuta `railway login` y `railway link` desde la raíz del proyecto, y selecciona el proyecto correcto. Conecta la base del entorno de prueba con `railway connect postgres --environment Staging` (sustituye `postgres` y `Staging` si tus nombres son distintos). La [CLI de Railway](https://docs.railway.com/cli/connect) puede usar un túnel SSH cuando la base no tiene proxy público.
 2. Antes de ejecutar el bloque, confirma en Railway que la conexión corresponde a **Staging**, que Stripe usa claves de prueba y que las imágenes están cargadas en el bucket no productivo con las claves del [inventario R2](R2.md). En el prompt de `psql`, pega:
@@ -165,6 +165,17 @@ ON CONFLICT (slug) DO NOTHING;
 | La compra se pagó pero no llegó el correo | Comprueba la entrega del webhook, el trabajo de correo y los logs del worker. Un fallo al generar el PDF o un rechazo de Resend impide el envío aunque Stripe haya confirmado el pago. |
 | El carrito conserva artículos pagados | Comprueba webhook, sesión y refresco del carrito. Las líneas que cambiaron mientras el Checkout estaba abierto se preservan deliberadamente. |
 
+### Control del consumo del workspace
+
+Railway ofrece límites para el consumo de **cómputo a nivel de workspace**, no un máximo independiente por servicio o entorno:
+
+1. Abre la página **Usage** del workspace y revisa el consumo por proyecto y los límites actuales. También puedes consultar el estado con <code>railway usage limit status</code>.
+2. Define primero el presupuesto mensual aprobado para el workspace. Configura la alerta suave para recibir un correo sin interrumpir servicios y un límite duro sólo si aceptas que, al alcanzarlo, Railway apague todos los workloads de ese workspace. Staging y Production comparten el efecto cuando están en el mismo workspace.
+3. No copies umbrales de ejemplo ni fijes cifras sin presupuesto aprobado. La configuración se gestiona desde **Workspace Usage**; la CLI puede consultarla y establecer valores aprobados con <code>railway usage limit set --target workspace --soft &lt;dólares&gt; --hard &lt;dólares&gt;</code>. Verifica las reglas de entrada en la [referencia CLI](https://docs.railway.com/cli/usage).
+4. Registra en el acta de despliegue quién eligió esos umbrales y el efecto esperado. El repositorio no confirma los valores actuales del workspace.
+
+[Control de costos de Railway](https://docs.railway.com/pricing/cost-control).
+
 ## 6. Promover a producción
 
 Promueve sólo después de aceptar staging y preparar estos elementos en el entorno `Production`:
@@ -173,7 +184,7 @@ Promueve sólo después de aceptar staging y preparar estos elementos en el ento
 - Dominios definitivos con TLS, `FRONTEND_ORIGIN`, URLs de API y URLs de medios de producción correctas.
 - Claves Stripe de producción y webhook de producción con su propio secreto.
 - Dominio remitente verificado y clave de Resend para los dos tipos de correo. El worker desplegado usa la API HTTPS de Resend; SMTP/Mailpit es el flujo local.
-- Catálogo real y medios de producción, sin el SQL de demostración.
+- Catálogo y medios de producción separados de los datos de staging, con precios comerciales finales aprobados por el cliente. Los importes actuales del MVP son para pruebas y no autorizan ventas reales.
 - Revisión de logs de API y worker, estado de `/health` y procedimiento para volver al despliegue anterior.
 
 Haz un primer pago real sólo después de autorizar explícitamente la salida a producción. Para deshacer una versión de aplicación, vuelve al despliegue anterior de API/frontend/worker compatible con el esquema actual. No reviertas una migración destructiva ni restaures una base sin revisar el impacto de datos.

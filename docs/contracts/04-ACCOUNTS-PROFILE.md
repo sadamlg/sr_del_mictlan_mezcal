@@ -4,7 +4,7 @@
 
 El módulo cubre registro y confirmación de correo, inicio y cierre de sesión, restauración de sesión, recuperación y cambio de contraseña, actualización del perfil y cambio de correo confirmado. La cuenta tiene tres secciones: **Información personal**, **Contraseña** y **Mis pedidos**. La contraseña no aparece en la navegación global.
 
-El catálogo y el carrito de invitado están disponibles sin cuenta. El pago y los datos de cuenta requieren sesión. Los detalles de carrito y pedidos están en [sus contratos](carritos.md) y [Checkout y pedidos](checkout-y-pedidos.md).
+El catálogo y el carrito de invitado están disponibles sin cuenta. El pago y los datos de cuenta requieren sesión. Los detalles de carrito y pedidos están en [sus contratos](05-CARTS.md) y [Checkout y pedidos](06-CHECKOUT-ORDERS.md).
 
 ## Datos y validaciones
 
@@ -53,7 +53,7 @@ El límite de solicitudes es local a cada proceso. Con varias réplicas se neces
 
 ## Correo e interfaz
 
-El worker obtiene de PostgreSQL los trabajos de confirmación de registro, cambio de correo y recuperación. En Railway los envía mediante la API HTTPS de Resend; en Compose, Mailpit (`mailpit:1025`) captura esos mensajes por SMTP sin usar un proveedor externo. El correo de compra también usa Resend y se describe en el [contrato de Checkout y pedidos](checkout-y-pedidos.md).
+El worker obtiene de PostgreSQL los trabajos de confirmación de registro, cambio de correo y recuperación. En Railway los envía mediante la API HTTPS de Resend; en Compose, Mailpit (`mailpit:1025`) captura esos mensajes por SMTP sin usar un proveedor externo. El correo de compra también usa Resend y se describe en el [contrato de Checkout y pedidos](06-CHECKOUT-ORDERS.md).
 
 Para reproducir la configuración del dominio, los remitentes y el worker, consulta la [guía de Resend](../architecture/services/RESEND.md) y la [guía de Neubox/cPanel](../architecture/services/NEUBOX.md).
 

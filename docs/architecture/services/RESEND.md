@@ -1,6 +1,6 @@
 # Correo transaccional con Mailpit y Resend
 
-La aplicación crea trabajos de correo en PostgreSQL y un worker los envía. En desarrollo (`NODE_ENV=development`), el worker usa SMTP hacia Mailpit para registro, recuperación, cambio de correo y compra con PDF. En Railway usa la API HTTPS de Resend para esos mismos trabajos; no necesita variables `SMTP_*` allí. Los contratos están en [cuentas](../../contracts/cuentas-perfil.md) y [correo de compra](../../contracts/checkout-y-pedidos.md#correo-de-compra-y-comprobantes).
+La aplicación crea trabajos de correo en PostgreSQL y un worker los envía. En desarrollo (`NODE_ENV=development`), el worker usa SMTP hacia Mailpit para registro, recuperación, cambio de correo y compra con PDF. En Railway usa la API HTTPS de Resend para esos mismos trabajos; no necesita variables `SMTP_*` allí. Los contratos están en [cuentas](../../contracts/04-ACCOUNTS-PROFILE.md) y [correo de compra](../../contracts/06-CHECKOUT-ORDERS.md#correo-de-compra-y-comprobantes).
 
 ## Probar primero sin proveedor externo
 
@@ -28,12 +28,18 @@ Crea una API key con permiso de envío, limitada al dominio cuando Resend ofrezc
 
 La API crea los trabajos; el worker envía. No pegues la clave en el README, `.env.example`, el frontend ni el servicio API. Tampoco configures `SMTP_PASSWORD` con la API key: este proyecto usa la API HTTPS de Resend fuera de desarrollo.
 
+## Límites de envío y facturación
+
+El plan Free publicado admite 3,000 correos por mes y 100 por día y no exige datos de facturación ([términos del plan Free](https://resend.com/legal/terms-of-service)). Que el alta no haya pedido tarjeta es compatible con una cuenta Free; confirma el plan activo y el uso en el dashboard antes de concluir cuál está aplicado. Todos los mensajes de esta aplicación —confirmación y cambio de correo, recuperación de contraseña y compra— cuentan contra la misma capacidad del equipo. Si Staging y Production usan el mismo equipo de Resend, las claves distintas no separan esa cuota. Consulta el límite vigente en [Precios de Resend](https://resend.com/pricing), porque el proveedor puede cambiarlo.
+
+En los planes pagados, **Transactional Overages** es una opción separada en **Settings**. Si se activa, Resend cobra automáticamente cada bloque adicional de 1,000 mensajes con la tarjeta registrada; el proveedor notifica cuando el uso se acerca o supera la cuota. No la actives para una réplica ni agregues una tarjeta sin presupuesto aprobado. Antes de elegir un plan de producción, estima la demanda diaria y mensual de cada flujo y deja margen para reintentos; los límites y el volumen se revisan en **Usage**. [Descripción oficial de sobreconsumo](https://resend.com/changelog/pay-as-you-go-pricing).
+
 ## Comprobar entrega y diagnosticar
 
 1. En staging, registra una cuenta usando un buzón al que tengas acceso. Comprueba que el worker procese el trabajo, que Resend muestre el mensaje y que el enlace apunte al frontend de staging.
 2. Confirma la cuenta y entra desde otro dispositivo; comprueba también recuperación de contraseña.
 3. Haz una compra de prueba y comprueba el correo con el PDF único. Revisa destinatario, remitente y datos del pedido. La recepción en la bandeja final confirma más que la sola aceptación por la API.
-4. Revisa las cuotas del plan vigente en [Servicios y costos](COSTS.md). Registro, recuperación y compra comparten la capacidad diaria del mismo proveedor; vigila los rechazos y el estado de la cola antes de aumentar tráfico.
+4. Revisa en **Usage** el consumo diario y mensual del plan activo. Si se alcanza la cuota, revisa el estado de Resend y los trabajos fallidos o pendientes del worker antes de reintentar. El alcance y los controles de costo por proveedor están en [Servicios y costos](COSTS.md).
 
 | Síntoma | Primer lugar para revisar |
 |---|---|
@@ -44,4 +50,4 @@ La API crea los trabajos; el worker envía. No pegues la clave en el README, `.e
 | Llegó la compra, pero no el PDF | Trabajo de compra, generación del adjunto y logs del worker. |
 | El pago está confirmado, pero no aparece correo en Resend | El webhook y el envío son etapas distintas: revisa que el pedido tenga trabajo de correo y que el worker haya podido generarlo y enviarlo. Una falla de PDF puede impedir ese envío; revisa el error del trabajo. |
 
-Los trabajos de compra usan una clave de idempotencia y reintentos según el [contrato de la fase 07](../../contracts/checkout-y-pedidos.md#correo-de-compra-y-comprobantes). Consulta la [API de envío](https://resend.com/docs/api-reference/emails/send-email) y las [claves de idempotencia](https://resend.com/docs/dashboard/emails/idempotency-keys) para el comportamiento del proveedor.
+Los trabajos de compra usan una clave de idempotencia y reintentos según el [contrato de la fase 07](../../contracts/06-CHECKOUT-ORDERS.md#correo-de-compra-y-comprobantes). Consulta la [API de envío](https://resend.com/docs/api-reference/emails/send-email) y las [claves de idempotencia](https://resend.com/docs/dashboard/emails/idempotency-keys) para el comportamiento del proveedor.

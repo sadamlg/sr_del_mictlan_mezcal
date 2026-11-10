@@ -764,7 +764,7 @@ docker compose exec backend npm run prisma:migrate:deploy
 docker compose exec -T postgres sh -c 'psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < backend/prisma/dev-showcase.sql
 ~~~
 
-El SQL contiene precios provisionales y no es un catálogo comercial. La [guía de Railway](../services/RAILWAY.md) explica los Dockerfiles de producción.
+El SQL contiene los precios vigentes del MVP, adecuados para desarrollo y pruebas con Stripe en modo de prueba; el cliente debe aprobar los precios comerciales finales antes de activar ventas reales. La [guía de Railway](../services/RAILWAY.md) explica los Dockerfiles de producción.
 
 ### Flujo diario de Prisma
 

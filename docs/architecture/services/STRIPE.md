@@ -1,6 +1,6 @@
 # Stripe Checkout y webhooks
 
-La API crea Checkout Sessions y sólo marca un pedido como pagado al recibir un webhook con firma válida. Volver del Checkout al frontend muestra el estado, pero no confirma por sí mismo la compra. El [contrato de la fase 06](../../contracts/checkout-y-pedidos.md) describe los datos y las transiciones del pedido.
+La API crea Checkout Sessions y sólo marca un pedido como pagado al recibir un webhook con firma válida. Volver del Checkout al frontend muestra el estado, pero no confirma por sí mismo la compra. El [contrato de la fase 06](../../contracts/06-CHECKOUT-ORDERS.md) describe los datos y las transiciones del pedido.
 
 ## Desarrollo local: Stripe CLI
 
@@ -36,9 +36,15 @@ Cada vez que uses un listener o cuenta distintos, compara su secreto de firma co
 
 El secreto del endpoint publicado es distinto del que entrega la Stripe CLI. Railway recibe directamente los eventos en su dominio público, así que el listener local no participa en este recorrido. [Webhooks de Stripe](https://docs.stripe.com/webhooks).
 
+## Tarifas y límites de uso
+
+El modo <code>sk_test_…</code> permite validar Checkout y webhooks sin cobrar pagos reales. En la tarifa estándar de México, el costo publicado es por transacción exitosa; revisa la tarifa aplicable al método de pago antes de producción en [Stripe México](https://stripe.com/mx/pricing).
+
+Los límites de velocidad de la API restringen el ritmo de solicitudes y pueden devolver HTTP 429; no establecen un tope monetario de gasto ni un límite de ventas. Esta integración no configura un tope financiero mensual en Stripe. Si el negocio requiere restringir ventas por presupuesto, inventario o volumen, debe decidirse y documentarse como regla comercial separada. No confundir esos límites con el control de tráfico de API. [Límites de la API de Stripe](https://docs.stripe.com/rate-limits).
+
 ## Producción y fallos frecuentes
 
-Producción necesita claves `sk_live_…`, un endpoint propio, su propio `whsec_…` y un catálogo con precios aprobados. No copies secretos de staging ni uses el SQL de demostración.
+Producción necesita claves <code>sk_live_…</code>, un endpoint propio, su propio <code>whsec_…</code> y precios comerciales finales aprobados por el cliente. Los precios actuales son los correctos para el MVP y las pruebas de staging, pero no autorizan ventas reales hasta esa aprobación. No copies secretos de staging ni cargues el SQL local como catálogo de producción.
 
 | Síntoma | Revisión |
 |---|---|
@@ -46,5 +52,5 @@ Producción necesita claves `sk_live_…`, un endpoint propio, su propio `whsec_
 | El navegador regresa pero el pedido sigue pendiente | Revisa que el listener local siga activo o que Stripe registre entrega exitosa al dominio de Railway. |
 | No llegan eventos | Comprueba modo test/live, URL pública, puerto local y lista de eventos suscritos. |
 | Compra confirmada sin correo | Revisa el worker y sus trabajos; el pago y el envío de correo son pasos distintos. |
-| El carrito conserva artículos pagados | Comprueba la entrega del webhook y la sesión de la cuenta. El backend conserva las líneas modificadas mientras el Checkout estaba abierto; consulta el [contrato de carrito](../../contracts/carritos.md). |
+| El carrito conserva artículos pagados | Comprueba la entrega del webhook y la sesión de la cuenta. El backend conserva las líneas modificadas mientras el Checkout estaba abierto; consulta el [contrato de carrito](../../contracts/05-CARTS.md). |
 | Imágenes ausentes sólo en Checkout | Revisa `STRIPE_MEDIA_BASE_URL`; Stripe no puede leer `localhost` o una IP LAN. |

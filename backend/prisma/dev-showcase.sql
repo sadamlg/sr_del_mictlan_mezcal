@@ -1,4 +1,4 @@
--- Vista previa local únicamente. Los importes son bases provisionales, no precios de venta aprobados.
+-- Vista previa local únicamente. Los importes son los vigentes para el alcance MVP; el cliente debe aprobar precios comerciales finales antes de vender en producción.
 -- Ejecutar sólo en la base de datos de desarrollo después de prisma migrate deploy.
 INSERT INTO products (
   id, slug, name, description, price_cents, image_key, image_alt,
