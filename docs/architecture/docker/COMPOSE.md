@@ -862,6 +862,8 @@ No confirmes un reset si hay datos locales que necesites conservar. Prisma docum
 
 ### Verificaciones de la aplicación completa
 
+Para reconstruir el repositorio definitivo, prepara también los checks de CI desde la base. La separación entre herramientas locales y la fase posterior de auditorías contra Staging está en [Calidad y validación antes de Producción](../QUALITY-AND-RELEASE.md). Playwright, Lighthouse y ZAP se incorporarán al llegar a esa fase y se ejecutarán bajo demanda o en runners temporales.
+
 Con el esquema aplicado, las pruebas y el lint del repositorio se ejecutan dentro de Compose:
 
 ~~~bash
