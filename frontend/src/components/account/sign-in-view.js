@@ -50,6 +50,8 @@ export default function SignInView({ continueToCheckout = false }) {
       await accountRequest('auth/login', { method: 'POST', body: { email, password, turnstileToken } });
       setWaitingForCart(true);
     } catch (requestError) {
+      setPassword('');
+      setPasswordVisible(false);
       setError(requestError.message);
       if (requestError.code === 'EMAIL_NOT_VERIFIED') setErrorKind('info');
     } finally {
@@ -57,6 +59,13 @@ export default function SignInView({ continueToCheckout = false }) {
       setTurnstileToken('');
       setTurnstileResetCount((count) => count + 1);
     }
+  }
+
+  function clearCredentialsBeforeLeaving() {
+    setEmail('');
+    setPassword('');
+    setPasswordVisible(false);
+    setError('');
   }
 
   return (
@@ -130,7 +139,7 @@ export default function SignInView({ continueToCheckout = false }) {
         </AccountSubmit>
       </form>
       <div className="mt-7 border-t border-mictlan-sand/10 pt-5 text-center text-sm text-mictlan-sage-muted">
-        ¿Aún no tienes cuenta? <AccountTextLink href={continueToCheckout ? '/cuenta/registro?continuar=checkout' : '/cuenta/registro'}>Crear una cuenta</AccountTextLink>
+        ¿Aún no tienes cuenta? <AccountTextLink href={continueToCheckout ? '/cuenta/registro?continuar=checkout' : '/cuenta/registro'} onClick={clearCredentialsBeforeLeaving}>Crear una cuenta</AccountTextLink>
       </div>
     </AccountCard>
   );
