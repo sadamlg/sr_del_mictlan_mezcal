@@ -28,15 +28,11 @@ export default function SignInView({ continueToCheckout = false }) {
       router.replace(continueToCheckout ? '/cuenta/checkout' : '/');
       return;
     }
-    if (sessionState === 'guest') {
-      setError('La contraseña fue aceptada, pero no pudimos conservar tu sesión. Inténtalo de nuevo.');
-      setErrorKind('error');
-      setWaitingForCart(false);
-    }
   }, [continueToCheckout, router, sessionState, waitingForCart]);
 
   async function submit(event) {
     event.preventDefault();
+    setWaitingForCart(false);
     if (!turnstileToken) {
       setError('Completa la verificación de seguridad para continuar.');
       setErrorKind('error');
@@ -45,7 +41,6 @@ export default function SignInView({ continueToCheckout = false }) {
     setBusy(true);
     setError('');
     setErrorKind('error');
-    setWaitingForCart(false);
     try {
       await accountRequest('auth/login', { method: 'POST', body: { email, password, turnstileToken } });
       setWaitingForCart(true);
@@ -66,6 +61,7 @@ export default function SignInView({ continueToCheckout = false }) {
     setPassword('');
     setPasswordVisible(false);
     setError('');
+    setWaitingForCart(false);
   }
 
   return (
@@ -74,7 +70,9 @@ export default function SignInView({ continueToCheckout = false }) {
       description="Vuelve a tu espacio personal y consulta tus datos y pedidos."
     >
       <form className="space-y-5" onSubmit={submit}>
-        {error && <AccountNotice kind={errorKind}>{error}</AccountNotice>}
+        {waitingForCart && sessionState === 'guest' ? (
+          <AccountNotice kind="error">La contraseña fue aceptada, pero no pudimos conservar tu sesión. Inténtalo de nuevo.</AccountNotice>
+        ) : error && <AccountNotice kind={errorKind}>{error}</AccountNotice>}
         {waitingForCart && sessionState === 'loading' && (
           <AccountNotice>Estamos comprobando tu sesión…</AccountNotice>
         )}

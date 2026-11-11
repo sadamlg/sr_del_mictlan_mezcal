@@ -14,6 +14,7 @@ Las decisiones duraderas del repositorio siguen en [AGENTS.md](../AGENTS.md), el
 | 06 · Stripe Checkout y pedidos | Compra, webhook firmado, pedidos e idempotencia | Concluida |
 | 07 · Correo transaccional y PDF | Resend, mensajes de compra y detalle de pedido | Concluida |
 | 08 · Staging | Railway, integraciones aisladas y aceptación de recorridos | Concluida |
+| 08.5 · Validación previa a Producción | CI, recorridos de navegador, accesibilidad, rendimiento, seguridad y operación | Planeada para el repositorio definitivo |
 | 09 · Producción | Dominio público, medios, costos, operación y salida autorizada | Planeada |
 
 ## Secuencia
@@ -27,10 +28,15 @@ flowchart TB
     p05 --> p06["✅ 06 · Stripe Checkout y pedidos<br/>Concluida"]
     p06 --> p07["✅ 07 · Correo transaccional y PDF<br/>Concluida"]
     p07 --> p08["✅ 08 · Staging<br/>Concluida"]
-    p08 --> p09["▫️ 09 · Producción<br/>Planeada"]
+    p08 --> p085["▫️ 08.5 · Validación previa a Producción<br/>Planeada para el repositorio definitivo"]
+    p085 --> p09["▫️ 09 · Producción<br/>Planeada"]
 ```
 
 ## Plan por fases
+
+### Reconstrucción del repositorio definitivo
+
+El siguiente trabajo previsto es reproducir estas guías en orden para construir desde cero el proyecto y su repositorio definitivo. Los estados concluidos y las evidencias de este documento corresponden al repositorio de referencia. Al iniciar la reconstrucción, registrar el nuevo repo y verificar allí cada fase con sus propios commits, entorno y fecha; conservar esta evidencia como historial de referencia. La fase 08.5 fue planificada el 11 de noviembre de 2026 y comenzará únicamente al llegar al Staging del nuevo repositorio. La base local y CI se preparan desde las fases iniciales según la [guía de calidad y salida](architecture/QUALITY-AND-RELEASE.md).
 
 ### Cuándo se definen los contratos
 
@@ -126,13 +132,21 @@ La fase 02 aprueba el alcance maestro del MVP, la arquitectura transversal, las 
 - **Validación local repetida (11 de noviembre de 2026):** `docker compose exec -T backend npm test` terminó con 131 pruebas aprobadas y cuatro pruebas de base de datos omitidas por requerir activación explícita; `docker compose exec -T -e CART_DATABASE_TEST=1 -e CHECKOUT_DATABASE_TEST=1 backend npm run test:db` aprobó las cuatro pruebas de PostgreSQL, y `docker compose exec -T frontend npm test` aprobó las 45 pruebas. En total, las 180 pruebas ejecutadas pasaron. Las pruebas de Checkout usan Stripe simulado y un webhook firmado de prueba; no se realizó un pago real.
 - **Revalidación de Staging (11 de noviembre de 2026):** `GET /health` de la API devolvió `{"status":"ok"}` y `GET /api/catalog/products` devolvió las tres fichas activas con imágenes HTTPS de R2. En el login, Turnstile completó y el API rechazó correctamente credenciales de prueba inválidas; la contraseña quedó vacía. Al navegar a registro y regresar, correo y contraseña quedaron vacíos. El login y los endpoints públicos no mostraron errores de consola. El responsable del proyecto confirmó haber validado previamente los recorridos completos en escritorio y móvil, incluidos registro, confirmación, recuperación, carrito, compra de prueba, webhook y correo con PDF; esta sesión no repitió el pago ni volvió a consumir esos correos.
 - **Límites de esta revalidación:** el widget de registro en el navegador automatizado devolvió el error Cloudflare `300030`, por lo que no se completó un registro real desde esa sesión. Cloudflare documenta los errores `300*` como fallos genéricos del challenge asociados a detección de comportamiento bot ([tabla oficial](https://developers.cloudflare.com/turnstile/troubleshooting/client-side-errors/error-codes/)). El responsable confirmó que el flujo sí pasó en navegador normal. La validación de catálogo comprobó las fichas y las URLs HTTPS de R2; la barrera de mayoría de edad impidió recorrer el catálogo visual desde esta sesión.
-- **Calidad estática (11 de noviembre de 2026):** las suites pasaron, pero ESLint global sigue reportando un error backend `no-useless-assignment` en `backend/src/email/purchase-documents.js:169`, y dos errores frontend `react-hooks/set-state-in-effect` en `frontend/src/components/account/sign-in-view.js:32` y `frontend/src/components/account/turnstile-widget.js:42`. Quedan registrados como limpieza técnica; no se modificó código en esta revalidación.
+- **Calidad estática (11 de noviembre de 2026):** la revalidación inicial detectó un error backend `no-useless-assignment` y dos errores frontend `react-hooks/set-state-in-effect`. En una revisión posterior se corrigieron los tres y los comandos de ESLint de backend y frontend terminaron sin errores.
 - **Aceptación concluida:** los recorridos completos de staging fueron confirmados por el responsable del proyecto y las revalidaciones técnicas enumeradas arriba pasaron dentro de sus límites. No se recreó Compose ni la infraestructura desde cero. Producción sigue pendiente en la fase 09.
+
+### 08.5. Validación previa a Producción — planeada para el repositorio definitivo
+
+- **Objetivo:** obtener evidencia reproducible de calidad funcional, accesibilidad, rendimiento, seguridad y recuperación del candidato antes de abrir Producción.
+- **Dependencias:** reconstrucción verificada de las fases 01–08 en el repositorio definitivo; CI básico preparado desde el inicio; Staging desplegado con commit identificable y proveedores de prueba. El responsable prepara antes de las pruebas cuentas/bandejas de prueba, acceso administrativo a GitHub/Railway y recursos aislados de PostgreSQL, Stripe, Resend y Cloudflare. Revisar cuotas y presupuesto antes de activar servicios adicionales.
+- **Resultado:** suites de Playwright y axe, informes Lighthouse y ZAP Baseline, revisión de seguridad, checks de GitHub Actions y evidencia de restauración/rollback. Las herramientas se ejecutan desde el equipo o runners temporales; Playwright no requiere un servicio permanente en Compose. La [guía de calidad y salida](architecture/QUALITY-AND-RELEASE.md) define el paquete obligatorio, complementos opcionales, orden y fuentes.
+- **Comprobaciones:** lint, pruebas y build aprobados; recorridos críticos reales de Staging documentados; accesibilidad automática y manual revisada; mediciones de rendimiento y SEO guardadas con objetivos acordados; hallazgos altos/críticos confirmados resueltos; restauración, alertas y rollback comprobados. Asociar resultados al mismo candidato y distinguir simulaciones, omisiones y bloqueos. Registrar responsable y aceptación antes de avanzar a la fase 09.
+- **Estado y evidencia:** sólo planeación aprobada. No se han instalado herramientas ni configurado CI o ejecutado auditorías de esta nueva fase. TestSprite, Sentry y las herramientas auxiliares se evalúan según la guía; no son requisitos de compra ni dependencias obligatorias.
 
 ### 09. Producción — planeada
 
 - **Objetivo:** preparar el entorno real, su dominio público, operación y costos antes de autorizar la salida.
-- **Dependencias:** aceptación de staging, cuenta y recursos de producción, dominio disponible y preparación por el responsable del proyecto de credenciales distintas para Stripe, Resend, Railway y R2.
+- **Dependencias:** aceptación de staging y cierre de la fase 08.5 en el repositorio definitivo, cuenta y recursos de producción, dominio disponible y preparación por el responsable del proyecto de credenciales distintas para Stripe, Resend, Railway y R2.
 - **09.1 · Preparar Railway y medios:** crear servicios y PostgreSQL separados de staging, aplicar migraciones, verificar catálogo, configurar Worker/Resend, claves de Stripe live y bucket de producción. Confirmar con el cliente los precios comerciales finales antes de habilitar cobros reales; los precios actuales del MVP sólo autorizan pruebas. La URL de medios debe ser pública y HTTPS para Stripe; no usar <code>r2.dev</code> en producción.
 - **09.2 · Decidir la capa pública de Cloudflare:** decidir si Cloudflare administrará DNS, proxy/CDN y el hostname personalizado de medios. R2 y la zona DNS son recursos distintos: usar R2 en desarrollo o staging no requiere cambiar nameservers. Si se migra la zona, inventariar y conservar antes los registros web, MX, SPF, DKIM, DMARC y verificaciones; cambiar la delegación desde Neubox afecta toda la zona. Probar TLS, tienda, webhook, imágenes y políticas de caché antes de habilitar el tráfico. Seguir [Neubox](architecture/services/NEUBOX.md), [Cloudflare](architecture/services/CLOUDFLARE.md) y [R2](architecture/services/R2.md).
 - **09.3 · Revisar cuotas, límites y costos antes de habilitar tráfico:**

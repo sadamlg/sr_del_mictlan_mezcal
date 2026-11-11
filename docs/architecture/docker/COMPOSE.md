@@ -55,6 +55,7 @@ Las dependencias JavaScript de referencia también se fijan al crear los manifie
 |---|---|
 | Backend y worker | Express <code>5.3.0</code>; Prisma CLI, <code>@prisma/client</code> y <code>@prisma/adapter-pg</code> <code>7.10.1</code>; <code>pg</code> <code>8.23.1</code> |
 | Frontend | <code>create-next-app</code> <code>16.4.0</code>; Next.js <code>16.4.1</code>; React y React DOM <code>19.3.0</code>; Tailwind CSS, <code>@tailwindcss/postcss</code> y <code>@tailwindcss/turbopack</code> <code>4.3.3</code>; PostCSS <code>8.5.29</code> |
+| Calidad | ESLint <code>10.13.0</code>, <code>@eslint/js</code> <code>10.0.1</code> y <code>globals</code> <code>17.13.0</code>; frontend añade <code>@next/eslint-plugin-next</code> <code>16.4.1</code> y <code>eslint-plugin-react-hooks</code> <code>7.1.1</code> |
 
 El <code>package-lock.json</code> registra las dependencias transitivas. Se conserva en Git y las imágenes instalan con <code>npm ci</code>; no se instala <code>node_modules</code> en el anfitrión. Prisma 7 usa un adaptador para conectarse a PostgreSQL y su configuración CLI define <code>DATABASE_URL</code> en <code>prisma.config.ts</code>. [Configuración oficial de Prisma Client 7](https://www.prisma.io/docs/orm/prisma-client/setup-and-configuration/introduction)
 
@@ -145,7 +146,7 @@ Los valores de contraseña anteriores son sólo para desarrollo local. Si cambia
 
 #### 2.1 Crear los manifiestos del backend
 
-Este manifiesto es el punto de partida del ejercicio. El backend completo del repositorio ya incluye además Stripe, Nodemailer, ESLint y sus propios scripts y pruebas; no sustituyas su `package.json` ni su lockfile por este ejemplo.
+Este manifiesto es el punto de partida del ejercicio. El backend completo del repositorio incluye además Stripe, Nodemailer y sus propios scripts y pruebas; no sustituyas su `package.json` ni su lockfile por este ejemplo.
 
 Crea <code>backend/package.json</code>:
 
@@ -158,6 +159,7 @@ Crea <code>backend/package.json</code>:
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
+    "lint": "eslint .",
     "worker:dev": "node --watch src/worker.js",
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",
@@ -184,7 +186,7 @@ docker run --rm \
     pg@8.23.1
 ~~~
 
-Instala la CLI de Prisma como dependencia de desarrollo:
+Registra la CLI de Prisma y ESLint como dependencias de desarrollo:
 
 ~~~bash
 docker run --rm \
@@ -193,7 +195,22 @@ docker run --rm \
   --volume "$PWD/backend:/app" \
   --workdir /app \
   node:24.21.0-bookworm-slim \
-  npm install --package-lock-only --save-dev --save-exact prisma@7.10.1
+  npm install --package-lock-only --save-dev --save-exact \
+    prisma@7.10.1 eslint@10.13.0 @eslint/js@10.0.1 globals@17.13.0
+~~~
+
+Crea `backend/eslint.config.mjs`:
+
+~~~js
+import js from '@eslint/js';
+import { defineConfig, globalIgnores } from 'eslint/config';
+import globals from 'globals';
+
+export default defineConfig([
+  js.configs.recommended,
+  { files: ['**/*.{js,mjs,cjs}'], languageOptions: { globals: globals.node } },
+  globalIgnores(['generated/**']),
+]);
 ~~~
 
 #### 2.2 Definir Prisma en el backend base
@@ -360,11 +377,13 @@ docker run --rm \
     --tailwind \
     --use-npm \
     --skip-install \
-    --no-eslint \
+    --eslint \
     --yes
 ~~~
 
 El comando selecciona JavaScript, App Router, <code>src/</code>, Tailwind y npm. <code>--skip-install</code> evita instalar dependencias en el volumen compartido; <code>--yes</code> acepta los valores predeterminados para cualquier opción no especificada. [Opciones oficiales de <code>create-next-app</code>](https://nextjs.org/docs/app/getting-started/installation)
+
+<code>--eslint</code> incluye ESLint en el frontend desde el inicio. Los comandos siguientes fijan las versiones y el ejemplo de configuración sustituye la configuración generada. Al construir las imágenes de desarrollo, <code>npm ci</code> instala las dependencias indicadas por cada lockfile, incluido ESLint.
 
 Fija las versiones de frontend y crea el lockfile dentro de la imagen temporal de Node:
 
@@ -390,8 +409,53 @@ docker run --rm \
     tailwindcss@4.3.3 \
     @tailwindcss/postcss@4.3.3 \
     @tailwindcss/turbopack@4.3.3 \
-    postcss@8.5.29
+    postcss@8.5.29 \
+    eslint@10.13.0 @eslint/js@10.0.1 globals@17.13.0 \
+    @next/eslint-plugin-next@16.4.1 eslint-plugin-react-hooks@7.1.1
 ~~~
+
+Elimina del manifiesto y lockfile el paquete de configuración generado que ya no se usa con el ejemplo siguiente:
+
+~~~bash
+docker run --rm --user "$(id -u):$(id -g)" --env HOME=/tmp \
+  --volume "$PWD/frontend:/app" --workdir /app \
+  node:24.21.0-bookworm-slim npm uninstall --package-lock-only --save-dev eslint-config-next
+~~~
+
+Configura el comando de lint en el manifiesto generado:
+
+~~~bash
+docker run --rm --user "$(id -u):$(id -g)" --env HOME=/tmp \
+  --volume "$PWD/frontend:/app" --workdir /app \
+  node:24.21.0-bookworm-slim npm pkg set 'scripts.lint=eslint .'
+~~~
+
+Crea o reemplaza `frontend/eslint.config.mjs` con la configuración del esqueleto:
+
+~~~js
+import js from '@eslint/js';
+import { defineConfig, globalIgnores } from 'eslint/config';
+import globals from 'globals';
+import nextPlugin from '@next/eslint-plugin-next';
+import reactHooks from 'eslint-plugin-react-hooks';
+
+export default defineConfig([
+  js.configs.recommended,
+  {
+    files: ['**/*.{js,jsx,mjs,cjs}'],
+    languageOptions: {
+      parserOptions: { ecmaFeatures: { jsx: true } },
+      globals: { ...globals.browser, ...globals.node },
+    },
+    plugins: { '@next/next': nextPlugin },
+    rules: { ...nextPlugin.configs.recommended.rules },
+  },
+  reactHooks.configs.flat.recommended,
+  globalIgnores(['.next/**', 'out/**', 'build/**', 'coverage/**', 'next-env.d.ts']),
+]);
+~~~
+
+La configuración del repositorio completo incluye además una excepción específica para el componente de aviso de edad, que todavía no existe en este esqueleto.
 
 El scaffold de <code>create-next-app</code> configura Tailwind para el bundler Turbopack mediante <code>@tailwindcss/turbopack</code>. Conserva esa configuración en <code>frontend/next.config.mjs</code> y fija el paquete a la misma versión exacta de Tailwind:
 
@@ -451,7 +515,7 @@ dist
 !.env.example
 ~~~
 
-El siguiente Dockerfile es el ejemplo mínimo del esqueleto. El [Dockerfile de desarrollo versionado](../../../backend/Dockerfile) añade la copia de configuración de ESLint; para la aplicación completa usa el archivo versionado.
+El siguiente Dockerfile es el ejemplo mínimo del esqueleto. Para la aplicación completa usa el [Dockerfile de desarrollo versionado](../../../backend/Dockerfile).
 
 Crea <code>backend/Dockerfile</code>:
 
@@ -470,6 +534,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY --chown=node:node prisma.config.ts ./prisma.config.ts
+COPY --chown=node:node eslint.config.mjs ./eslint.config.mjs
 COPY --chown=node:node prisma ./prisma
 COPY --chown=node:node src ./src
 
@@ -796,6 +861,8 @@ docker compose exec backend npm run prisma:migrate:status
 No confirmes un reset si hay datos locales que necesites conservar. Prisma documenta <code>migrate dev</code> para desarrollo y <code>migrate deploy</code> para aplicar migraciones pendientes. En Prisma 7, <code>migrate dev</code> no ejecuta <code>prisma generate</code> automáticamente, por lo que los comandos aparecen como pasos separados. [Referencia CLI de Prisma 7](https://www.prisma.io/docs/orm/v7/reference/prisma-cli-reference)
 
 ### Verificaciones de la aplicación completa
+
+Para reconstruir el repositorio definitivo, prepara también los checks de CI desde la base. La separación entre herramientas locales y la fase posterior de auditorías contra Staging está en [Calidad y validación antes de Producción](../QUALITY-AND-RELEASE.md). Playwright, Lighthouse y ZAP se incorporarán al llegar a esa fase y se ejecutarán bajo demanda o en runners temporales.
 
 Con el esquema aplicado, las pruebas y el lint del repositorio se ejecutan dentro de Compose:
 

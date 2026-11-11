@@ -50,6 +50,8 @@
 
 ## Pruebas y ejecución
 
+- Al reconstruir el repositorio definitivo, sigue [Calidad y validación antes de Producción](docs/architecture/QUALITY-AND-RELEASE.md): lint, pruebas y CI se preparan desde la base; la fase 08.5 comienza cuando ese nuevo repo llegue a Staging. Registra evidencia propia sin heredar estados concluidos del repositorio de referencia.
+
 - Los cambios de lógica o comportamiento incluyen pruebas del contrato afectado y siguen TDD. Los cambios sólo documentales o visuales no requieren pruebas unitarias artificiales.
 - Usa `node:test` para el backend y pruebas unitarias del frontend en `frontend/tests/`.
 - Usa Docker Compose como entorno local de referencia. Antes de builds, revisa memoria con `free -h` y carga con `docker stats --no-stream`; ejecuta cargas intensivas en serie.
