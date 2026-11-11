@@ -30,6 +30,7 @@ export default function TurnstileWidget({ action, onToken, onAvailabilityChange,
   const widgetIdRef = useRef(null);
   const callbacksRef = useRef({ onToken, onAvailabilityChange });
   const [loadError, setLoadError] = useState('');
+  const displayError = siteKey ? loadError : 'La verificación de seguridad no está configurada. Inténtalo más tarde.';
 
   useEffect(() => {
     callbacksRef.current = { onToken, onAvailabilityChange };
@@ -39,11 +40,9 @@ export default function TurnstileWidget({ action, onToken, onAvailabilityChange,
     let active = true;
     callbacksRef.current.onAvailabilityChange(Boolean(siteKey));
     if (!siteKey) {
-      setLoadError('La verificación de seguridad no está configurada. Inténtalo más tarde.');
       return () => { active = false; };
     }
 
-    setLoadError('');
     callbacksRef.current.onAvailabilityChange(false);
     loadTurnstileScript()
       .then(() => {
@@ -99,7 +98,7 @@ export default function TurnstileWidget({ action, onToken, onAvailabilityChange,
     <div className="space-y-2 text-center" role="group" aria-label="Verificación de seguridad">
       <p className="font-ui text-xs uppercase tracking-[0.1em] text-mictlan-sage-muted">Verificación de seguridad</p>
       <div ref={containerRef} className="flex justify-center" />
-      {loadError && <p className="font-ui text-xs leading-5 text-mictlan-error-text" role="alert">{loadError}</p>}
+      {displayError && <p className="font-ui text-xs leading-5 text-mictlan-error-text" role="alert">{displayError}</p>}
     </div>
   );
 }

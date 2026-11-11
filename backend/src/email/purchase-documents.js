@@ -166,7 +166,6 @@ function wrapText(value, maxWidth, size, font) {
   for (const word of text.split(' ')) {
     if (approximateTextWidth(word, size, font) > maxWidth) {
       if (line) lines.push(line);
-      line = '';
       let chunk = '';
       for (const character of word) {
         if (chunk && approximateTextWidth(chunk + character, size, font) > maxWidth) {
