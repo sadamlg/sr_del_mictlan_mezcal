@@ -12,6 +12,8 @@ Para el dominio de este proyecto, la [guía de Neubox y cPanel](NEUBOX.md) expli
 
 Cloudflare administra la entrada pública y los medios; Railway ejecuta Next.js, Express, PostgreSQL y el worker. Las conexiones internas entre servicios Railway —por ejemplo, Next.js a Express durante SSR y Express a PostgreSQL— permanecen dentro de su red privada.
 
+Turnstile es un producto de verificación antiabuso independiente de DNS, proxy/CDN y R2. Para staging no hace falta migrar nameservers ni activar el proxy: se permite el hostname público del frontend en el widget y la API valida los tokens mediante Siteverify. La [guía de Railway](RAILWAY.md#turnstile-de-staging) indica qué clave va en cada servicio. Usa widgets y claves separados para desarrollo, staging y producción; el secreto nunca se configura en el frontend.
+
 La compra de prueba y el correo con PDF fueron confirmados manualmente por el responsable en staging. El estado actual de dominios y DNS debe verificarse en los proveedores; no se deduce sólo del repositorio.
 
 ## Orden por fase

@@ -71,6 +71,7 @@ test('Compose API creates Checkout from current prices and saves one owner-only 
       allowInsecureDevHttp: true,
       frontendOrigin,
       secureCookies: false,
+      turnstileVerifier: async () => true,
       stripe,
       stripeWebhookSecret: webhookSecret,
     });
@@ -87,7 +88,7 @@ test('Compose API creates Checkout from current prices and saves one owner-only 
     const login = await fetch(`${apiUrl}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Origin: frontendOrigin },
-      body: JSON.stringify({ email, password: 'checkout-passphrase-2026' }),
+      body: JSON.stringify({ email, password: 'checkout-passphrase-2026', turnstileToken: 'test-token' }),
     });
     assert.equal(login.status, 200);
     const cookie = login.headers.get('set-cookie')?.split(';', 1)[0];
@@ -184,7 +185,7 @@ test('Compose API creates Checkout from current prices and saves one owner-only 
     const otherLogin = await fetch(`${apiUrl}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Origin: frontendOrigin },
-      body: JSON.stringify({ email: otherEmail, password }),
+      body: JSON.stringify({ email: otherEmail, password, turnstileToken: 'test-token' }),
     });
     assert.equal(otherLogin.status, 200);
     const otherCookie = otherLogin.headers.get('set-cookie')?.split(';', 1)[0];

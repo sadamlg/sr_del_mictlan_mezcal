@@ -25,7 +25,26 @@ function asErrorResponse(response, error, logger) {
   });
 }
 
-export function createAccountHandlers(service, { secureCookies = false, logger = console } = {}) {
+async function verifiedAccountInput(request, action, verifyTurnstile) {
+  const body = request.body;
+  const token = body?.turnstileToken;
+  if (typeof token !== 'string' || token.trim().length === 0) {
+    throw new AccountError(403, 'TURNSTILE_REQUIRED', 'Completa la verificación de seguridad para continuar.');
+  }
+  if (token.length > 2048 || await verifyTurnstile(token, action) !== true) {
+    throw new AccountError(403, 'TURNSTILE_INVALID', 'No pudimos verificar tu solicitud. Completa la verificación de nuevo.');
+  }
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return body;
+  const accountInput = { ...body };
+  delete accountInput.turnstileToken;
+  return accountInput;
+}
+
+export function createAccountHandlers(service, {
+  secureCookies = false,
+  verifyTurnstile = async () => false,
+  logger = console,
+} = {}) {
   function wrap(action, { status = 200, cookie = false, clearCookie = false, empty = false } = {}) {
     return async (request, response) => {
       setCommonHeaders(response);
@@ -49,8 +68,8 @@ export function createAccountHandlers(service, { secureCookies = false, logger =
   const currentAccount = (request) => service.getSession(readSessionCookie(request));
 
   return {
-    register: wrap((request) => service.register(request.body), { status: 201 }),
-    login: wrap((request) => service.login(request.body), { cookie: true }),
+    register: wrap(async (request) => service.register(await verifiedAccountInput(request, 'account_register', verifyTurnstile)), { status: 201 }),
+    login: wrap(async (request) => service.login(await verifiedAccountInput(request, 'account_login', verifyTurnstile)), { cookie: true }),
     logout: wrap(async (request) => {
       await service.logout(readSessionCookie(request));
       return {};

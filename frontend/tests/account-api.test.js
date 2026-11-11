@@ -41,6 +41,27 @@ test('account requests expose structured API errors to form views', async (conte
   });
 });
 
+test('login sends the Turnstile token with credentials', async (context) => {
+  const originalFetch = globalThis.fetch;
+  let requestBody;
+  globalThis.fetch = async (_url, options) => {
+    requestBody = JSON.parse(options.body);
+    return { status: 200, ok: true, json: async () => ({ account: { id: 'account-id' } }) };
+  };
+  context.after(() => { globalThis.fetch = originalFetch; });
+
+  await accountRequest('auth/login', {
+    method: 'POST',
+    body: { email: 'ana@example.com', password: 'private-passphrase', turnstileToken: 'widget-token' },
+  });
+
+  assert.deepEqual(requestBody, {
+    email: 'ana@example.com',
+    password: 'private-passphrase',
+    turnstileToken: 'widget-token',
+  });
+});
+
 test('204 account responses do not try to parse a response body', async (context) => {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async () => ({ status: 204, ok: true, json: async () => { throw new Error('no body'); } });

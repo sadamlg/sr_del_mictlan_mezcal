@@ -58,6 +58,7 @@ test('Compose API keeps account carts private and calculates totals from current
       allowInsecureDevHttp: true,
       frontendOrigin,
       secureCookies: false,
+      turnstileVerifier: async () => true,
     });
     server = app.listen(0, '127.0.0.1');
     await once(server, 'listening');
@@ -66,7 +67,7 @@ test('Compose API keeps account carts private and calculates totals from current
     const login = await fetch(`${apiUrl}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Origin: frontendOrigin },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, turnstileToken: 'test-token' }),
     });
     assert.equal(login.status, 200);
     assert.equal(login.headers.get('access-control-allow-origin'), frontendOrigin);
@@ -178,6 +179,7 @@ test('Compose API merges the guest Calios cart into a newly authenticated accoun
       allowInsecureDevHttp: true,
       frontendOrigin,
       secureCookies: false,
+      turnstileVerifier: async () => true,
     });
     server = app.listen(0, '127.0.0.1');
     await once(server, 'listening');
@@ -185,7 +187,7 @@ test('Compose API merges the guest Calios cart into a newly authenticated accoun
     const login = await fetch(`${apiUrl}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Origin: frontendOrigin },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, turnstileToken: 'test-token' }),
     });
     assert.equal(login.status, 200);
     const cookie = login.headers.get('set-cookie')?.split(';', 1)[0];

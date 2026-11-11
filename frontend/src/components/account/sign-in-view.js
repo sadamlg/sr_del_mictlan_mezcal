@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { accountRequest } from '../../lib/account-api';
 import { useCart } from '../cart/cart-provider';
 import { AccountCard, AccountField, AccountNotice, AccountSubmit, AccountTextLink } from './account-ui';
+import TurnstileWidget from './turnstile-widget';
 
 export default function SignInView({ continueToCheckout = false }) {
   const router = useRouter();
@@ -17,6 +18,9 @@ export default function SignInView({ continueToCheckout = false }) {
   const [waitingForCart, setWaitingForCart] = useState(false);
   const [error, setError] = useState('');
   const [errorKind, setErrorKind] = useState('error');
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const [turnstileReady, setTurnstileReady] = useState(false);
+  const [turnstileResetCount, setTurnstileResetCount] = useState(0);
 
   useEffect(() => {
     if (!waitingForCart) return;
@@ -33,18 +37,25 @@ export default function SignInView({ continueToCheckout = false }) {
 
   async function submit(event) {
     event.preventDefault();
+    if (!turnstileToken) {
+      setError('Completa la verificación de seguridad para continuar.');
+      setErrorKind('error');
+      return;
+    }
     setBusy(true);
     setError('');
     setErrorKind('error');
     setWaitingForCart(false);
     try {
-      await accountRequest('auth/login', { method: 'POST', body: { email, password } });
+      await accountRequest('auth/login', { method: 'POST', body: { email, password, turnstileToken } });
       setWaitingForCart(true);
     } catch (requestError) {
       setError(requestError.message);
       if (requestError.code === 'EMAIL_NOT_VERIFIED') setErrorKind('info');
     } finally {
       setBusy(false);
+      setTurnstileToken('');
+      setTurnstileResetCount((count) => count + 1);
     }
   }
 
@@ -105,7 +116,18 @@ export default function SignInView({ continueToCheckout = false }) {
             </button>
           )}
         />
-        <AccountSubmit busy={busy || (waitingForCart && sessionState === 'loading')} disabled={waitingForCart && sessionState === 'account'}>Entrar a mi cuenta</AccountSubmit>
+        <TurnstileWidget
+          action="account_login"
+          onToken={setTurnstileToken}
+          onAvailabilityChange={setTurnstileReady}
+          resetCount={turnstileResetCount}
+        />
+        <AccountSubmit
+          busy={busy || (waitingForCart && sessionState === 'loading')}
+          disabled={!turnstileReady || (waitingForCart && sessionState === 'account')}
+        >
+          Entrar a mi cuenta
+        </AccountSubmit>
       </form>
       <div className="mt-7 border-t border-mictlan-sand/10 pt-5 text-center text-sm text-mictlan-sage-muted">
         ¿Aún no tienes cuenta? <AccountTextLink href={continueToCheckout ? '/cuenta/registro?continuar=checkout' : '/cuenta/registro'}>Crear una cuenta</AccountTextLink>

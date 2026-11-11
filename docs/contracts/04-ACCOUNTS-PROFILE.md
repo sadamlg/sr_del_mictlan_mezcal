@@ -14,6 +14,12 @@ El catálogo y el carrito de invitado están disponibles sin cuenta. El pago y l
 - Las contraseñas tienen de 12 a 128 caracteres y se almacenan como hash con sal. Nunca se devuelven por API ni se escriben en logs.
 - Cambiar contraseña desde la sección **Contraseña** revoca las otras sesiones. La recuperación responde de forma genérica, use o no una cuenta existente; su token de un solo uso vence en 30 minutos.
 
+## Verificación antiabuso
+
+Registro e inicio de sesión requieren un token de Cloudflare Turnstile. El navegador obtiene el token del widget y lo envía como `turnstileToken`; la API verifica cada intento con Siteverify antes de crear una cuenta o sesión. El token no se pasa al servicio de cuentas ni se registra en logs. Debe tener entre 1 y 2.048 caracteres y no puede reutilizarse: el cliente obtiene uno nuevo después de cada envío, también cuando los datos de cuenta no pasan validación.
+
+El backend verifica el `success` de Siteverify. En entornos HTTPS con cookies seguras también exige que `hostname` coincida con el host de `FRONTEND_ORIGIN` y que `action` sea `account_register` o `account_login`, según la ruta. Un token ausente o inválido responde `403` con `TURNSTILE_REQUIRED` o `TURNSTILE_INVALID`; si la configuración o Siteverify no están disponibles, la ruta falla de forma cerrada con `503`. La clave secreta sólo pertenece al servicio API; la clave pública del widget se configura en el frontend.
+
 ## Datos de cuenta
 
 - `firstName` y `lastName`: nombre(s) y apellidos obligatorios, normalizados por separado y con límite de 120 caracteres cada uno. El saludo de cuenta y los correos usan `firstName`.
@@ -36,8 +42,8 @@ Todas las rutas de negocio usan `/api` y JSON.
 
 | Método y ruta | Acceso | Resultado |
 |---|---|---|
-| `POST /api/auth/register` | Público | Crea registro pendiente y encola confirmación; no crea sesión. |
-| `POST /api/auth/login` | Público | Crea sesión sólo para cuentas confirmadas. |
+| `POST /api/auth/register` | Público | Requiere `turnstileToken`; verifica el token y crea registro pendiente/enfila confirmación; no crea sesión. |
+| `POST /api/auth/login` | Público | Requiere `turnstileToken`; verifica el token y crea sesión sólo para cuentas confirmadas. |
 | `POST /api/auth/logout` | Sesión opcional | Revoca la sesión actual y expira la cookie. |
 | `GET /api/auth/session` | Sesión opcional | Devuelve la cuenta autenticada o `401`. |
 | `POST /api/auth/password-reset-requests` | Público | Encola recuperación con respuesta genérica. |
@@ -68,3 +74,5 @@ Este apartado conserva la revisión histórica realizada durante esa fase; no af
 Se revisó `../sr_del_mictlan`: el checkout contiene el acceso visual de cuenta en escritorio y móvil, pero no implementa registro, autenticación, perfil u órdenes. Su hoja de ruta propone adaptar casos de autenticación y separar rutas/controladores/servicios. Su código usa CommonJS, Mongoose/MongoDB y Redis/BullMQ; no se porta porque este proyecto usa ESM, Express, Prisma/PostgreSQL y prohíbe Redis/BullMQ. Se adapta el acceso visual con los componentes actuales y se rehace la persistencia y la lógica con el contrato presente. Para nombre(s) y apellidos, no había un contrato ni datos separados que portar: se agrega una migración que conserva nombres existentes y separa la primera palabra del resto para que cada persona pueda corregirlos en su perfil.
 
 Para exigir confirmación antes de activar cuentas se volvió a revisar ese repositorio: no aporta código ni un contrato de autenticación que se pueda reutilizar. Se conserva y adapta el flujo de tokens de un solo uso y el worker de correo ya implementados aquí; se rehacen las reglas de sesión y los mensajes para que el registro permanezca pendiente hasta confirmar.
+
+Para añadir Turnstile se volvió a revisar `../sr_del_mictlan`: el repositorio anterior no contiene rutas, contratos ni pruebas de autenticación que se puedan portar. La integración se implementa en el contrato actual de Express/ESM; el token queda en el límite HTTP y no modifica el servicio de cuentas ni la persistencia.
