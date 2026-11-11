@@ -56,6 +56,7 @@ Configura las siguientes variables en el servicio `api` de cada entorno:
 | `STRIPE_MEDIA_BASE_URL` | La misma URL HTTPS de medios para que Stripe descargue las imágenes del checkout. |
 | `STRIPE_SECRET_KEY` | Clave secreta de Stripe del entorno. En staging usa `sk_test_…`. |
 | `STRIPE_WEBHOOK_SECRET` | Secreto de firma `whsec_…` del endpoint de ese entorno. |
+| `TURNSTILE_SECRET_KEY` | Clave secreta del widget Turnstile de staging; sólo se configura en `api`. |
 
 ## 3. Configurar worker
 
@@ -96,12 +97,31 @@ Variables:
 | `INTERNAL_API_URL` | `http://${{api.RAILWAY_PRIVATE_DOMAIN}}:${{api.PORT}}` |
 | `NEXT_PUBLIC_API_URL` | `https://${{api.RAILWAY_PUBLIC_DOMAIN}}` (fallback para llamadas directas fuera del Dockerfile de producción) |
 | `MEDIA_BASE_URL` | URL HTTPS pública del bucket de medios de ese entorno. |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Clave pública del widget Turnstile de staging. |
 
-`INTERNAL_API_URL` se usa en solicitudes del servidor Next.js y en el proxy `/api/backend/*`; debe apuntar a la red privada de Railway. El Dockerfile de producción envía las llamadas del navegador por ese proxy, bajo el mismo dominio del frontend. Así las cookies de sesión son propias del frontend y no dependen de cookies entre dominios. `NEXT_PUBLIC_API_URL` queda como fallback para entornos que no usan el Dockerfile de producción. `MEDIA_BASE_URL` participa en la configuración de imágenes durante el build. Si cambias estas variables, vuelve a construir y desplegar el frontend.
+`INTERNAL_API_URL` se usa en solicitudes del servidor Next.js y en el proxy `/api/backend/*`; debe apuntar a la red privada de Railway. El Dockerfile de producción envía las llamadas del navegador por ese proxy, bajo el mismo dominio del frontend. Así las cookies de sesión son propias del frontend y no dependen de cookies entre dominios. `NEXT_PUBLIC_API_URL` queda como fallback para entornos que no usan el Dockerfile de producción. `MEDIA_BASE_URL` y `NEXT_PUBLIC_TURNSTILE_SITE_KEY` participan en el build. Si cambias estas variables, vuelve a construir y desplegar el frontend.
 
 Las cookies de sesión de producción usan `SameSite=Lax; Secure`. El proxy conserva `Origin` para que la API siga validando `FRONTEND_ORIGIN`, reenvía la cookie HttpOnly y conserva `X-Real-IP` para que el rate limit siga distinguiendo a cada cliente.
 
 Staging puede seguir usando el bucket no productivo documentado en [Cloudflare R2](R2.md). Antes de producción configura un bucket y hostname separados, y reemplaza ambas URL de medios.
+
+### Estado observado de Staging · 10 de noviembre de 2026
+
+En el proyecto `sr_del_mictlan_mezcal`, el entorno `staging` mostró los cuatro servicios en línea: `Backend`, `Frontend`, `worker` y `Postgres`; el volumen `postgres-volume` estaba adjunto. Los hostnames públicos mostrados fueron `backend-staging-a425.up.railway.app` para API y `frontend-staging-18c9.up.railway.app` para frontend. No se mostró hostname público para worker ni Postgres.
+
+El panel mostró estos nombres de variables; no se abrieron ni copiaron valores:
+
+- **Backend:** `RAILWAY_DOCKERFILE_PATH`, `NODE_ENV`, `DATABASE_URL`, `FRONTEND_ORIGIN`, `MEDIA_BASE_URL`, `STRIPE_MEDIA_BASE_URL`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`. Falta `TURNSTILE_SECRET_KEY`.
+- **Frontend:** `NODE_ENV`, `INTERNAL_API_URL`, `NEXT_PUBLIC_API_URL`, `MEDIA_BASE_URL`, `RAILWAY_DOCKERFILE_PATH`. Falta `NEXT_PUBLIC_TURNSTILE_SITE_KEY`.
+- **Worker:** `RAILWAY_DOCKERFILE_PATH`, `NODE_ENV`, `DATABASE_URL`, `APP_BASE_URL`, `RESEND_API_KEY`, `RESEND_FROM`, `MAIL_FROM` y variables `SMTP_*`. Estas últimas no son necesarias en Railway según la configuración documentada arriba; revisar si son residuo de configuración local. No se cambió ninguna variable.
+
+La presencia de nombres `STRIPE_*`, `RESEND_*` y `MEDIA_BASE_URL` no confirma los valores, modo de Stripe, webhook, remitentes ni bucket. No se verificaron los paneles de Stripe, Resend o Cloudflare. La activación de Turnstile y la aceptación de los recorridos siguen pendientes.
+
+## Turnstile de staging
+
+El responsable del proyecto crea un widget Turnstile separado para staging y permite sólo el hostname público del frontend de staging. Configura la clave pública en `NEXT_PUBLIC_TURNSTILE_SITE_KEY` del servicio `frontend` y el secreto en `TURNSTILE_SECRET_KEY` del servicio `api`; no copies el secreto a frontend, worker, Compose ni al repositorio. La API toma el hostname esperado de `FRONTEND_ORIGIN` y verifica `success`, `hostname` y `action` (`account_register` o `account_login`) cuando las cookies son seguras.
+
+Después de guardar variables, reconstruye y despliega `api` y `frontend`. Desde ambos formularios comprueba un token real válido, uno ausente y uno inválido; los casos ausente/inválido deben detenerse antes de crear cuenta o sesión. Los test keys de Cloudflare son sólo para desarrollo automatizado local: sus respuestas no contienen `action` y usan `example.com` como hostname, así que no acreditan el hostname ni la configuración real de staging. Consulta las instrucciones vigentes de [Siteverify](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/) y [test keys](https://developers.cloudflare.com/turnstile/troubleshooting/testing/).
 
 ## 5. Configurar Stripe y validar staging
 
@@ -111,7 +131,7 @@ Staging puede seguir usando el bucket no productivo documentado en [Cloudflare R
 4. Carga en staging el catálogo y las imágenes no productivas con los importes actuales del MVP. El SQL incluido abajo es para pruebas en una base de staging aislada; no es un seed de producción.
 5. Prueba registro, confirmación de cuenta, recuperación de contraseña, inicio de sesión, imágenes del catálogo y carrito, compra aceptada, compra cancelada, webhook, limpieza del carrito, orden y PDF, entrega/reintento del worker y logs de errores.
 6. Revisa los correos de cuenta y la confirmación de compra en Resend. La [guía de Resend](RESEND.md) explica la clave, remitentes y diagnóstico del worker.
-7. Antes de dar por cerrada la fase 08, implementa y valida Turnstile: aún no está en el código. La integración debe validar el token en servidor con Cloudflare Siteverify.
+7. Antes de dar por cerrada la fase 08, configura Turnstile con un widget y claves propios de staging siguiendo la sección [Turnstile de staging](#turnstile-de-staging), y valida ambos formularios con tokens reales.
 
 ### Ejemplo reproducible de catálogo para staging
 
@@ -172,7 +192,9 @@ Railway ofrece límites para el consumo de **cómputo a nivel de workspace**, no
 1. Abre la página **Usage** del workspace y revisa el consumo por proyecto y los límites actuales. También puedes consultar el estado con <code>railway usage limit status</code>.
 2. Define primero el presupuesto mensual aprobado para el workspace. Configura la alerta suave para recibir un correo sin interrumpir servicios y un límite duro sólo si aceptas que, al alcanzarlo, Railway apague todos los workloads de ese workspace. Staging y Production comparten el efecto cuando están en el mismo workspace.
 3. No copies umbrales de ejemplo ni fijes cifras sin presupuesto aprobado. La configuración se gestiona desde **Workspace Usage**; la CLI puede consultarla y establecer valores aprobados con <code>railway usage limit set --target workspace --soft &lt;dólares&gt; --hard &lt;dólares&gt;</code>. Verifica las reglas de entrada en la [referencia CLI](https://docs.railway.com/cli/usage).
-4. Registra en el acta de despliegue quién eligió esos umbrales y el efecto esperado. El repositorio no confirma los valores actuales del workspace.
+4. Registra en el acta de despliegue quién eligió esos umbrales y el efecto esperado. No cambies valores existentes sin presupuesto aprobado.
+
+**Lectura del panel (2026-11-10, workspace Hobby):** el periodo mostrado era `26 oct – 26 nov`; el proyecto `sr_del_mictlan_mezcal` llevaba `$2.27` de consumo y `$4.08` estimados. El límite de cómputo estaba en `$10` para alerta por correo y `$20` como límite duro; se habían consumido `$2.27` del límite. El límite duro de Agent estaba en `$5`, su alerta suave no tenía valor y el consumo mostrado era `$0`. El plan indicaba hasta `8 GB` de RAM, `8 vCPU` y `100 GB` de disco compartido. Esta lectura sólo registra la configuración observada; no propone ni cambia umbrales.
 
 [Control de costos de Railway](https://docs.railway.com/pricing/cost-control).
 

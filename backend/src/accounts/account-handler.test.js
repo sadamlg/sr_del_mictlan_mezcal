@@ -35,18 +35,99 @@ function publicAccount() {
 }
 
 test('registration creates a pending account without issuing a session cookie', async () => {
+  let serviceInput;
   const handlers = createAccountHandlers({
-    register: async () => ({ message: 'Confirma tu correo antes de iniciar sesión.', email: 'ana@example.com' }),
-  }, { secureCookies: false });
+    register: async (input) => {
+      serviceInput = input;
+      return { message: 'Confirma tu correo antes de iniciar sesión.', email: 'ana@example.com' };
+    },
+  }, {
+    secureCookies: false,
+    verifyTurnstile: async (token, action) => token === 'valid-token' && action === 'account_register',
+  });
   const result = response();
 
-  await handlers.register({ body: { email: 'ana@example.com' } }, result);
+  await handlers.register({ body: { email: 'ana@example.com', turnstileToken: 'valid-token' } }, result);
 
   assert.equal(result.statusCode, 201);
   assert.equal(result.body.email, 'ana@example.com');
   assert.match(result.body.message, /Confirma tu correo/);
+  assert.deepEqual(serviceInput, { email: 'ana@example.com' });
   assert.equal('sessionToken' in result.body, false);
   assert.equal(result.headers['Set-Cookie'], undefined);
+});
+
+test('login validates its Turnstile token and removes it before calling the account service', async () => {
+  let serviceInput;
+  const handlers = createAccountHandlers({
+    login: async (input) => {
+      serviceInput = input;
+      return { account: { id: 'account-id' }, sessionToken: 'session-token-value-long-enough-1234567890' };
+    },
+  }, { verifyTurnstile: async (token, action) => token === 'valid-token' && action === 'account_login' });
+  const result = response();
+
+  await handlers.login({ body: { email: 'ana@example.com', password: 'secret', turnstileToken: 'valid-token' } }, result);
+
+  assert.equal(result.statusCode, 200);
+  assert.deepEqual(serviceInput, { email: 'ana@example.com', password: 'secret' });
+  assert.equal('sessionToken' in result.body, false);
+});
+
+test('registration rejects a missing Turnstile token before creating an account', async () => {
+  let created = false;
+  const handlers = createAccountHandlers({ register: async () => { created = true; } }, {
+    verifyTurnstile: async () => { throw new Error('must not call Siteverify without a token'); },
+  });
+  const result = response();
+
+  await handlers.register({ body: { email: 'ana@example.com' } }, result);
+
+  assert.equal(result.statusCode, 403);
+  assert.equal(result.body.error.code, 'TURNSTILE_REQUIRED');
+  assert.equal(created, false);
+});
+
+test('registration rejects an invalid Turnstile token before creating an account', async () => {
+  let created = false;
+  const handlers = createAccountHandlers({ register: async () => { created = true; } }, {
+    verifyTurnstile: async () => false,
+  });
+  const result = response();
+
+  await handlers.register({ body: { email: 'ana@example.com', turnstileToken: 'invalid-token' } }, result);
+
+  assert.equal(result.statusCode, 403);
+  assert.equal(result.body.error.code, 'TURNSTILE_INVALID');
+  assert.equal(created, false);
+});
+
+test('login rejects a missing Turnstile token before authenticating', async () => {
+  let authenticated = false;
+  const handlers = createAccountHandlers({ login: async () => { authenticated = true; } }, {
+    verifyTurnstile: async () => { throw new Error('must not call Siteverify without a token'); },
+  });
+  const result = response();
+
+  await handlers.login({ body: { email: 'ana@example.com', password: 'secret' } }, result);
+
+  assert.equal(result.statusCode, 403);
+  assert.equal(result.body.error.code, 'TURNSTILE_REQUIRED');
+  assert.equal(authenticated, false);
+});
+
+test('login rejects an invalid Turnstile token before authenticating', async () => {
+  let authenticated = false;
+  const handlers = createAccountHandlers({ login: async () => { authenticated = true; } }, {
+    verifyTurnstile: async () => false,
+  });
+  const result = response();
+
+  await handlers.login({ body: { email: 'ana@example.com', password: 'secret', turnstileToken: 'invalid-token' } }, result);
+
+  assert.equal(result.statusCode, 403);
+  assert.equal(result.body.error.code, 'TURNSTILE_INVALID');
+  assert.equal(authenticated, false);
 });
 
 test('production session cookies are Secure and logout expires the cookie', async () => {
@@ -63,10 +144,10 @@ test('production session cookies are Secure and logout expires the cookie', asyn
 test('authentication errors use the documented structured response', async () => {
   const handlers = createAccountHandlers({
     login: async () => { throw new AccountError(401, 'INVALID_CREDENTIALS', 'El correo o la contraseña no son correctos.'); },
-  });
+  }, { verifyTurnstile: async () => true });
   const result = response();
 
-  await handlers.login({ body: {} }, result);
+  await handlers.login({ body: { turnstileToken: 'valid-token' } }, result);
 
   assert.equal(result.statusCode, 401);
   assert.deepEqual(result.body, {

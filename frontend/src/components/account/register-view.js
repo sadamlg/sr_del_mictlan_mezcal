@@ -6,6 +6,7 @@ import { accountRequest } from '../../lib/account-api';
 import { rememberCheckoutContinuation } from '../../lib/checkout-continuation.js';
 import AccountDatePicker from './account-date-picker';
 import { AccountCard, AccountField, AccountNotice, AccountSubmit, AccountTextLink, AddressFields, FormGrid } from './account-ui';
+import TurnstileWidget from './turnstile-widget';
 
 const EMPTY_ADDRESS = { street: '', number: '', neighborhood: '', locality: '', state: '', postalCode: '' };
 
@@ -17,6 +18,9 @@ export default function RegisterView({ continueToCheckout = false }) {
   const [message, setMessage] = useState('');
   const [registered, setRegistered] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const [turnstileReady, setTurnstileReady] = useState(false);
+  const [turnstileResetCount, setTurnstileResetCount] = useState(0);
   const resetAfterSuccessOnHide = useRef(false);
 
   useLayoutEffect(() => () => {
@@ -36,12 +40,20 @@ export default function RegisterView({ continueToCheckout = false }) {
 
   async function submit(event) {
     event.preventDefault();
+    if (!turnstileToken) {
+      setMessage('Completa la verificación de seguridad para continuar.');
+      setErrors({});
+      return;
+    }
     setBusy(true);
     setErrors({});
     setMessage('');
     setRegistered(false);
     try {
-      const result = await accountRequest('auth/register', { method: 'POST', body: { ...form, address } });
+      const result = await accountRequest('auth/register', {
+        method: 'POST',
+        body: { ...form, address, turnstileToken },
+      });
       if (continueToCheckout) rememberCheckoutContinuation();
       resetAfterSuccessOnHide.current = true;
       setMessage(result.message);
@@ -51,6 +63,8 @@ export default function RegisterView({ continueToCheckout = false }) {
       setMessage(requestError.message);
     } finally {
       setBusy(false);
+      setTurnstileToken('');
+      setTurnstileResetCount((count) => count + 1);
     }
   }
 
@@ -117,7 +131,13 @@ export default function RegisterView({ continueToCheckout = false }) {
           <AddressFields address={address} setAddress={setAddress} errors={errors} />
         </div>
         <AccountNotice>Solo aceptamos cuentas de personas mayores de 18 años. No podrás iniciar sesión hasta confirmar tu correo.</AccountNotice>
-        <AccountSubmit busy={busy}>Crear mi cuenta</AccountSubmit>
+        <TurnstileWidget
+          action="account_register"
+          onToken={setTurnstileToken}
+          onAvailabilityChange={setTurnstileReady}
+          resetCount={turnstileResetCount}
+        />
+        <AccountSubmit busy={busy} disabled={!turnstileReady}>Crear mi cuenta</AccountSubmit>
       </form>
       <div className="mt-7 border-t border-mictlan-sand/10 pt-5 text-center text-sm text-mictlan-sage-muted">
         ¿Ya tienes cuenta? <AccountTextLink href={continueToCheckout ? '/cuenta/iniciar-sesion?continuar=checkout' : '/cuenta/iniciar-sesion'}>Iniciar sesión</AccountTextLink>

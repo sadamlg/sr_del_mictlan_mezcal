@@ -10,6 +10,7 @@ import { createAccountHandlers } from './accounts/account-handler.js';
 import { createAccountRateLimit } from './accounts/account-rate-limit.js';
 import { createAccountRepository } from './accounts/account-repository.js';
 import { createAccountService } from './accounts/account-service.js';
+import { createTurnstileVerifier } from './accounts/turnstile-verifier.js';
 import { createCartHandlers } from './carts/cart-handler.js';
 import { createCartRepository } from './carts/cart-repository.js';
 import { createCartService } from './carts/cart-service.js';
@@ -26,6 +27,11 @@ export function createApp({
   allowInsecureDevHttp = false,
   frontendOrigin = process.env.FRONTEND_ORIGIN || 'http://localhost:3000',
   secureCookies = process.env.NODE_ENV === 'production',
+  turnstileVerifier = createTurnstileVerifier({
+    secretKey: process.env.TURNSTILE_SECRET_KEY,
+    expectedHostname: new URL(frontendOrigin).hostname,
+    enforceContext: secureCookies,
+  }),
   stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null,
   stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET,
 }) {
@@ -37,7 +43,7 @@ export function createApp({
     repository: createAccountRepository(database),
     orderRepository: checkoutRepository,
   });
-  const accountHandlers = createAccountHandlers(accountService, { secureCookies });
+  const accountHandlers = createAccountHandlers(accountService, { secureCookies, verifyTurnstile: turnstileVerifier });
   const accountRateLimit = createAccountRateLimit();
   const cartHandlers = createCartHandlers({
     accountService,
