@@ -96,9 +96,9 @@ export default function TurnstileWidget({ action, onToken, onAvailabilityChange,
   }, [resetCount]);
 
   return (
-    <div className="space-y-2" role="group" aria-label="Verificación de seguridad">
+    <div className="space-y-2 text-center" role="group" aria-label="Verificación de seguridad">
       <p className="font-ui text-xs uppercase tracking-[0.1em] text-mictlan-sage-muted">Verificación de seguridad</p>
-      <div ref={containerRef} />
+      <div ref={containerRef} className="flex justify-center" />
       {loadError && <p className="font-ui text-xs leading-5 text-mictlan-error-text" role="alert">{loadError}</p>}
     </div>
   );
