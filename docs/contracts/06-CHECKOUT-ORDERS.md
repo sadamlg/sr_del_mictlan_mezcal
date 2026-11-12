@@ -168,7 +168,7 @@ Este orden y los criterios inferiores se conservan como referencia del plan de l
 Comandos previstos, siempre dentro de Compose:
 
 - `docker compose exec backend npm test`
-- `docker compose exec backend npm run test:db`
+- `docker compose exec -e CART_DATABASE_TEST=1 -e CHECKOUT_DATABASE_TEST=1 backend npm run test:db` (en una base local de prueba con migraciones aplicadas; sin esas variables se omiten los casos de PostgreSQL).
 - `docker compose exec backend npm run prisma:validate`
 - `docker compose exec backend npm run lint`
 - Aplicar migraciones con `docker compose exec backend npm run prisma:migrate:dev -- --name checkout_orders` y comprobar con `docker compose exec backend npm run prisma:migrate:status`.

@@ -6,6 +6,7 @@ Las decisiones duraderas del repositorio siguen en [AGENTS.md](../AGENTS.md), el
 
 | Fase | Resultado | Estado |
 |---|---|---|
+| 00 · Preparación del repositorio definitivo | Referencia, recursos y repositorio nuevo identificados | Planeada para el repositorio definitivo |
 | 01 · Entorno local y Docker | Stack reproducible en Compose, con acceso local y opción LAN | Concluida |
 | 02 · Alcance y arquitectura | Alcance maestro y arquitectura transversal; los contratos de módulo se detallan en sus fases | Concluida |
 | 03 · Landing, catálogo y medios | Catálogo, presentación, medios y carga pública | Concluida |
@@ -14,13 +15,14 @@ Las decisiones duraderas del repositorio siguen en [AGENTS.md](../AGENTS.md), el
 | 06 · Stripe Checkout y pedidos | Compra, webhook firmado, pedidos e idempotencia | Concluida |
 | 07 · Correo transaccional y PDF | Resend, mensajes de compra y detalle de pedido | Concluida |
 | 08 · Staging | Railway, integraciones aisladas y aceptación de recorridos | Concluida |
-| 08.5 · Validación previa a Producción | CI, recorridos de navegador, accesibilidad, rendimiento, seguridad y operación | Planeada para el repositorio definitivo |
-| 09 · Producción | Dominio público, medios, costos, operación y salida autorizada | Planeada |
+| 09 · Validación previa a Producción | CI, recorridos de navegador, accesibilidad, rendimiento, seguridad y operación | Planeada para el repositorio definitivo |
+| 10 · Producción | Dominio público, medios, costos, operación y salida autorizada | Planeada |
 
 ## Secuencia
 
 ```mermaid
 flowchart TB
+    p00["▫️ 00 · Preparación del repositorio definitivo<br/>Planeada"] --> p01
     p01["✅ 01 · Entorno local y Docker<br/>Concluida"] --> p02["✅ 02 · Alcance y arquitectura<br/>Concluida"]
     p02 --> p03["✅ 03 · Landing, catálogo y medios<br/>Concluida"]
     p03 --> p04["✅ 04 · Cuentas y perfil<br/>Concluida"]
@@ -28,15 +30,15 @@ flowchart TB
     p05 --> p06["✅ 06 · Stripe Checkout y pedidos<br/>Concluida"]
     p06 --> p07["✅ 07 · Correo transaccional y PDF<br/>Concluida"]
     p07 --> p08["✅ 08 · Staging<br/>Concluida"]
-    p08 --> p085["▫️ 08.5 · Validación previa a Producción<br/>Planeada para el repositorio definitivo"]
-    p085 --> p09["▫️ 09 · Producción<br/>Planeada"]
+    p08 --> p09["▫️ 09 · Validación previa a Producción<br/>Planeada para el repositorio definitivo"]
+    p09 --> p10["▫️ 10 · Producción<br/>Planeada"]
 ```
 
 ## Plan por fases
 
 ### Reconstrucción del repositorio definitivo
 
-El siguiente trabajo previsto es reproducir estas guías en orden para construir desde cero el proyecto y su repositorio definitivo. Los estados concluidos y las evidencias de este documento corresponden al repositorio de referencia. Al iniciar la reconstrucción, registrar el nuevo repo y verificar allí cada fase con sus propios commits, entorno y fecha; conservar esta evidencia como historial de referencia. La fase 08.5 fue planificada el 11 de noviembre de 2026 y comenzará únicamente al llegar al Staging del nuevo repositorio. La base local y CI se preparan desde las fases iniciales según la [guía de calidad y salida](architecture/QUALITY-AND-RELEASE.md).
+El siguiente trabajo previsto es reproducir estas guías en orden para construir desde cero el proyecto y su repositorio definitivo, comenzando con la [fase 00](00-RECONSTRUCCION.md). Los estados concluidos y las evidencias de este documento corresponden al repositorio de referencia. Al iniciar la reconstrucción, registrar el nuevo repo y verificar allí cada fase con sus propios commits, entorno y fecha; conservar esta evidencia como historial de referencia. La fase 09 fue planificada el 11 de noviembre de 2026 y comenzará únicamente al llegar al Staging del nuevo repositorio. La base local y CI se preparan desde las fases iniciales según la [guía de calidad y salida](quality/QUALITY-AND-RELEASE.md).
 
 ### Cuándo se definen los contratos
 
@@ -45,8 +47,9 @@ La fase 02 aprueba el alcance maestro del MVP, la arquitectura transversal, las 
 ### 01. Entorno local y Docker — concluida
 
 - **Objetivo:** permitir que una copia limpia del repositorio levante el stack de desarrollo y sus dependencias sin instalar Node.js en el equipo anfitrión.
-- **Dependencias:** ninguna.
+- **Dependencias:** ninguna para el entorno de referencia; para la reconstrucción del repositorio definitivo, completar antes la [fase 00](00-RECONSTRUCCION.md).
 - **Resultado:** frontend Next.js, API Express, PostgreSQL, Prisma, worker y Mailpit en Docker Compose. El modo local estándar enlaza servicios al loopback; el modo LAN es opcional y reversible y cambia la publicación de puertos y las direcciones usadas por el navegador. Los medios pueden servirse localmente o desde R2 sin cambiar los puertos de Compose.
+- **CI del repositorio definitivo:** en esta fase crear y verificar un workflow mínimo con lint de frontend y backend; incorporar pruebas y build cuando existan durante las fases funcionales. La fase 09 añade la validación integral en Staging. El flujo y la protección de ramas se detallan en [Calidad y salida](quality/QUALITY-AND-RELEASE.md#evolución-del-ci-en-el-repositorio-definitivo).
 - **Comprobaciones:** reconstruir y levantar Compose desde la guía; comprobar frontend, API, base de datos, worker y recepción de correo en Mailpit. Si se usa LAN, confirmar acceso desde otro dispositivo y poder volver al modo local. La guía distingue estos modos de los Dockerfiles de producción que se preparan en la fase 08.
 - **Estado y evidencia:** configuración de Compose y del modo LAN presente en el repositorio; no hay un servicio externo que preparar. La última fecha de ejecución completa no está registrada en este roadmap. Compose y su ejercicio de construcción desde cero están en [la guía maestra](architecture/docker/COMPOSE.md).
 
@@ -116,7 +119,7 @@ La fase 02 aprueba el alcance maestro del MVP, la arquitectura transversal, las 
 
 - **Resultado:** PostgreSQL persiste un solo trabajo de confirmación por pedido pagado y el worker lo procesa. En Compose el worker usa SMTP hacia Mailpit; en Railway usa la API HTTPS de Resend. La clave pertenece al Worker y se separa por entorno. `MAIL_FROM` se usa para mensajes de cuenta y `RESEND_FROM` para compras; verificar envío no crea por sí mismo un buzón para recibir respuestas. No se añade otro broker a la cola persistida. El worker registra tipo de trabajo, intento e error sin volcar destinatarios, domicilios ni contenido del mensaje.
 - **Comprobaciones:** dominio verificado, remitentes autorizados, enlaces con el origen del entorno correcto, mensaje visible en Resend y en la bandeja destino, PDF con el detalle correcto y trabajo recuperable ante fallos. No guardar claves en el repo ni configurarlas como `SMTP_PASSWORD`.
-- **Estado y evidencia:** código de Resend y PDF implementado; configuración de staging y recepción de mensajes de cuenta y compra reportadas. Para la cabecera del correo se decidió usar la imagen de marca en vez de depender de Cinzel, que no se renderizaba de forma fiable en Gmail; el cambio quedó en el commit `488d78b` del 29 de octubre de 2026. La cola implementa reintentos y deduplicación. La recepción del correo de compra está reportada para esa misma fecha. La aceptación de producción corresponde a la fase 09. Las instrucciones de cuenta, dominio y Worker están en [Resend](architecture/services/RESEND.md); el contenido del PDF y la cola están en el [contrato de Checkout](contracts/06-CHECKOUT-ORDERS.md#correo-de-compra-y-comprobantes).
+- **Estado y evidencia:** código de Resend y PDF implementado; configuración de staging y recepción de mensajes de cuenta y compra reportadas. Para la cabecera del correo se decidió usar la imagen de marca en vez de depender de Cinzel, que no se renderizaba de forma fiable en Gmail; el cambio quedó en el commit `488d78b` del 29 de octubre de 2026. La cola implementa reintentos y deduplicación. La recepción del correo de compra está reportada para esa misma fecha. La aceptación de producción corresponde a la fase 10. Las instrucciones de cuenta, dominio y Worker están en [Resend](architecture/services/RESEND.md); el contenido del PDF y la cola están en el [contrato de Checkout](contracts/06-CHECKOUT-ORDERS.md#correo-de-compra-y-comprobantes).
 
 ### 08. Staging — concluida
 
@@ -133,23 +136,23 @@ La fase 02 aprueba el alcance maestro del MVP, la arquitectura transversal, las 
 - **Revalidación de Staging (11 de noviembre de 2026):** `GET /health` de la API devolvió `{"status":"ok"}` y `GET /api/catalog/products` devolvió las tres fichas activas con imágenes HTTPS de R2. En el login, Turnstile completó y el API rechazó correctamente credenciales de prueba inválidas; la contraseña quedó vacía. Al navegar a registro y regresar, correo y contraseña quedaron vacíos. El login y los endpoints públicos no mostraron errores de consola. El responsable del proyecto confirmó haber validado previamente los recorridos completos en escritorio y móvil, incluidos registro, confirmación, recuperación, carrito, compra de prueba, webhook y correo con PDF; esta sesión no repitió el pago ni volvió a consumir esos correos.
 - **Límites de esta revalidación:** el widget de registro en el navegador automatizado devolvió el error Cloudflare `300030`, por lo que no se completó un registro real desde esa sesión. Cloudflare documenta los errores `300*` como fallos genéricos del challenge asociados a detección de comportamiento bot ([tabla oficial](https://developers.cloudflare.com/turnstile/troubleshooting/client-side-errors/error-codes/)). El responsable confirmó que el flujo sí pasó en navegador normal. La validación de catálogo comprobó las fichas y las URLs HTTPS de R2; la barrera de mayoría de edad impidió recorrer el catálogo visual desde esta sesión.
 - **Calidad estática (11 de noviembre de 2026):** la revalidación inicial detectó un error backend `no-useless-assignment` y dos errores frontend `react-hooks/set-state-in-effect`. En una revisión posterior se corrigieron los tres y los comandos de ESLint de backend y frontend terminaron sin errores.
-- **Aceptación concluida:** los recorridos completos de staging fueron confirmados por el responsable del proyecto y las revalidaciones técnicas enumeradas arriba pasaron dentro de sus límites. No se recreó Compose ni la infraestructura desde cero. Producción sigue pendiente en la fase 09.
+- **Aceptación concluida:** los recorridos completos de staging fueron confirmados por el responsable del proyecto y las revalidaciones técnicas enumeradas arriba pasaron dentro de sus límites. No se recreó Compose ni la infraestructura desde cero. Producción sigue pendiente en la fase 10.
 
-### 08.5. Validación previa a Producción — planeada para el repositorio definitivo
+### 09. Validación previa a Producción — planeada para el repositorio definitivo
 
 - **Objetivo:** obtener evidencia reproducible de calidad funcional, accesibilidad, rendimiento, seguridad y recuperación del candidato antes de abrir Producción.
 - **Dependencias:** reconstrucción verificada de las fases 01–08 en el repositorio definitivo; CI básico preparado desde el inicio; Staging desplegado con commit identificable y proveedores de prueba. El responsable prepara antes de las pruebas cuentas/bandejas de prueba, acceso administrativo a GitHub/Railway y recursos aislados de PostgreSQL, Stripe, Resend y Cloudflare. Revisar cuotas y presupuesto antes de activar servicios adicionales.
-- **Resultado:** suites de Playwright y axe, informes Lighthouse y ZAP Baseline, revisión de seguridad, checks de GitHub Actions y evidencia de restauración/rollback. Las herramientas se ejecutan desde el equipo o runners temporales; Playwright no requiere un servicio permanente en Compose. La [guía de calidad y salida](architecture/QUALITY-AND-RELEASE.md) define el paquete obligatorio, complementos opcionales, orden y fuentes.
-- **Comprobaciones:** lint, pruebas y build aprobados; recorridos críticos reales de Staging documentados; accesibilidad automática y manual revisada; mediciones de rendimiento y SEO guardadas con objetivos acordados; hallazgos altos/críticos confirmados resueltos; restauración, alertas y rollback comprobados. Asociar resultados al mismo candidato y distinguir simulaciones, omisiones y bloqueos. Registrar responsable y aceptación antes de avanzar a la fase 09.
+- **Resultado:** suites de Playwright y axe, informes Lighthouse y ZAP Baseline, revisión de seguridad, checks de GitHub Actions y evidencia de restauración/rollback. Las herramientas se ejecutan desde el equipo o runners temporales; Playwright no requiere un servicio permanente en Compose. La [guía de calidad y salida](quality/QUALITY-AND-RELEASE.md) define el paquete obligatorio, complementos opcionales, orden y fuentes.
+- **Comprobaciones:** lint, pruebas y build aprobados; recorridos críticos reales de Staging documentados; accesibilidad automática y manual revisada; mediciones de rendimiento y SEO guardadas con objetivos acordados; hallazgos altos/críticos confirmados resueltos; restauración, alertas y rollback comprobados. Asociar resultados al mismo candidato y distinguir simulaciones, omisiones y bloqueos. Registrar responsable y aceptación antes de avanzar a la fase 10.
 - **Estado y evidencia:** sólo planeación aprobada. No se han instalado herramientas ni configurado CI o ejecutado auditorías de esta nueva fase. TestSprite, Sentry y las herramientas auxiliares se evalúan según la guía; no son requisitos de compra ni dependencias obligatorias.
 
-### 09. Producción — planeada
+### 10. Producción — planeada
 
 - **Objetivo:** preparar el entorno real, su dominio público, operación y costos antes de autorizar la salida.
-- **Dependencias:** aceptación de staging y cierre de la fase 08.5 en el repositorio definitivo, cuenta y recursos de producción, dominio disponible y preparación por el responsable del proyecto de credenciales distintas para Stripe, Resend, Railway y R2.
-- **09.1 · Preparar Railway y medios:** crear servicios y PostgreSQL separados de staging, aplicar migraciones, verificar catálogo, configurar Worker/Resend, claves de Stripe live y bucket de producción. Confirmar con el cliente los precios comerciales finales antes de habilitar cobros reales; los precios actuales del MVP sólo autorizan pruebas. La URL de medios debe ser pública y HTTPS para Stripe; no usar <code>r2.dev</code> en producción.
-- **09.2 · Decidir la capa pública de Cloudflare:** decidir si Cloudflare administrará DNS, proxy/CDN y el hostname personalizado de medios. R2 y la zona DNS son recursos distintos: usar R2 en desarrollo o staging no requiere cambiar nameservers. Si se migra la zona, inventariar y conservar antes los registros web, MX, SPF, DKIM, DMARC y verificaciones; cambiar la delegación desde Neubox afecta toda la zona. Probar TLS, tienda, webhook, imágenes y políticas de caché antes de habilitar el tráfico. Seguir [Neubox](architecture/services/NEUBOX.md), [Cloudflare](architecture/services/CLOUDFLARE.md) y [R2](architecture/services/R2.md).
-- **09.3 · Revisar cuotas, límites y costos antes de habilitar tráfico:**
+- **Dependencias:** aceptación de staging y cierre de la fase 09 en el repositorio definitivo, cuenta y recursos de producción, dominio disponible y preparación por el responsable del proyecto de credenciales distintas para Stripe, Resend, Railway y R2.
+- **10.1 · Preparar Railway y medios:** crear servicios y PostgreSQL separados de staging, aplicar migraciones, verificar catálogo, configurar Worker/Resend, claves de Stripe live y bucket de producción. Confirmar con el cliente los precios comerciales finales antes de habilitar cobros reales; los precios actuales del MVP sólo autorizan pruebas. La URL de medios debe ser pública y HTTPS para Stripe; no usar <code>r2.dev</code> en producción.
+- **10.2 · Decidir la capa pública de Cloudflare:** decidir si Cloudflare administrará DNS, proxy/CDN y el hostname personalizado de medios. R2 y la zona DNS son recursos distintos: usar R2 en desarrollo o staging no requiere cambiar nameservers. Si se migra la zona, inventariar y conservar antes los registros web, MX, SPF, DKIM, DMARC y verificaciones; cambiar la delegación desde Neubox afecta toda la zona. Probar TLS, tienda, webhook, imágenes y políticas de caché antes de habilitar el tráfico. Seguir [Neubox](architecture/services/NEUBOX.md), [Cloudflare](architecture/services/CLOUDFLARE.md) y [R2](architecture/services/R2.md).
+- **10.3 · Revisar cuotas, límites y costos antes de habilitar tráfico:**
   - **R2:** contrastar almacenamiento y operaciones con la cuota Standard vigente; el egreso de R2 es gratuito. La alerta de presupuesto de Cloudflare es a nivel de cuenta y sólo notifica: no detiene el consumo ni fija un máximo para R2.
   - **Cloudflare Images, sólo si se elige:** sus transformaciones son un producto separado de R2/CDN. El plan Free permite 5,000 transformaciones únicas al mes; al excederlas, las transformaciones nuevas pueden fallar. No está configurado en este proyecto.
   - **Railway:** revisar los límites del workspace. La alerta suave envía correo; el límite duro de cómputo apaga todos los workloads del workspace al alcanzarse. Seleccionar ambos importes con el presupuesto aprobado y considerar que Staging y Production comparten el efecto si están en el mismo workspace.
@@ -157,6 +160,6 @@ La fase 02 aprueba el alcance maestro del MVP, la arquitectura transversal, las 
   - **Stripe:** el modo de prueba no procesa pagos reales. En Standard, Stripe cobra por transacción exitosa; los límites de solicitudes API limitan la tasa de llamadas, no el gasto o las ventas. No hay un tope de gasto configurado por esta integración. Si el negocio necesita un límite de ventas, debe definirse como regla del negocio antes de producción.
   - Registrar los umbrales y el responsable sólo después de revisar los paneles actuales y aprobar un presupuesto. La tabla y los enlaces oficiales están en [Servicios y costos](architecture/services/COSTS.md); cada guía de proveedor contiene sus controles.
 
-- **09.4 · Preparar operación y salida:** configurar copias de seguridad y comprobar recuperación, monitoreo, responsables de secretos, respuesta a fallos y procedimiento de rollback. Completar dominio canónico, metadatos, `robots.txt` y `sitemap.xml` antes de abrir el sitio a indexación, según [RENDERING-AND-SEO.md](architecture/RENDERING-AND-SEO.md).
+- **10.4 · Preparar operación y salida:** configurar copias de seguridad y comprobar recuperación, monitoreo, responsables de secretos, respuesta a fallos y procedimiento de rollback. Completar dominio canónico, metadatos, `robots.txt` y `sitemap.xml` antes de abrir el sitio a indexación, según [RENDERING-AND-SEO.md](architecture/RENDERING-AND-SEO.md).
 - **Comprobaciones:** repetir en producción las integraciones críticas con las credenciales y recursos de ese entorno; verificar correo, imágenes y enlaces bajo dominio final; revisar restauración y costos; obtener autorización explícita antes de habilitar ventas.
 - **Estado y evidencia:** planeada. El repositorio no versiona la configuración privada de Railway, DNS/TLS ni secretos; el estado de cuentas y proveedores debe verificarse en cada panel. No se ha registrado una salida a producción.

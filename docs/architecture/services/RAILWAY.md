@@ -115,7 +115,7 @@ El panel mostró estos nombres de variables; no se abrieron ni copiaron valores:
 - **Frontend:** `NODE_ENV`, `INTERNAL_API_URL`, `NEXT_PUBLIC_API_URL`, `MEDIA_BASE_URL`, `RAILWAY_DOCKERFILE_PATH`. Falta `NEXT_PUBLIC_TURNSTILE_SITE_KEY`.
 - **Worker:** `RAILWAY_DOCKERFILE_PATH`, `NODE_ENV`, `DATABASE_URL`, `APP_BASE_URL`, `RESEND_API_KEY`, `RESEND_FROM`, `MAIL_FROM` y variables `SMTP_*`. Estas últimas no son necesarias en Railway según la configuración documentada arriba; revisar si son residuo de configuración local. No se cambió ninguna variable.
 
-La presencia de nombres `STRIPE_*`, `RESEND_*` y `MEDIA_BASE_URL` no confirma los valores, modo de Stripe, webhook, remitentes ni bucket. No se verificaron los paneles de Stripe, Resend o Cloudflare. La activación de Turnstile y la aceptación de los recorridos siguen pendientes.
+En la observación del 10 de noviembre, la presencia de nombres `STRIPE_*`, `RESEND_*` y `MEDIA_BASE_URL` no confirmó valores, modo de Stripe, webhook, remitentes ni bucket. Entonces no se verificaron los paneles de Stripe, Resend o Cloudflare y Turnstile estaba pendiente. Para la evidencia posterior, sus límites y el estado de la reconstrucción, consulta el [roadmap](../../ROADMAP.md#08-staging--concluida); el repositorio definitivo requiere su propia configuración y validación.
 
 ## Turnstile de staging
 

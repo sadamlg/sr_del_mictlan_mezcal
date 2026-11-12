@@ -20,6 +20,8 @@ Registro e inicio de sesión requieren un token de Cloudflare Turnstile. El nave
 
 El backend verifica el `success` de Siteverify. En entornos HTTPS con cookies seguras también exige que `hostname` coincida con el host de `FRONTEND_ORIGIN` y que `action` sea `account_register` o `account_login`, según la ruta. Un token ausente o inválido responde `403` con `TURNSTILE_REQUIRED` o `TURNSTILE_INVALID`; si la configuración o Siteverify no están disponibles, la ruta falla de forma cerrada con `503`. La clave secreta sólo pertenece al servicio API; la clave pública del widget se configura en el frontend.
 
+Al implementar esta capacidad en el repositorio nuevo, añade `NEXT_PUBLIC_TURNSTILE_SITE_KEY` al entorno del frontend y `TURNSTILE_SECRET_KEY` al de la API en Compose y `.env.example`, sin versionar secretos reales. Para desarrollo local, configura en `.env` el par de claves de prueba publicado por Cloudflare y recrea frontend y API; verifica el par y sus casos en la [documentación oficial](https://developers.cloudflare.com/turnstile/troubleshooting/testing/). El esqueleto inicial de Compose no implementa todavía este formulario ni estas variables: se agregan durante la fase de cuentas. La comprobación con widget real, hostname y acción corresponde a Staging, según [Railway](../architecture/services/RAILWAY.md#turnstile-de-staging); no sustituyas sus claves reales por claves de prueba para declarar esa validación aprobada.
+
 ## Datos de cuenta
 
 - `firstName` y `lastName`: nombre(s) y apellidos obligatorios, normalizados por separado y con límite de 120 caracteres cada uno. El saludo de cuenta y los correos usan `firstName`.
