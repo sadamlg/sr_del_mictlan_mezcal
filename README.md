@@ -26,6 +26,8 @@ En producción, Cloudflare publica la tienda, el endpoint de la API para webhook
 
 La decisión de renderizado y los criterios SEO están en [Renderizado y SEO](docs/architecture/RENDERING-AND-SEO.md).
 
+Para consultar las rutas públicas y privadas, revisa [Rutas y acceso](docs/architecture/ROUTES-AND-ACCESS.md). Los [contratos](docs/contracts/) detallan el comportamiento del catálogo, las cuentas, los carritos y los pedidos; el [alcance del MVP](docs/MVP_SCOPE.md) reúne sus límites.
+
 El diagrama muestra las conexiones entre el navegador, Cloudflare, Railway y los servicios externos.
 
 ```mermaid
@@ -127,11 +129,15 @@ feature/* ── pull request ──> develop ──> Railway staging
                                 main ──> Railway producción
 ```
 
+El [roadmap](docs/ROADMAP.md) organiza las fases y su estado; la [guía de Railway](docs/architecture/services/RAILWAY.md) explica la configuración de Staging y Producción. El plan para CI y validación antes de la salida está en [Calidad y validación](docs/quality/QUALITY-AND-RELEASE.md).
+
 ## Clonar y configurar el repositorio
 
 Se requiere Git, Docker Engine y Docker Compose. Desde la carpeta donde guardarás el proyecto:
 
 Para entender o reproducir la construcción de la infraestructura local desde cero, consulta la [guía de Docker Compose](docs/architecture/docker/COMPOSE.md). Si clonaste la aplicación actual, usa los archivos ya incluidos y sigue los comandos de esta sección.
+
+Para construir el repositorio definitivo desde cero, comienza por la [fase 00 de reconstrucción](docs/00-RECONSTRUCCION.md) y consulta los resultados y pendientes de la [auditoría](docs/AUDITORIA-RECONSTRUCCION.md).
 
 ```bash
 git clone https://github.com/sadamlg/sr_del_mictlan_mezcal.git
@@ -164,6 +170,8 @@ Docker Compose construye las imágenes del frontend y backend, y levanta fronten
 | [Webhook de Stripe (Stripe CLI)](docs/architecture/services/STRIPE.md) | `POST http://localhost:4000/api/webhooks/stripe` |
 | Mailpit; bandeja de correo de desarrollo | [http://localhost:8025](http://localhost:8025) |
 | PostgreSQL | `localhost:5432` |
+
+Para los medios locales y externos, consulta la [guía de R2](docs/architecture/services/R2.md). La [guía de correo](docs/architecture/services/RESEND.md) explica las pruebas locales con Mailpit y la configuración de Resend en Railway.
 
 ### Reiniciar, recrear o reconstruir frontend y API
 
