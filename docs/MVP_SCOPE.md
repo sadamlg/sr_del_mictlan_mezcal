@@ -22,7 +22,7 @@ Presentar la marca y su catálogo, permitir preparar compras como invitado o cli
 - Registro, confirmación de correo, inicio/cierre de sesión, recuperación y cambio de contraseña, actualización de perfil y cambio de correo confirmado.
 - El registro solicita nombre, apellidos, correo, fecha de nacimiento y dirección en México. La fecha debe acreditar al menos 18 años; el código postal debe tener cinco dígitos. No se consulta un servicio externo de direcciones.
 - La dirección incluye calle, número, colonia, localidad o ciudad, estado y código postal. La información personal se puede editar y una fecha de nacimiento modificada debe seguir acreditando mayoría de edad.
-- La cuenta sólo se activa al confirmar el correo. Si el registro nació durante el checkout, confirmar el correo inicia sesión y continúa al resumen de compra; en los demás casos vuelve a la tienda.
+- La cuenta sólo se activa al confirmar el correo, que también inicia sesión. Si el registro nació durante el checkout, continúa al resumen de compra; en los demás casos vuelve a la tienda.
 - La cuenta contiene las secciones **Información personal**, **Contraseña** y **Mis pedidos**. Sólo la información personal permite editar los datos del perfil; la contraseña tiene su propio formulario.
 - Con sesión iniciada, el encabezado muestra un saludo con el primer nombre; el menú da acceso a la cuenta, los pedidos y el cierre de sesión.
 - Registro e inicio de sesión requieren Cloudflare Turnstile validado también por el backend. El estado de implementación y su validación por entorno se registran en la fase 08 del roadmap.
@@ -54,4 +54,4 @@ Presentar la marca y su catálogo, permitir preparar compras como invitado o cli
 - Un visitante puede preparar un carrito; al autenticarse se combina sin duplicar transferencias.
 - Los artículos activos se cobran al precio vigente y cada pago confirmado genera un pedido independiente, visible sólo para su titular.
 - Ninguna compra se confirma por el retorno del navegador; no se almacena el número completo de tarjeta, CVC ni datos de inventario.
-- El MVP cumple este criterio cuando la fase 07 cierre con el correo de compra y el PDF de detalle de pedido verificados. La integración en Staging, la validación previa a Producción del repositorio definitivo y la preparación de salida se detallan en las fases 08, 08.5 y 09 del [roadmap](ROADMAP.md), con el proceso técnico en [Calidad y validación antes de Producción](architecture/QUALITY-AND-RELEASE.md).
+- El MVP cumple este criterio cuando la fase 07 cierre con el correo de compra y el PDF de detalle de pedido verificados. La integración en Staging, la validación previa a Producción del proyecto y la preparación de salida se detallan en las fases 08, 09 y 10 del [roadmap](ROADMAP.md), con el proceso técnico en [Calidad y validación antes de Producción](quality/QUALITY-AND-RELEASE.md).

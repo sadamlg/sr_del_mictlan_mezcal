@@ -20,6 +20,8 @@ Registro e inicio de sesión requieren un token de Cloudflare Turnstile. El nave
 
 El backend verifica el `success` de Siteverify. En entornos HTTPS con cookies seguras también exige que `hostname` coincida con el host de `FRONTEND_ORIGIN` y que `action` sea `account_register` o `account_login`, según la ruta. Un token ausente o inválido responde `403` con `TURNSTILE_REQUIRED` o `TURNSTILE_INVALID`; si la configuración o Siteverify no están disponibles, la ruta falla de forma cerrada con `503`. La clave secreta sólo pertenece al servicio API; la clave pública del widget se configura en el frontend.
 
+Al implementar esta capacidad en el repositorio nuevo, añade `NEXT_PUBLIC_TURNSTILE_SITE_KEY` al entorno del frontend y `TURNSTILE_SECRET_KEY` al de la API en Compose y `.env.example`, sin versionar secretos reales. Para desarrollo local, configura en `.env` el par de claves de prueba publicado por Cloudflare y recrea frontend y API; verifica el par y sus casos en la [documentación oficial](https://developers.cloudflare.com/turnstile/troubleshooting/testing/). El esqueleto inicial de Compose no implementa todavía este formulario ni estas variables: se agregan durante la fase de cuentas. La comprobación con widget real, hostname y acción corresponde a Staging, según [Railway](../architecture/services/RAILWAY.md#turnstile-de-staging); no sustituyas sus claves reales por claves de prueba para declarar esa validación aprobada.
+
 ## Datos de cuenta
 
 - `firstName` y `lastName`: nombre(s) y apellidos obligatorios, normalizados por separado y con límite de 120 caracteres cada uno. El saludo de cuenta y los correos usan `firstName`.
@@ -66,13 +68,3 @@ Para reproducir la configuración del dominio, los remitentes y el worker, consu
 Los trabajos de cuenta contienen identificador de usuario y tipo de mensaje, no la contraseña ni el token en claro. El worker crea el token al procesar y persiste su hash; los enlaces de confirmación de cuenta y cambio de correo vencen en 24 horas y los de recuperación en 30 minutos.
 
 Después de registrarse, la interfaz explica que debe confirmar el correo. Si el registro comenzó al intentar comprar, confirmar inicia sesión, transfiere el carrito de invitado y lleva al resumen de compra; en los demás casos, vuelve a la tienda. Confirmar un cambio de correo conserva la sesión. Los formularios de registro y cambio de contraseña permiten mostrar u ocultar la contraseña. El aviso de cambios guardados en el perfil es temporal; al volver a esa sección sólo permanece la confirmación del correo. **Mis pedidos** muestra pedidos reales y sólo del titular; la interfaz también resuelve estados sin sesión, carga, error y sesión vencida.
-
-## Referencia revisada durante la fase 04
-
-Este apartado conserva la revisión histórica realizada durante esa fase; no afirma que el repositorio de referencia siga disponible o tenga el mismo contenido.
-
-Se revisó `../sr_del_mictlan`: el checkout contiene el acceso visual de cuenta en escritorio y móvil, pero no implementa registro, autenticación, perfil u órdenes. Su hoja de ruta propone adaptar casos de autenticación y separar rutas/controladores/servicios. Su código usa CommonJS, Mongoose/MongoDB y Redis/BullMQ; no se porta porque este proyecto usa ESM, Express, Prisma/PostgreSQL y prohíbe Redis/BullMQ. Se adapta el acceso visual con los componentes actuales y se rehace la persistencia y la lógica con el contrato presente. Para nombre(s) y apellidos, no había un contrato ni datos separados que portar: se agrega una migración que conserva nombres existentes y separa la primera palabra del resto para que cada persona pueda corregirlos en su perfil.
-
-Para exigir confirmación antes de activar cuentas se volvió a revisar ese repositorio: no aporta código ni un contrato de autenticación que se pueda reutilizar. Se conserva y adapta el flujo de tokens de un solo uso y el worker de correo ya implementados aquí; se rehacen las reglas de sesión y los mensajes para que el registro permanezca pendiente hasta confirmar.
-
-Para añadir Turnstile se volvió a revisar `../sr_del_mictlan`: el repositorio anterior no contiene rutas, contratos ni pruebas de autenticación que se puedan portar. La integración se implementa en el contrato actual de Express/ESM; el token queda en el límite HTTP y no modifica el servicio de cuentas ni la persistencia.

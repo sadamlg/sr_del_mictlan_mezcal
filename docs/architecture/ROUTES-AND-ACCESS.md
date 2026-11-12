@@ -74,6 +74,7 @@ Estas operaciones requieren sesión válida. El backend deriva la cuenta de la c
 | `PUT /api/cart/account/items`, `DELETE /api/cart/account/items/:slug` | Establecer cantidad o retirar un producto. |
 | `GET /api/checkout/payment-methods` | Consultar los datos seguros de tarjetas guardadas en Stripe. |
 | `POST /api/checkout/sessions` | Crear una sesión de Stripe a partir de los datos vigentes del servidor. |
+| `GET /api/checkout/return-status?session_id=…` | Consultar el estado del Checkout asociado a la cuenta autenticada; el webhook determina la confirmación del pago. |
 | `GET /api/orders` | Consultar sólo pedidos pagados del titular de la sesión. |
 
 ## Flujo de cuenta nueva durante la compra

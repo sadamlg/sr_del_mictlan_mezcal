@@ -383,6 +383,12 @@ docker run --rm \
 
 El comando selecciona JavaScript, App Router, <code>src/</code>, Tailwind y npm. <code>--skip-install</code> evita instalar dependencias en el volumen compartido; <code>--yes</code> acepta los valores predeterminados para cualquier opción no especificada. [Opciones oficiales de <code>create-next-app</code>](https://nextjs.org/docs/app/getting-started/installation)
 
+Crea también el directorio de pruebas que monta Compose, antes de levantar los servicios:
+
+~~~bash
+mkdir -p frontend/tests
+~~~
+
 <code>--eslint</code> incluye ESLint en el frontend desde el inicio. Los comandos siguientes fijan las versiones y el ejemplo de configuración sustituye la configuración generada. Al construir las imágenes de desarrollo, <code>npm ci</code> instala las dependencias indicadas por cada lockfile, incluido ESLint.
 
 Fija las versiones de frontend y crea el lockfile dentro de la imagen temporal de Node:
@@ -396,6 +402,14 @@ docker run --rm \
   node:24.21.0-bookworm-slim \
   npm install --package-lock-only --save-exact \
     next@16.4.1 react@19.3.0 react-dom@19.3.0
+~~~
+
+Antes de fijar ESLint 10, elimina del manifiesto y lockfile la configuración generada para ESLint 9. El orden evita conflictos de dependencias; el ejemplo siguiente define la configuración propia del proyecto:
+
+~~~bash
+docker run --rm --user "$(id -u):$(id -g)" --env HOME=/tmp \
+  --volume "$PWD/frontend:/app" --workdir /app \
+  node:24.21.0-bookworm-slim npm uninstall --package-lock-only --save-dev eslint-config-next
 ~~~
 
 ~~~bash
@@ -412,14 +426,6 @@ docker run --rm \
     postcss@8.5.29 \
     eslint@10.13.0 @eslint/js@10.0.1 globals@17.13.0 \
     @next/eslint-plugin-next@16.4.1 eslint-plugin-react-hooks@7.1.1
-~~~
-
-Elimina del manifiesto y lockfile el paquete de configuración generado que ya no se usa con el ejemplo siguiente:
-
-~~~bash
-docker run --rm --user "$(id -u):$(id -g)" --env HOME=/tmp \
-  --volume "$PWD/frontend:/app" --workdir /app \
-  node:24.21.0-bookworm-slim npm uninstall --package-lock-only --save-dev eslint-config-next
 ~~~
 
 Configura el comando de lint en el manifiesto generado:
@@ -862,19 +868,19 @@ No confirmes un reset si hay datos locales que necesites conservar. Prisma docum
 
 ### Verificaciones de la aplicación completa
 
-Para reconstruir el repositorio definitivo, prepara también los checks de CI desde la base. La separación entre herramientas locales y la fase posterior de auditorías contra Staging está en [Calidad y validación antes de Producción](../QUALITY-AND-RELEASE.md). Playwright, Lighthouse y ZAP se incorporarán al llegar a esa fase y se ejecutarán bajo demanda o en runners temporales.
+Configura desde la fase 01 un CI mínimo con lint de frontend y backend. Añade pruebas y build conforme se implementen; la validación integral de Staging corresponde a la fase 09. La secuencia está en [Calidad y validación antes de Producción](../../quality/QUALITY-AND-RELEASE.md). Playwright, Lighthouse y ZAP se incorporarán al llegar a esa fase y se ejecutarán bajo demanda o en runners temporales.
 
 Con el esquema aplicado, las pruebas y el lint del repositorio se ejecutan dentro de Compose:
 
 ~~~bash
 docker compose exec backend npm test
-docker compose exec backend npm run test:db
+docker compose exec -e CART_DATABASE_TEST=1 -e CHECKOUT_DATABASE_TEST=1 backend npm run test:db
 docker compose exec frontend npm test
 docker compose exec backend npm run lint
 docker compose exec frontend npm run lint
 ~~~
 
-Las pruebas de base necesitan migraciones aplicadas y un entorno de prueba adecuado. Los comandos de este apartado describen cómo ejecutarlas; no indican que hayan pasado en esta revisión documental.
+Las pruebas de base necesitan migraciones aplicadas y una base local de prueba adecuada; los indicadores anteriores activan los casos que, de otro modo, se omiten. Algunas pruebas requieren también el catálogo de demostración. No apuntes estas pruebas a Staging ni a Producción. Los comandos de este apartado describen cómo ejecutarlas; no indican que hayan pasado en esta revisión documental.
 
 ### Detener y limpiar
 
@@ -915,7 +921,7 @@ El script usa los puertos configurados en `.env` (`FRONTEND_PORT`, `BACKEND_PORT
 Para que el dispositivo cargue los medios desde R2, pasa la URL pública HTTPS del bucket no productivo:
 
 ~~~bash
-scripts/dev-lan.sh up 192.168.1.20 --media-url https://pub-47df7d3a7dd94d268c1661b2c36e0ae5.r2.dev
+scripts/dev-lan.sh up 192.168.1.20 --media-url https://example.r2.dev
 ~~~
 
 Con `--media-url`, el script establece esa URL en `MEDIA_BASE_URL` y `STRIPE_MEDIA_BASE_URL` y reconstruye las imágenes para que Next.js admita el origen. Esto sólo cambia las URL usadas para obtener medios; no abre puertos para R2 ni cambia el worker de correo. Sin esa opción, las imágenes se sirven desde la aplicación en la dirección LAN.

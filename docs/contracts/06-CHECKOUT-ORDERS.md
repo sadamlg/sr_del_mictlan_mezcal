@@ -1,6 +1,6 @@
 # Contrato de Checkout y pedidos
 
-**Estado:** implementado y probado manualmente en staging con Stripe en modo de prueba el 29 de octubre de 2026. Producción sigue pendiente de preparación y validación.
+**Estado:** contrato previsto para implementación y validación durante las fases 06 y 08.
 
 ## Recorrido de compra
 
@@ -168,18 +168,10 @@ Este orden y los criterios inferiores se conservan como referencia del plan de l
 Comandos previstos, siempre dentro de Compose:
 
 - `docker compose exec backend npm test`
-- `docker compose exec backend npm run test:db`
+- `docker compose exec -e CART_DATABASE_TEST=1 -e CHECKOUT_DATABASE_TEST=1 backend npm run test:db` (en una base local de prueba con migraciones aplicadas; sin esas variables se omiten los casos de PostgreSQL).
 - `docker compose exec backend npm run prisma:validate`
 - `docker compose exec backend npm run lint`
 - Aplicar migraciones con `docker compose exec backend npm run prisma:migrate:dev -- --name checkout_orders` y comprobar con `docker compose exec backend npm run prisma:migrate:status`.
-
-## Referencia del repositorio anterior durante la fase 06
-
-Durante la fase 06 se inspeccionaron las instrucciones, README, roadmap, contratos, historial Git, archivos de backend y pruebas del repositorio de referencia. La copia disponible de ese repositorio sólo contenía código de salud y catálogo; no se encontraron módulos ni pruebas de Stripe, pagos u órdenes. Esta observación es histórica y no describe el estado actual de esta aplicación.
-
-- **Reutilizar como principios:** autoridad del backend sobre disponibilidad/precio, webhook firmado, lectura de pedidos aislada por titular, respuestas de error sin detalles internos y pruebas de API con `node:test`.
-- **Adaptar:** forma de componer Express, capas handler/servicio/repositorio y pruebas PostgreSQL al ESM, Prisma y sesión con cookie del proyecto actual.
-- **Rehacer:** persistencia de pedidos y snapshots con relaciones/migraciones PostgreSQL/Prisma; no se porta el checkout porque no existe en los archivos inspeccionados. En la fase 06 se excluyeron Redis/BullMQ, reservas/locks de inventario y logística; correo y PDF se implementaron después en la fase 07.
 
 ## Referencias de implementación
 

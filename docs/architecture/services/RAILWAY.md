@@ -105,18 +105,6 @@ Las cookies de sesión de producción usan `SameSite=Lax; Secure`. El proxy cons
 
 Staging puede seguir usando el bucket no productivo documentado en [Cloudflare R2](R2.md). Antes de producción configura un bucket y hostname separados, y reemplaza ambas URL de medios.
 
-### Estado observado de Staging · 10 de noviembre de 2026
-
-En el proyecto `sr_del_mictlan_mezcal`, el entorno `staging` mostró los cuatro servicios en línea: `Backend`, `Frontend`, `worker` y `Postgres`; el volumen `postgres-volume` estaba adjunto. Los hostnames públicos mostrados fueron `backend-staging-a425.up.railway.app` para API y `frontend-staging-18c9.up.railway.app` para frontend. No se mostró hostname público para worker ni Postgres.
-
-El panel mostró estos nombres de variables; no se abrieron ni copiaron valores:
-
-- **Backend:** `RAILWAY_DOCKERFILE_PATH`, `NODE_ENV`, `DATABASE_URL`, `FRONTEND_ORIGIN`, `MEDIA_BASE_URL`, `STRIPE_MEDIA_BASE_URL`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`. Falta `TURNSTILE_SECRET_KEY`.
-- **Frontend:** `NODE_ENV`, `INTERNAL_API_URL`, `NEXT_PUBLIC_API_URL`, `MEDIA_BASE_URL`, `RAILWAY_DOCKERFILE_PATH`. Falta `NEXT_PUBLIC_TURNSTILE_SITE_KEY`.
-- **Worker:** `RAILWAY_DOCKERFILE_PATH`, `NODE_ENV`, `DATABASE_URL`, `APP_BASE_URL`, `RESEND_API_KEY`, `RESEND_FROM`, `MAIL_FROM` y variables `SMTP_*`. Estas últimas no son necesarias en Railway según la configuración documentada arriba; revisar si son residuo de configuración local. No se cambió ninguna variable.
-
-La presencia de nombres `STRIPE_*`, `RESEND_*` y `MEDIA_BASE_URL` no confirma los valores, modo de Stripe, webhook, remitentes ni bucket. No se verificaron los paneles de Stripe, Resend o Cloudflare. La activación de Turnstile y la aceptación de los recorridos siguen pendientes.
-
 ## Turnstile de staging
 
 El responsable del proyecto crea un widget Turnstile separado para staging y permite sólo el hostname público del frontend de staging. Configura la clave pública en `NEXT_PUBLIC_TURNSTILE_SITE_KEY` del servicio `frontend` y el secreto en `TURNSTILE_SECRET_KEY` del servicio `api`; no copies el secreto a frontend, worker, Compose ni al repositorio. La API toma el hostname esperado de `FRONTEND_ORIGIN` y verifica `success`, `hostname` y `action` (`account_register` o `account_login`) cuando las cookies son seguras.
@@ -194,7 +182,6 @@ Railway ofrece límites para el consumo de **cómputo a nivel de workspace**, no
 3. No copies umbrales de ejemplo ni fijes cifras sin presupuesto aprobado. La configuración se gestiona desde **Workspace Usage**; la CLI puede consultarla y establecer valores aprobados con <code>railway usage limit set --target workspace --soft &lt;dólares&gt; --hard &lt;dólares&gt;</code>. Verifica las reglas de entrada en la [referencia CLI](https://docs.railway.com/cli/usage).
 4. Registra en el acta de despliegue quién eligió esos umbrales y el efecto esperado. No cambies valores existentes sin presupuesto aprobado.
 
-**Lectura del panel (2026-11-10, workspace Hobby):** el periodo mostrado era `26 oct – 26 nov`; el proyecto `sr_del_mictlan_mezcal` llevaba `$2.27` de consumo y `$4.08` estimados. El límite de cómputo estaba en `$10` para alerta por correo y `$20` como límite duro; se habían consumido `$2.27` del límite. El límite duro de Agent estaba en `$5`, su alerta suave no tenía valor y el consumo mostrado era `$0`. El plan indicaba hasta `8 GB` de RAM, `8 vCPU` y `100 GB` de disco compartido. Esta lectura sólo registra la configuración observada; no propone ni cambia umbrales.
 
 [Control de costos de Railway](https://docs.railway.com/pricing/cost-control).
 
