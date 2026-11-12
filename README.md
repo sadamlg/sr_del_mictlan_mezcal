@@ -137,11 +137,11 @@ Se requiere Git, Docker Engine y Docker Compose. Desde la carpeta donde guardar�
 
 Para entender o reproducir la construcción de la infraestructura local desde cero, consulta la [guía de Docker Compose](docs/architecture/docker/COMPOSE.md). Si clonaste la aplicación actual, usa los archivos ya incluidos y sigue los comandos de esta sección.
 
-Para construir el repositorio definitivo desde cero, comienza por la [fase 00 de reconstrucción](docs/00-RECONSTRUCCION.md) y consulta los resultados y pendientes de la [auditoría](docs/AUDITORIA-RECONSTRUCCION.md).
+Para crear el repositorio y construir el proyecto por fases, consulta el [roadmap](docs/ROADMAP.md).
 
 ```bash
-git clone https://github.com/sadamlg/sr_del_mictlan_mezcal.git
-cd sr_del_mictlan_mezcal
+git clone https://github.com/sadamlg/sr_del_mictlan.git
+cd sr_del_mictlan
 cp .env.example .env
 ```
 

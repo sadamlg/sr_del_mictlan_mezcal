@@ -868,7 +868,7 @@ No confirmes un reset si hay datos locales que necesites conservar. Prisma docum
 
 ### Verificaciones de la aplicación completa
 
-Para reconstruir el repositorio definitivo, configura desde la fase 01 un CI mínimo con lint de frontend y backend. Añade pruebas y build conforme se implementen; la validación integral de Staging corresponde a la fase 09. La secuencia está en [Calidad y validación antes de Producción](../../quality/QUALITY-AND-RELEASE.md). Playwright, Lighthouse y ZAP se incorporarán al llegar a esa fase y se ejecutarán bajo demanda o en runners temporales.
+Configura desde la fase 01 un CI mínimo con lint de frontend y backend. Añade pruebas y build conforme se implementen; la validación integral de Staging corresponde a la fase 09. La secuencia está en [Calidad y validación antes de Producción](../../quality/QUALITY-AND-RELEASE.md). Playwright, Lighthouse y ZAP se incorporarán al llegar a esa fase y se ejecutarán bajo demanda o en runners temporales.
 
 Con el esquema aplicado, las pruebas y el lint del repositorio se ejecutan dentro de Compose:
 
@@ -921,7 +921,7 @@ El script usa los puertos configurados en `.env` (`FRONTEND_PORT`, `BACKEND_PORT
 Para que el dispositivo cargue los medios desde R2, pasa la URL pública HTTPS del bucket no productivo:
 
 ~~~bash
-scripts/dev-lan.sh up 192.168.1.20 --media-url https://pub-47df7d3a7dd94d268c1661b2c36e0ae5.r2.dev
+scripts/dev-lan.sh up 192.168.1.20 --media-url https://example.r2.dev
 ~~~
 
 Con `--media-url`, el script establece esa URL en `MEDIA_BASE_URL` y `STRIPE_MEDIA_BASE_URL` y reconstruye las imágenes para que Next.js admita el origen. Esto sólo cambia las URL usadas para obtener medios; no abre puertos para R2 ni cambia el worker de correo. Sin esa opción, las imágenes se sirven desde la aplicación en la dirección LAN.

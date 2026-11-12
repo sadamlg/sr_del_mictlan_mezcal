@@ -34,7 +34,7 @@ La landing muestra únicamente productos activos. El catálogo no incluye catego
 
 La tabla `products` conserva un `slug`, nombre, descripción, precio en centavos, claves de ambas imágenes, texto alternativo de la botella, dos etiquetas descriptivas, perfil sensorial, porcentajes mínimo y máximo de alcohol, volumen en mililitros, posición y estado activo. Los campos opcionales de información sensorial, alcohol y volumen pueden quedar sin documentar y se publican como `null`. Los campos requeridos pueden permanecer vacíos mientras la ficha está inactiva; PostgreSQL impide activar un producto incompleto. La imagen de ambiente es decorativa, por lo que su texto alternativo público está vacío.
 
-<code>backend/prisma/dev-showcase.sql</code> carga tres fichas únicamente para una vista previa local. Sus precios de $250, $350 y $500 MXN por 750 ml son los valores correctos del alcance MVP y para las pruebas de desarrollo/staging; no deben confundirse con precios comerciales finales aprobados para producción. El cliente debe confirmar esos precios antes de habilitar ventas reales. El archivo no es una migración ni se ejecuta automáticamente. Sólo úsalo en una base local vacía; no lo apliques en staging o producción. El carrito y el checkout ya están implementados, así que estos registros permiten probar el flujo de pago con Stripe en modo de prueba.
+<code>backend/prisma/dev-showcase.sql</code> carga tres fichas únicamente para una vista previa local. Sus precios de $250, $350 y $500 MXN por 750 ml son los valores correctos del alcance MVP y para las pruebas de desarrollo/staging; no deben confundirse con precios comerciales finales aprobados para producción. El cliente debe confirmar esos precios antes de habilitar ventas reales. El archivo no es una migración ni se ejecuta automáticamente. Sólo úsalo en una base local vacía; no lo apliques en staging o producción. Cuando estén implementados carrito y checkout, estos registros permitirán probar el pago con Stripe en modo de prueba.
 
 ### Medios
 
@@ -44,7 +44,7 @@ Las claves aceptan segmentos ASCII de letras, números, puntos, guiones y guione
 
 ## Contador de visitas
 
-El contador muestra cuántas sesiones del navegador han abierto la landing desde que se habilitó esta tabla. No representa personas únicas ni visitas históricas anteriores a la migración.
+El contador muestra cuántas sesiones del navegador han abierto la landing desde que se habilitó esta tabla. No representa personas únicas ni visitas anteriores a la habilitación del contador.
 
 Al cargar la página, el navegador genera un UUID y lo guarda en `sessionStorage`. Envía `POST /api/visits` a la ruta del frontend; esta lo reenvía a la API interna. Una recarga reutiliza el UUID y no incrementa la cifra. Al abrir otra pestaña o sesión puede generarse otro UUID. No se guardan IP, cookies ni información personal para este contador.
 

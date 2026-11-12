@@ -5,7 +5,7 @@
 - `README.md`: stack, arquitectura y entorno local.
 - `docs/MVP_SCOPE.md`: alcance objetivo aprobado.
 - `docs/ROADMAP.md`: estado y próximos hitos.
-- `docs/contracts/`: comportamiento actual de cada módulo.
+- `docs/contracts/`: comportamiento previsto y criterios de cada módulo; consultar el roadmap para conocer su estado de implementación y validación.
 - `docs/architecture/`: diagrama del sistema, Docker Compose, servicios externos, costos y rutas de acceso.
 - `docs/DESIGN.md`: sistema visual; `frontend/src/app/globals.css` implementa sus tokens.
 - Mantén cada hecho en su fuente principal. En otros documentos, enlázala en vez de copiar su contenido. Distingue funciones implementadas, pendientes y dependientes de configuración externa.
@@ -34,11 +34,6 @@
 - Conserva los resultados, dependencias y criterios de las fases anteriores. Si una decisión posterior los cambia, actualízalos y explica qué cambió sin borrar el contexto necesario para reconstruir el proyecto.
 - Antes de proponer la siguiente fase, comprueba sus requisitos contra el roadmap, el código y la configuración conocida. Señala lo que falte o no puedas verificar; no lo presentes como ya disponible.
 
-## Referencia del proyecto anterior
-
-- Al iniciar una fase funcional, si está disponible `../sr_del_mictlan`, revisa sus contratos, decisiones, flujos, casos límite, pruebas y código relacionados. Es una referencia, no la fuente de verdad: adapta sólo lo compatible con la arquitectura y el alcance actuales.
-- Registra en el contrato del módulo qué se reutilizó, adaptó o rehízo y por qué no conviene portar el resto.
-
 ## Alcance y frontend
 
 - No amplíes el MVP por agregar o cambiar medios en una superficie aprobada; revisa el contrato si cambia una página, un flujo o una capacidad de usuario.
@@ -46,11 +41,11 @@
 - Sigue `docs/DESIGN.md` y sus tokens `mictlan-*`; no sustituyas los colores de marca con colores cromáticos genéricos de Tailwind. Si falta un rol cromático, actualiza `docs/DESIGN.md` y `globals.css` juntos.
 - Usa Lucide React para iconos. Valida en navegador cambios de interfaz, estados relevantes, accesibilidad, responsividad y consola.
 
-- Antes de migrar una sección existente de la landing, revisa su estructura, recursos, estilos, interacciones y tamaños en la referencia disponible. Conserva el comportamiento aprobado y señala ambigüedades antes de cambiarlo.
+- Antes de implementar una sección de la landing, revisa su estructura, recursos, estilos, interacciones y tamaños definidos. Conserva el comportamiento aprobado y señala ambigüedades antes de cambiarlo.
 
 ## Pruebas y ejecución
 
-- Al reconstruir el repositorio definitivo, sigue [Calidad y validación antes de Producción](docs/quality/QUALITY-AND-RELEASE.md): CI con lint desde la fase 01; agrega pruebas y build al implementar módulos. La fase 09 comienza cuando ese nuevo repo llegue a Staging. Registra evidencia propia sin heredar estados concluidos del repositorio de referencia.
+- Sigue [Calidad y validación antes de Producción](docs/quality/QUALITY-AND-RELEASE.md): CI con lint desde la fase 01; agrega pruebas y build al implementar módulos. La fase 09 comienza cuando el proyecto llegue a Staging. Registra evidencia por entorno, fecha y commit.
 
 - Los cambios de lógica o comportamiento incluyen pruebas del contrato afectado y siguen TDD. Los cambios sólo documentales o visuales no requieren pruebas unitarias artificiales.
 - Usa `node:test` para el backend y pruebas unitarias del frontend en `frontend/tests/`.

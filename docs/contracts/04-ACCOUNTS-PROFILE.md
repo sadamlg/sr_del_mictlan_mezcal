@@ -68,13 +68,3 @@ Para reproducir la configuración del dominio, los remitentes y el worker, consu
 Los trabajos de cuenta contienen identificador de usuario y tipo de mensaje, no la contraseña ni el token en claro. El worker crea el token al procesar y persiste su hash; los enlaces de confirmación de cuenta y cambio de correo vencen en 24 horas y los de recuperación en 30 minutos.
 
 Después de registrarse, la interfaz explica que debe confirmar el correo. Si el registro comenzó al intentar comprar, confirmar inicia sesión, transfiere el carrito de invitado y lleva al resumen de compra; en los demás casos, vuelve a la tienda. Confirmar un cambio de correo conserva la sesión. Los formularios de registro y cambio de contraseña permiten mostrar u ocultar la contraseña. El aviso de cambios guardados en el perfil es temporal; al volver a esa sección sólo permanece la confirmación del correo. **Mis pedidos** muestra pedidos reales y sólo del titular; la interfaz también resuelve estados sin sesión, carga, error y sesión vencida.
-
-## Referencia revisada durante la fase 04
-
-Este apartado conserva la revisión histórica realizada durante esa fase; no afirma que el repositorio de referencia siga disponible o tenga el mismo contenido.
-
-Se revisó `../sr_del_mictlan`: el checkout contiene el acceso visual de cuenta en escritorio y móvil, pero no implementa registro, autenticación, perfil u órdenes. Su hoja de ruta propone adaptar casos de autenticación y separar rutas/controladores/servicios. Su código usa CommonJS, Mongoose/MongoDB y Redis/BullMQ; no se porta porque este proyecto usa ESM, Express, Prisma/PostgreSQL y prohíbe Redis/BullMQ. Se adapta el acceso visual con los componentes actuales y se rehace la persistencia y la lógica con el contrato presente. Para nombre(s) y apellidos, no había un contrato ni datos separados que portar: se agrega una migración que conserva nombres existentes y separa la primera palabra del resto para que cada persona pueda corregirlos en su perfil.
-
-Para exigir confirmación antes de activar cuentas se volvió a revisar ese repositorio: no aporta código ni un contrato de autenticación que se pueda reutilizar. Se conserva y adapta el flujo de tokens de un solo uso y el worker de correo ya implementados aquí; se rehacen las reglas de sesión y los mensajes para que el registro permanezca pendiente hasta confirmar.
-
-Para añadir Turnstile se volvió a revisar `../sr_del_mictlan`: el repositorio anterior no contiene rutas, contratos ni pruebas de autenticación que se puedan portar. La integración se implementa en el contrato actual de Express/ESM; el token queda en el límite HTTP y no modifica el servicio de cuentas ni la persistencia.

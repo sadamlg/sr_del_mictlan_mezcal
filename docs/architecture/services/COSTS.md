@@ -1,15 +1,15 @@
 # Servicios y costos
 
-Tarifas revisadas el **29 de octubre de 2026** en documentación y páginas oficiales. USD salvo donde se indica MXN. Los proveedores pueden cambiarlas; vuelve a consultar antes de contratar. El estado de staging refleja las pruebas confirmadas por el responsable ese día y no sustituye una consulta actual a las cuentas externas.
+Tarifas revisadas el **29 de octubre de 2026** en documentación y páginas oficiales. USD salvo donde se indica MXN. Los proveedores pueden cambiarlas; vuelve a consultar antes de contratar. El estado de cuentas y recursos debe verificarse en cada entorno.
 
 | Servicio | Estado en el proyecto | Precio publicado y uso |
 |---|---|---|
 | **Cloudflare Free** | Configuración de dominio aún externa | US$0/mes; DNS sin cargo. El dominio no está incluido. Proxy/CDN, TLS y controles web dependen de zona y registros configurados. [DNS](https://developers.cloudflare.com/dns/faq/), [proxy](https://developers.cloudflare.com/dns/proxy-status/), [Universal SSL](https://developers.cloudflare.com/ssl/edge-certificates/universal-ssl/) |
-| **Cloudflare R2 Standard** | Bucket no productivo y medios públicos de desarrollo listos | 10 GB-mes, 1 millón de operaciones Clase A y 10 millones Clase B gratis al mes; después US$0.015/GB-mes, US$4.50/millón A y US$0.36/millón B. El egreso es gratuito. [Tarifas](https://developers.cloudflare.com/r2/pricing/) |
-| **Railway Hobby** | Staging desplegado y usado para una compra de prueba; producción pendiente | US$5/mes incluyen US$5 de uso. Recursos publicados: CPU US$20/vCPU-mes, RAM US$10/GB-mes, egreso US$0.05/GB y volumen US$0.15/GB-mes. Hobby permite hasta 5 GB de volumen. [Planes](https://docs.railway.com/pricing/plans), [facturación](https://docs.railway.com/pricing/understanding-your-bill) |
-| **PostgreSQL, frontend, API y worker en Railway** | Recorrido de staging comprobado manualmente; producción pendiente | Su costo depende de uso medido de CPU, RAM, red y volumen. No hay costo mensual real estimable sin medir el entorno desplegado. |
-| **Resend** | Correo de compra con PDF recibido en la prueba de staging; producción pendiente. | Free: US$0 hasta 3,000 correos/mes y 100/día. Pro: US$20/mes por 50,000 correos, luego US$0.90 por cada 1,000. [Precios](https://resend.com/pricing) |
-| **Stripe Checkout** | Checkout y webhook implementados; se prueba en modo de prueba | Sin mensualidad ni instalación estándar. Para tarjeta nacional exitosa en México: 3.6% + MXN 3, antes de IVA. Una venta de MXN 1,000 implica MXN 39 de comisión antes de IVA. Pueden aplicar cargos por tarjeta internacional, conversión o meses sin intereses. [Stripe México](https://stripe.com/mx/pricing) |
+| **Cloudflare R2 Standard** | Bucket no productivo por configurar | 10 GB-mes, 1 millón de operaciones Clase A y 10 millones Clase B gratis al mes; después US$0.015/GB-mes, US$4.50/millón A y US$0.36/millón B. El egreso es gratuito. [Tarifas](https://developers.cloudflare.com/r2/pricing/) |
+| **Railway Hobby** | Staging y producción por configurar | US$5/mes incluyen US$5 de uso. Recursos publicados: CPU US$20/vCPU-mes, RAM US$10/GB-mes, egreso US$0.05/GB y volumen US$0.15/GB-mes. Hobby permite hasta 5 GB de volumen. [Planes](https://docs.railway.com/pricing/plans), [facturación](https://docs.railway.com/pricing/understanding-your-bill) |
+| **PostgreSQL, frontend, API y worker en Railway** | Servicios por desplegar y validar | Su costo depende de uso medido de CPU, RAM, red y volumen. No hay costo mensual real estimable sin medir el entorno desplegado. |
+| **Resend** | Proveedor por configurar y validar. | Free: US$0 hasta 3,000 correos/mes y 100/día. Pro: US$20/mes por 50,000 correos, luego US$0.90 por cada 1,000. [Precios](https://resend.com/pricing) |
+| **Stripe Checkout** | Checkout y webhook por implementar y probar | Sin mensualidad ni instalación estándar. Para tarjeta nacional exitosa en México: 3.6% + MXN 3, antes de IVA. Una venta de MXN 1,000 implica MXN 39 de comisión antes de IVA. Pueden aplicar cargos por tarjeta internacional, conversión o meses sin intereses. [Stripe México](https://stripe.com/mx/pricing) |
 
 ## Límites de consumo y controles
 
